@@ -1,49 +1,46 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-26T19:42:45.673Z",
+  "generatedAt": "2026-02-26T19:53:22.519Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
     "total": 2,
-    "implemented": 2,
+    "implemented": 1,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Fix the 'Not Found' error displayed when navigating to the deployed application. Ensure the TanStack Router configuration correctly handles the root route and all defined routes (home, about, event-details, registration, gallery, check-registration, admin, admin/dashboard) so that users land on the home page by default without seeing a 404/not-found screen.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/pages/NotFoundPage.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/pages/NotFoundPage.tsx"
-        ]
+        "summary": "Update the hardcoded admin host/owner email in the backend to 'athiakash1977@gmail.com'. This email should be used as the primary admin credential for verifying login access to the admin dashboard.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
       },
       {
         "id": "REQ-2",
-        "summary": "Ensure the frontend build configuration (index.html and asset paths) supports client-side routing correctly in the Internet Computer deployment environment, so that deep-link navigation and page refreshes do not result in 'Not Found' errors.",
+        "summary": "Update the AdminLogin page to pre-populate or reference the admin email 'athiakash1977@gmail.com' as the expected host email for login validation on the frontend side, ensuring the login flow matches the updated backend credential.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/index.html",
-          "frontend/src/App.tsx"
+          "frontend/src/pages/AdminLogin.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/App.tsx"
+          "frontend/src/pages/AdminLogin.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/App.tsx",
-    "frontend/src/pages/NotFoundPage.tsx",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/pages/AdminLogin.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

@@ -1,47 +1,21 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix 'Not Found' routing error on deployed app",
+  "title": "Set admin dashboard host email to athiakash1977@gmail.com",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Fix the 'Not Found' error by correcting TanStack Router configuration to properly handle the root route and all defined routes",
-      "acceptanceCriteria": [
-        "Navigating to the root URL '/' renders the HomePage without any 'Not Found' error",
-        "All defined routes (about, event-details, registration, gallery, check-registration, admin, admin/dashboard) resolve correctly",
-        "A proper catch-all or fallback route is defined so unknown paths show a user-friendly 404 page rather than a blank or broken screen",
-        "The deployed production build does not show 'Not Found' on initial page load"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Review and fix the TanStack Router configuration to ensure the root route '/' is properly defined and mapped to HomePage. Verify that all route definitions (home, about, event-details, registration, gallery, check-registration, admin, admin/dashboard) have correct path configurations. Add a catch-all NotFound route that handles undefined paths gracefully. Ensure the router's basepath and routing strategy are compatible with Internet Computer deployment."
-        },
-        {
-          "path": "frontend/src/pages/NotFoundPage.tsx",
-          "operation": "create",
-          "description": "Create a user-friendly 404 Not Found page component that displays a clear message when users navigate to an undefined route. Include a link back to the home page and match the site's design system with Navbar and Footer components."
-        }
-      ]
-    },
-    {
       "id": "REQ-2",
-      "summary": "Ensure frontend build configuration supports client-side routing in IC deployment environment to prevent 'Not Found' errors on page refresh and deep links",
+      "summary": "Update the AdminLogin page to validate against the admin email 'athiakash1977@gmail.com' on the frontend side, ensuring the login flow matches the backend credential.",
       "acceptanceCriteria": [
-        "Page refresh on any valid route does not produce a 'Not Found' error",
-        "Direct URL navigation to any defined route loads the correct page"
+        "The frontend admin login form correctly authenticates against the email 'athiakash1977@gmail.com'",
+        "Successful login with 'athiakash1977@gmail.com' redirects to the admin dashboard",
+        "Login attempts with a different email are rejected"
       ],
       "file_operations": [
         {
-          "path": "frontend/index.html",
+          "path": "frontend/src/pages/AdminLogin.tsx",
           "operation": "modify",
-          "description": "Verify that the base tag and script module paths are correctly configured for Internet Computer deployment. Ensure asset paths are relative and compatible with the IC asset canister serving strategy. Add any necessary meta tags or configuration to support client-side routing in production."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Ensure the TanStack Router is configured with the correct basepath for IC deployment (if needed). Verify that the router uses hash-based routing or that the deployment environment is configured to serve index.html for all routes. Add fallback handling to redirect unknown routes to the NotFound page component."
+          "description": "Update the admin login form to validate that the entered email matches 'athiakash1977@gmail.com' before calling the backend verification. Add frontend validation to reject login attempts with any other email address. Ensure the email input field displays or pre-populates 'athiakash1977@gmail.com' as the expected admin host email. The existing backend call to verify credentials should remain unchanged, but add a client-side check that blocks submission if the email doesn't match the expected admin email."
         }
       ]
     }

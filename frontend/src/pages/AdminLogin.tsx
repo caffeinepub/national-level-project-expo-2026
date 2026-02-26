@@ -8,8 +8,10 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Lock, Loader2, AlertCircle } from 'lucide-react';
 
+const ADMIN_EMAIL = 'athiakash1977@gmail.com';
+
 export default function AdminLogin() {
-  const [email, setEmail] = useState('athiakash1977@gmail.com');
+  const [email, setEmail] = useState(ADMIN_EMAIL);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -19,8 +21,15 @@ export default function AdminLogin() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    // Frontend guard: only the designated admin email is accepted
+    if (email.trim().toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+      setError(`Access denied. Only the designated admin host (${ADMIN_EMAIL}) can log in.`);
+      return;
+    }
+
     verifyCredentials(
-      { email, password },
+      { email: email.trim(), password },
       {
         onSuccess: (isAdmin) => {
           if (isAdmin) {
@@ -59,7 +68,9 @@ export default function AdminLogin() {
         <CardContent className="pt-4">
           <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-foreground">Email</Label>
+              <Label htmlFor="email" className="text-foreground">
+                Admin Email
+              </Label>
               <Input
                 id="email"
                 type="text"
@@ -67,8 +78,12 @@ export default function AdminLogin() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="bg-background border-border text-foreground"
+                placeholder={ADMIN_EMAIL}
                 required
               />
+              <p className="text-xs text-muted-foreground">
+                Host: <span className="text-primary font-medium">{ADMIN_EMAIL}</span>
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="password" className="text-foreground">Password</Label>

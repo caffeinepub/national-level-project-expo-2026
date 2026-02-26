@@ -137,6 +137,7 @@ export const idlService = IDL.Service({
   'deleteGalleryImage' : IDL.Func([IDL.Text], [IDL.Bool], []),
   'deleteRegistration' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'getAboutContent' : IDL.Func([], [IDL.Opt(AboutContent)], ['query']),
+  'getAdminHostEmail' : IDL.Func([], [IDL.Text], ['query']),
   'getAllRegistrationRecords' : IDL.Func(
       [],
       [IDL.Vec(RegistrationRecord)],
@@ -336,6 +337,7 @@ export const idlFactory = ({ IDL }) => {
     'deleteGalleryImage' : IDL.Func([IDL.Text], [IDL.Bool], []),
     'deleteRegistration' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'getAboutContent' : IDL.Func([], [IDL.Opt(AboutContent)], ['query']),
+    'getAdminHostEmail' : IDL.Func([], [IDL.Text], ['query']),
     'getAllRegistrationRecords' : IDL.Func(
         [],
         [IDL.Vec(RegistrationRecord)],

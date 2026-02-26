@@ -1,32 +1,39 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "New project",
-  "architectural_notes": [],
-  "known_issues": [
-    "Deployed app showing 'not found' error after Version 27 production release"
+  "summary": "Project with an admin dashboard. Admin host email set to athiakash1977@gmail.com.",
+  "architectural_notes": [
+    "Admin dashboard host email: athiakash1977@gmail.com"
   ],
-  "isFixRequest": true,
+  "known_issues": [],
+  "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-fix-the-not-found-error-displayed-when-navigating-to-the-deployed-application-ensure-the-tanstack-router-configuration-correctly-handles-the-root-route-and-all-defined-routes-home-about-event-details-registration-gallery-check-registration-admin-admin-dashboard-so-that-users-land-on-the-home-page-by-default-without-seeing-a-404-not-found-screen",
-      "title": "Fix the 'Not Found' error displayed when navigating to the deployed application. Ensure the TanStack Router configuration correctly handles the root route and all defined routes (home, about, event-details, registration, gallery, check-registration, admin, admin/dashboard) so that users land on the home page by default without seeing a 404/not-found screen.",
-      "reqIds": [
-        "REQ-1"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-the-frontend-build-configuration-index-html-and-asset-paths-supports-client-side-routing-correctly-in-the-internet-computer-deployment-environment-so-that-deep-link-navigation-and-page-refreshes-do-not-result-in-not-found-errors",
-      "title": "Ensure the frontend build configuration (index.html and asset paths) supports client-side routing correctly in the Internet Computer deployment environment, so that deep-link navigation and page refreshes do not result in 'Not Found' errors.",
+      "id": "feature-update-the-adminlogin-page-to-pre-populate-or-reference-the-admin-email-athiakash1977-gmail-com-as-the-expected-host-email-for-login-validation-on-the-frontend-side-ensuring-the-login-flow-matches-the-updated-backend-credential",
+      "title": "Update the AdminLogin page to pre-populate or reference the admin email 'athiakash1977@gmail.com' as the expected host email for login validation on the frontend side, ensuring the login flow matches the updated backend credential.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     }
   ],
-  "new_feature_requests": [],
-  "projectName": "Fix 'Not Found' routing error on deployed app",
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Set admin dashboard host email to athiakash1977@gmail.com",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Update the hardcoded admin host/owner email in the backend to 'athiakash1977@gmail.com'. This email should be used as the primary admin credential for verifying login access to the admin dashboard.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    }
+  ],
+  "projectName": "National Project Expo 2026",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

@@ -122,6 +122,7 @@ export interface _SERVICE {
   'deleteGalleryImage' : ActorMethod<[string], boolean>,
   'deleteRegistration' : ActorMethod<[bigint], boolean>,
   'getAboutContent' : ActorMethod<[], [] | [AboutContent]>,
+  'getAdminHostEmail' : ActorMethod<[], string>,
   'getAllRegistrationRecords' : ActorMethod<[], Array<RegistrationRecord>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,

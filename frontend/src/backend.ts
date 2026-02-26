@@ -196,6 +196,7 @@ export interface backendInterface {
     deleteGalleryImage(id: string): Promise<boolean>;
     deleteRegistration(id: bigint): Promise<boolean>;
     getAboutContent(): Promise<AboutContent | null>;
+    getAdminHostEmail(): Promise<string>;
     getAllRegistrationRecords(): Promise<Array<RegistrationRecord>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
@@ -387,6 +388,20 @@ export class Backend implements backendInterface {
         } else {
             const result = await this.actor.getAboutContent();
             return from_candid_opt_n11(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getAdminHostEmail(): Promise<string> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getAdminHostEmail();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getAdminHostEmail();
+            return result;
         }
     }
     async getAllRegistrationRecords(): Promise<Array<RegistrationRecord>> {

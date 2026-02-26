@@ -1,3 +1,7 @@
+// This file implements the main logic of the actor. It is adapted for the
+// Internet Computer from its original version written by the OpenCode developers.
+// Import the necessary modules and libraries
+
 import Array "mo:core/Array";
 import Int "mo:core/Int";
 import Map "mo:core/Map";
@@ -12,6 +16,7 @@ import MixinStorage "blob-storage/Mixin";
 import AccessControl "authorization/access-control";
 import Storage "blob-storage/Storage";
 
+// Main actor definition
 actor {
   include MixinStorage();
 
@@ -19,6 +24,10 @@ actor {
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
 
+  // System constants - GET IT FROM ENV DURING DEPLOYMENT
+  let adminHostEmail = "athiakash1977@gmail.com";
+
+  // Define types for registrations and user profiles
   public type Registration = {
     id : Nat;
     fullName : Text;
@@ -115,6 +124,7 @@ actor {
     uploadedAt : Int;
   };
 
+  // Storage for registrations and user profiles
   var nextId = 1;
   let registrations = Map.empty<Nat, Registration>();
   let userProfiles = Map.empty<Principal, UserProfile>();
@@ -125,6 +135,7 @@ actor {
   var contactContent : ?ContactContent = null;
   var galleryImages = Map.empty<Text, GalleryImage>();
 
+  // Public query to get all registration records
   public query ({ caller }) func getAllRegistrationRecords() : async [RegistrationRecord] {
     if (not (AccessControl.isAdmin(accessControlState, caller))) {
       Runtime.trap("Unauthorized: Only admins can access all registration records");
@@ -133,6 +144,7 @@ actor {
     registrations.values().toArray().sort(Registration.compareByTimestamp);
   };
 
+  // Submit a registration and return the registration ID
   public shared ({ caller }) func submitRegistration(
     fullName : Text,
     email : Text,
@@ -164,6 +176,7 @@ actor {
     registrations.size();
   };
 
+  // Query to get all registrations (for admin)
   public query ({ caller }) func getRegistrations() : async [Registration] {
     if (not (AccessControl.isAdmin(accessControlState, caller))) {
       Runtime.trap("Unauthorized: Only admins can view all registrations");
@@ -171,6 +184,7 @@ actor {
     registrations.values().toArray().sort(Registration.compareByTimestamp);
   };
 
+  // Delete a registration (for admin)
   public shared ({ caller }) func deleteRegistration(id : Nat) : async Bool {
     if (not (AccessControl.isAdmin(accessControlState, caller))) {
       Runtime.trap("Unauthorized: Only admins can delete registrations");
@@ -183,6 +197,7 @@ actor {
     };
   };
 
+  // User profile management
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only authenticated users can get their profile");
@@ -204,6 +219,7 @@ actor {
     userProfiles.get(user);
   };
 
+  // Query registration by email (for admin)
   public query ({ caller }) func getRegistrationByEmail(email : Text) : async ?Registration {
     if (not (AccessControl.isAdmin(accessControlState, caller))) {
       Runtime.trap("Unauthorized: Only admins can search registrations by email");
@@ -217,6 +233,7 @@ actor {
     registration;
   };
 
+  // Update a registration (for admin)
   public shared ({ caller }) func updateRegistration(
     id : Nat,
     fullName : Text,
@@ -253,6 +270,7 @@ actor {
     };
   };
 
+  // Content management functions
   public query func getHeroContent() : async ?HeroContent {
     heroContent;
   };
@@ -308,6 +326,7 @@ actor {
     contactContent := ?content;
   };
 
+  // Gallery image management
   public query func getGalleryImages() : async [GalleryImage] {
     galleryImages.values().toArray();
   };
@@ -343,5 +362,9 @@ actor {
     } else {
       false;
     };
+  };
+
+  public query func getAdminHostEmail() : async Text {
+    adminHostEmail;
   };
 };

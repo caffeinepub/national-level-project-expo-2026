@@ -2,31 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-fix-the-not-found-error-displayed-when-navigating-to-the-deployed-application-ensure-the-tanstack-router-configuration-correctly-handles-the-root-route-and-all-defined-routes-home-about-event-details-registration-gallery-check-registration-admin-admin-dashboard-so-that-users-land-on-the-home-page-by-default-without-seeing-a-404-not-found-screen",
-      "featureTitle": "Fix the 'Not Found' error displayed when navigating to the deployed application. Ensure the TanStack Router configuration correctly handles the root route and all defined routes (home, about, event-details, registration, gallery, check-registration, admin, admin/dashboard) so that users land on the home page by default without seeing a 404/not-found screen.",
+      "featureId": "feature-update-the-adminlogin-page-to-pre-populate-or-reference-the-admin-email-athiakash1977-gmail-com-as-the-expected-host-email-for-login-validation-on-the-frontend-side-ensuring-the-login-flow-matches-the-updated-backend-credential",
+      "featureTitle": "Update the AdminLogin page to pre-populate or reference the admin email 'athiakash1977@gmail.com' as the expected host email for login validation on the frontend side, ensuring the login flow matches the updated backend credential.",
       "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/pages/NotFoundPage.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-1"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-ensure-the-frontend-build-configuration-index-html-and-asset-paths-supports-client-side-routing-correctly-in-the-internet-computer-deployment-environment-so-that-deep-link-navigation-and-page-refreshes-do-not-result-in-not-found-errors",
-      "featureTitle": "Ensure the frontend build configuration (index.html and asset paths) supports client-side routing correctly in the Internet Computer deployment environment, so that deep-link navigation and page refreshes do not result in 'Not Found' errors.",
-      "files": [
-        "frontend/src/App.tsx"
+        "frontend/src/pages/AdminLogin.tsx"
       ],
       "components": [
         "authorization@4.0.0",

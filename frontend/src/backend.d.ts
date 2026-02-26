@@ -103,6 +103,7 @@ export interface backendInterface {
     deleteGalleryImage(id: string): Promise<boolean>;
     deleteRegistration(id: bigint): Promise<boolean>;
     getAboutContent(): Promise<AboutContent | null>;
+    getAdminHostEmail(): Promise<string>;
     getAllRegistrationRecords(): Promise<Array<RegistrationRecord>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;

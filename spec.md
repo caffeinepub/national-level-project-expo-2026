@@ -1,11 +1,10 @@
 # Specification
 
 ## Summary
-**Goal:** Fix the "Not Found" routing error on the deployed application so users land on the home page correctly.
+**Goal:** Update the admin dashboard host email to `athiakash1977@gmail.com` for the National Project Expo 2026 application.
 
 **Planned changes:**
-- Fix TanStack Router configuration to correctly handle the root route and all defined routes (home, about, event-details, registration, gallery, check-registration, admin, admin/dashboard)
-- Add a proper catch-all/fallback route to show a user-friendly 404 page for unknown paths
-- Ensure frontend build configuration and asset paths support client-side routing in the Internet Computer deployment environment so page refreshes and direct URL navigation work correctly
+- Update the hardcoded admin email in the backend to `athiakash1977@gmail.com` so it is used as the primary credential for admin authentication
+- Update the frontend AdminLogin page to validate login against `athiakash1977@gmail.com`, rejecting any other email
 
-**User-visible outcome:** Users can navigate to the deployed app without seeing a "Not Found" error; the home page loads at the root URL, all routes resolve correctly, and page refreshes on any valid route work as expected.
+**User-visible outcome:** Logging into the admin dashboard with `athiakash1977@gmail.com` and the correct password grants access, while any other email is rejected.

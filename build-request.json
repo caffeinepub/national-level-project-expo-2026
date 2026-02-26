@@ -1,53 +1,54 @@
 {
   "kind": "build_request",
-  "title": "Fix 'Not Found' routing error on deployed app",
-  "priority": "high",
+  "title": "Set admin dashboard host email to athiakash1977@gmail.com",
+  "projectName": "National Project Expo 2026",
+  "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Fix the 'Not Found' error displayed when navigating to the deployed application. Ensure the TanStack Router configuration correctly handles the root route and all defined routes (home, about, event-details, registration, gallery, check-registration, admin, admin/dashboard) so that users land on the home page by default without seeing a 404/not-found screen.",
-      "target": "frontend",
+      "text": "Update the hardcoded admin host/owner email in the backend to 'athiakash1977@gmail.com'. This email should be used as the primary admin credential for verifying login access to the admin dashboard.",
+      "target": "backend",
       "source": {
         "messageIds": [
           "msg-latest"
         ],
         "quotes": [
-          "it is showing not fount"
+          "set the admin dashboard hoat as athiakash1977@gmail.com"
         ]
       },
       "acceptanceCriteria": [
-        "Navigating to the root URL '/' renders the HomePage without any 'Not Found' error",
-        "All defined routes (about, event-details, registration, gallery, check-registration, admin, admin/dashboard) resolve correctly",
-        "A proper catch-all or fallback route is defined so unknown paths show a user-friendly 404 page rather than a blank or broken screen",
-        "The deployed production build does not show 'Not Found' on initial page load"
+        "The admin email used for authentication/verification in the backend is set to 'athiakash1977@gmail.com'",
+        "Logging in with 'athiakash1977@gmail.com' and the correct password grants access to the admin dashboard",
+        "No other email address is accepted as the admin host email unless explicitly configured"
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Ensure the frontend build configuration (index.html and asset paths) supports client-side routing correctly in the Internet Computer deployment environment, so that deep-link navigation and page refreshes do not result in 'Not Found' errors.",
+      "text": "Update the AdminLogin page to pre-populate or reference the admin email 'athiakash1977@gmail.com' as the expected host email for login validation on the frontend side, ensuring the login flow matches the updated backend credential.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-latest"
         ],
         "quotes": [
-          "it is showing not fount"
+          "set the admin dashboard hoat as athiakash1977@gmail.com"
         ]
       },
       "acceptanceCriteria": [
-        "Page refresh on any valid route does not produce a 'Not Found' error",
-        "Direct URL navigation to any defined route loads the correct page"
+        "The frontend admin login form correctly authenticates against the email 'athiakash1977@gmail.com'",
+        "Successful login with 'athiakash1977@gmail.com' redirects to the admin dashboard",
+        "Login attempts with a different email are rejected"
       ]
     }
   ],
   "constraints": [
-    "Do not modify files listed in frontend.immutablePaths",
-    "Do not alter the existing backend actor or data models"
+    "Do not change the admin dashboard layout or any unrelated frontend components",
+    "Do not alter the existing password/token verification logic beyond updating the email value"
   ],
   "nonGoals": [
-    "Adding new routes or pages",
-    "Changing visual design or layout",
-    "Modifying backend logic"
+    "Adding multiple admin accounts or roles",
+    "Implementing email-based password reset",
+    "Fixing the 404 routing issue visible in the uploaded screenshot (separate concern)"
   ],
   "imageRequirements": {
     "required": [],
