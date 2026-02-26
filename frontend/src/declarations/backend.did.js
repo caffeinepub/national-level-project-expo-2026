@@ -13,9 +13,53 @@ export const UserRole = IDL.Variant({
   'user' : IDL.Null,
   'guest' : IDL.Null,
 });
+export const FeatureCard = IDL.Record({
+  'title' : IDL.Text,
+  'icon' : IDL.Text,
+  'description' : IDL.Text,
+});
+export const AboutContent = IDL.Record({
+  'sectionDescription' : IDL.Text,
+  'featureCards' : IDL.Vec(FeatureCard),
+});
 export const UserProfile = IDL.Record({
   'name' : IDL.Text,
   'email' : IDL.Text,
+});
+export const ContactContent = IDL.Record({
+  'email' : IDL.Text,
+  'website' : IDL.Text,
+  'addressLine1' : IDL.Text,
+  'addressLine2' : IDL.Text,
+  'phone' : IDL.Text,
+});
+export const Coordinator = IDL.Record({
+  'name' : IDL.Text,
+  'role' : IDL.Text,
+  'email' : IDL.Text,
+  'phone' : IDL.Text,
+});
+export const CoordinatorsContent = IDL.Record({
+  'studentCoordinators' : IDL.Vec(Coordinator),
+  'facultyCoordinators' : IDL.Vec(Coordinator),
+});
+export const TimelineMilestone = IDL.Record({
+  'milestoneLabel' : IDL.Text,
+  'date' : IDL.Text,
+});
+export const EventDetailsContent = IDL.Record({
+  'venue' : IDL.Text,
+  'timelineMilestones' : IDL.Vec(TimelineMilestone),
+  'projectCategories' : IDL.Vec(IDL.Text),
+  'eligibilityCriteria' : IDL.Text,
+  'registrationFee' : IDL.Text,
+  'eventDate' : IDL.Text,
+});
+export const HeroContent = IDL.Record({
+  'tagline' : IDL.Text,
+  'collegeName' : IDL.Text,
+  'eventTitle' : IDL.Text,
+  'eventDate' : IDL.Text,
 });
 export const Registration = IDL.Record({
   'id' : IDL.Nat,
@@ -34,8 +78,21 @@ export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'deleteRegistration' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+  'getAboutContent' : IDL.Func([], [IDL.Opt(AboutContent)], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+  'getContactContent' : IDL.Func([], [IDL.Opt(ContactContent)], ['query']),
+  'getCoordinatorsContent' : IDL.Func(
+      [],
+      [IDL.Opt(CoordinatorsContent)],
+      ['query'],
+    ),
+  'getEventDetailsContent' : IDL.Func(
+      [],
+      [IDL.Opt(EventDetailsContent)],
+      ['query'],
+    ),
+  'getHeroContent' : IDL.Func([], [IDL.Opt(HeroContent)], ['query']),
   'getRegistrationByEmail' : IDL.Func(
       [IDL.Text],
       [IDL.Opt(Registration)],
@@ -64,6 +121,11 @@ export const idlService = IDL.Service({
       [IDL.Nat],
       [],
     ),
+  'updateAboutContent' : IDL.Func([AboutContent], [], []),
+  'updateContactContent' : IDL.Func([ContactContent], [], []),
+  'updateCoordinatorsContent' : IDL.Func([CoordinatorsContent], [], []),
+  'updateEventDetailsContent' : IDL.Func([EventDetailsContent], [], []),
+  'updateHeroContent' : IDL.Func([HeroContent], [], []),
   'updateRegistration' : IDL.Func(
       [
         IDL.Nat,
@@ -94,7 +156,51 @@ export const idlFactory = ({ IDL }) => {
     'user' : IDL.Null,
     'guest' : IDL.Null,
   });
+  const FeatureCard = IDL.Record({
+    'title' : IDL.Text,
+    'icon' : IDL.Text,
+    'description' : IDL.Text,
+  });
+  const AboutContent = IDL.Record({
+    'sectionDescription' : IDL.Text,
+    'featureCards' : IDL.Vec(FeatureCard),
+  });
   const UserProfile = IDL.Record({ 'name' : IDL.Text, 'email' : IDL.Text });
+  const ContactContent = IDL.Record({
+    'email' : IDL.Text,
+    'website' : IDL.Text,
+    'addressLine1' : IDL.Text,
+    'addressLine2' : IDL.Text,
+    'phone' : IDL.Text,
+  });
+  const Coordinator = IDL.Record({
+    'name' : IDL.Text,
+    'role' : IDL.Text,
+    'email' : IDL.Text,
+    'phone' : IDL.Text,
+  });
+  const CoordinatorsContent = IDL.Record({
+    'studentCoordinators' : IDL.Vec(Coordinator),
+    'facultyCoordinators' : IDL.Vec(Coordinator),
+  });
+  const TimelineMilestone = IDL.Record({
+    'milestoneLabel' : IDL.Text,
+    'date' : IDL.Text,
+  });
+  const EventDetailsContent = IDL.Record({
+    'venue' : IDL.Text,
+    'timelineMilestones' : IDL.Vec(TimelineMilestone),
+    'projectCategories' : IDL.Vec(IDL.Text),
+    'eligibilityCriteria' : IDL.Text,
+    'registrationFee' : IDL.Text,
+    'eventDate' : IDL.Text,
+  });
+  const HeroContent = IDL.Record({
+    'tagline' : IDL.Text,
+    'collegeName' : IDL.Text,
+    'eventTitle' : IDL.Text,
+    'eventDate' : IDL.Text,
+  });
   const Registration = IDL.Record({
     'id' : IDL.Nat,
     'collegeName' : IDL.Text,
@@ -112,8 +218,21 @@ export const idlFactory = ({ IDL }) => {
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'deleteRegistration' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+    'getAboutContent' : IDL.Func([], [IDL.Opt(AboutContent)], ['query']),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+    'getContactContent' : IDL.Func([], [IDL.Opt(ContactContent)], ['query']),
+    'getCoordinatorsContent' : IDL.Func(
+        [],
+        [IDL.Opt(CoordinatorsContent)],
+        ['query'],
+      ),
+    'getEventDetailsContent' : IDL.Func(
+        [],
+        [IDL.Opt(EventDetailsContent)],
+        ['query'],
+      ),
+    'getHeroContent' : IDL.Func([], [IDL.Opt(HeroContent)], ['query']),
     'getRegistrationByEmail' : IDL.Func(
         [IDL.Text],
         [IDL.Opt(Registration)],
@@ -142,6 +261,11 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Nat],
         [],
       ),
+    'updateAboutContent' : IDL.Func([AboutContent], [], []),
+    'updateContactContent' : IDL.Func([ContactContent], [], []),
+    'updateCoordinatorsContent' : IDL.Func([CoordinatorsContent], [], []),
+    'updateEventDetailsContent' : IDL.Func([EventDetailsContent], [], []),
+    'updateHeroContent' : IDL.Func([HeroContent], [], []),
     'updateRegistration' : IDL.Func(
         [
           IDL.Nat,

@@ -1,12 +1,21 @@
 import { useState, useEffect } from 'react';
 import { ChevronDown, Users, Trophy } from 'lucide-react';
-import { useGetRegistrationCount } from '../hooks/useQueries';
+import { useGetRegistrationCount, useGetHeroContent } from '../hooks/useQueries';
 
-const EVENT_DATE = new Date('2026-04-15T09:00:00');
+const DEFAULT_EVENT_TITLE = 'National Level Project Expo 2026';
+const DEFAULT_TAGLINE = 'Innovate · Collaborate · Inspire';
+const DEFAULT_EVENT_DATE = 'April 15, 2026';
+const DEFAULT_COLLEGE_NAME = 'E.G.S. Pillay Engineering College';
 
-function getTimeLeft() {
+function getEventDate(dateStr: string): Date {
+  const parsed = new Date(dateStr);
+  if (!isNaN(parsed.getTime())) return parsed;
+  return new Date('2026-04-15T09:00:00');
+}
+
+function getTimeLeft(eventDate: Date) {
   const now = new Date();
-  const diff = EVENT_DATE.getTime() - now.getTime();
+  const diff = eventDate.getTime() - now.getTime();
   if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
   return {
     days: Math.floor(diff / (1000 * 60 * 60 * 24)),
@@ -30,14 +39,22 @@ function CountdownUnit({ value, label }: { value: number; label: string }) {
 }
 
 export default function Hero() {
-  const [timeLeft, setTimeLeft] = useState(getTimeLeft());
+  const { data: heroContent } = useGetHeroContent();
   const { data: countData } = useGetRegistrationCount();
   const registrationCount = countData ? Number(countData) : 0;
 
+  const eventTitle = heroContent?.eventTitle || DEFAULT_EVENT_TITLE;
+  const tagline = heroContent?.tagline || DEFAULT_TAGLINE;
+  const eventDateStr = heroContent?.eventDate || DEFAULT_EVENT_DATE;
+  const collegeName = heroContent?.collegeName || DEFAULT_COLLEGE_NAME;
+
+  const eventDate = getEventDate(eventDateStr);
+  const [timeLeft, setTimeLeft] = useState(getTimeLeft(eventDate));
+
   useEffect(() => {
-    const timer = setInterval(() => setTimeLeft(getTimeLeft()), 1000);
+    const timer = setInterval(() => setTimeLeft(getTimeLeft(eventDate)), 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [eventDate.getTime()]);
 
   const handleRegisterClick = () => {
     const el = document.getElementById('registration');
@@ -90,25 +107,33 @@ export default function Hero() {
         {/* College Branding */}
         <div className="animate-slide-up opacity-0 [animation-fill-mode:forwards] [animation-delay:0.1s]">
           <span className="inline-block px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold text-expo-green-end border border-expo-green-start/40 bg-expo-green-start/10 backdrop-blur-sm mb-4 tracking-wide uppercase">
-            E.G.S. Pillay Engineering College • ECE Department
+            {collegeName} • ECE Department
           </span>
         </div>
 
         {/* Event Title */}
         <div className="animate-slide-up opacity-0 [animation-fill-mode:forwards] [animation-delay:0.25s]">
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-white leading-tight mb-4">
-            National Level
-            <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-expo-green-start to-expo-green-end">
-              Project Expo 2026
-            </span>
+            {eventTitle.includes('2026') ? (
+              <>
+                {eventTitle.replace('Project Expo 2026', '')}
+                <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-expo-green-start to-expo-green-end">
+                  Project Expo 2026
+                </span>
+              </>
+            ) : (
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-expo-green-start to-expo-green-end">
+                {eventTitle}
+              </span>
+            )}
           </h1>
         </div>
 
         {/* Tagline */}
         <div className="animate-slide-up opacity-0 [animation-fill-mode:forwards] [animation-delay:0.4s]">
           <p className="text-lg sm:text-xl text-white/70 mb-3 font-medium">
-            Innovate · Collaborate · Inspire
+            {tagline}
           </p>
           <p className="text-sm sm:text-base text-white/50 mb-8 max-w-2xl mx-auto">
             Showcase your groundbreaking projects to industry experts, win exciting prizes, and connect with brilliant minds from across the nation.
@@ -155,7 +180,7 @@ export default function Hero() {
           >
             Register Now — It's Free!
           </button>
-          <p className="mt-3 text-xs text-white/40">April 15, 2026 • Nagapattinam, Tamil Nadu</p>
+          <p className="mt-3 text-xs text-white/40">{eventDateStr} • Nagapattinam, Tamil Nadu</p>
         </div>
       </div>
 

@@ -24,12 +24,21 @@ export default function AdminLogin() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginForm>();
+  } = useForm<LoginForm>({
+    defaultValues: {
+      email: 'athiakash1977@gmail.com',
+      password: '',
+    },
+  });
 
   const onSubmit = async (data: LoginForm) => {
     setLoginError('');
     try {
-      const isValid = await verifyMutation.mutateAsync(data);
+      // Pass email and password exactly as typed — no trimming or transformation
+      const isValid = await verifyMutation.mutateAsync({
+        email: data.email,
+        password: data.password,
+      });
       if (isValid) {
         login();
         navigate({ to: '/admin/dashboard' });
@@ -65,7 +74,7 @@ export default function AdminLogin() {
             Secure Login
           </h2>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" autoComplete="off">
             <div className="space-y-1.5">
               <Label htmlFor="email" className="text-white/70 text-sm">
                 Email Address
@@ -74,8 +83,9 @@ export default function AdminLogin() {
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
                 <Input
                   id="email"
-                  type="email"
-                  placeholder="admin@egspillay.ac.in"
+                  type="text"
+                  autoComplete="off"
+                  placeholder="athiakash1977@gmail.com"
                   className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/20 focus:border-expo-green-start/60"
                   {...register('email', {
                     required: 'Email is required',
@@ -95,6 +105,7 @@ export default function AdminLogin() {
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
                   placeholder="Enter your password"
                   className="pl-10 pr-10 bg-white/5 border-white/10 text-white placeholder:text-white/20 focus:border-expo-green-start/60"
                   {...register('password', { required: 'Password is required' })}

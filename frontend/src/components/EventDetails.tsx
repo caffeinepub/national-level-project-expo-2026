@@ -1,14 +1,13 @@
 import { Calendar, MapPin, IndianRupee, Users, Tag, Clock } from 'lucide-react';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
+import { useGetEventDetailsContent } from '../hooks/useQueries';
 
-const eventInfo = [
-  { icon: Calendar, label: 'Event Date', value: 'April 15, 2026', sub: 'Wednesday' },
-  { icon: MapPin, label: 'Venue', value: 'E.G.S. Pillay Engineering College', sub: 'Nagapattinam, Tamil Nadu' },
-  { icon: IndianRupee, label: 'Registration Fee', value: 'FREE', sub: 'No registration fee' },
-  { icon: Users, label: 'Eligibility', value: 'All Engineering Students', sub: 'UG & PG (Any College)' },
-];
+const DEFAULT_EVENT_DATE = 'April 15, 2026';
+const DEFAULT_VENUE = 'E.G.S. Pillay Engineering College';
+const DEFAULT_FEE = 'Rs. 150';
+const DEFAULT_ELIGIBILITY = 'All Engineering Students';
 
-const categories = [
+const DEFAULT_CATEGORIES = [
   { name: 'IoT & Embedded Systems', color: 'bg-blue-500/20 text-blue-300 border-blue-500/30' },
   { name: 'AI / Machine Learning', color: 'bg-purple-500/20 text-purple-300 border-purple-500/30' },
   { name: 'Robotics & Automation', color: 'bg-orange-500/20 text-orange-300 border-orange-500/30' },
@@ -17,15 +16,31 @@ const categories = [
   { name: 'Others / Interdisciplinary', color: 'bg-expo-green-start/20 text-expo-green-end border-expo-green-start/30' },
 ];
 
-const timeline = [
-  { date: 'March 1, 2026', title: 'Registration Opens', desc: 'Online registration portal goes live. Submit your team details and project abstract.', side: 'left' },
-  { date: 'March 31, 2026', title: 'Registration Deadline', desc: 'Last date to register and submit your project abstract for review.', side: 'right' },
-  { date: 'April 5, 2026', title: 'Abstract Review', desc: 'Submitted abstracts will be reviewed by faculty coordinators. Selected teams will be notified.', side: 'left' },
-  { date: 'April 10, 2026', title: 'Confirmation & Briefing', desc: 'Selected teams receive confirmation and event guidelines. Prepare your project demo.', side: 'right' },
-  { date: 'April 15, 2026', title: 'Expo Day 🎉', desc: 'Present your project to judges, industry experts, and fellow innovators. Winners announced!', side: 'left' },
+const CATEGORY_COLORS = [
+  'bg-blue-500/20 text-blue-300 border-blue-500/30',
+  'bg-purple-500/20 text-purple-300 border-purple-500/30',
+  'bg-orange-500/20 text-orange-300 border-orange-500/30',
+  'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
+  'bg-pink-500/20 text-pink-300 border-pink-500/30',
+  'bg-expo-green-start/20 text-expo-green-end border-expo-green-start/30',
 ];
 
-function TimelineItem({ item, index }: { item: (typeof timeline)[0]; index: number }) {
+const DEFAULT_TIMELINE = [
+  { date: 'March 1, 2026', title: 'Registration Opens', desc: 'Online registration portal goes live. Submit your team details and project abstract.', side: 'left' as const },
+  { date: 'March 31, 2026', title: 'Registration Deadline', desc: 'Last date to register and submit your project abstract for review.', side: 'right' as const },
+  { date: 'April 5, 2026', title: 'Abstract Review', desc: 'Submitted abstracts will be reviewed by faculty coordinators. Selected teams will be notified.', side: 'left' as const },
+  { date: 'April 10, 2026', title: 'Confirmation & Briefing', desc: 'Selected teams receive confirmation and event guidelines. Prepare your project demo.', side: 'right' as const },
+  { date: 'April 15, 2026', title: 'Expo Day 🎉', desc: 'Present your project to judges, industry experts, and fellow innovators. Winners announced!', side: 'left' as const },
+];
+
+interface TimelineItemData {
+  date: string;
+  title: string;
+  desc: string;
+  side: 'left' | 'right';
+}
+
+function TimelineItem({ item, index }: { item: TimelineItemData; index: number }) {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.3 });
   const isLeft = item.side === 'left';
 
@@ -86,6 +101,37 @@ function TimelineItem({ item, index }: { item: (typeof timeline)[0]; index: numb
 
 export default function EventDetails() {
   const { ref: headingRef, isVisible: headingVisible } = useScrollAnimation({ threshold: 0.3 });
+  const { data: eventDetailsContent } = useGetEventDetailsContent();
+
+  const eventDate = eventDetailsContent?.eventDate || DEFAULT_EVENT_DATE;
+  const venue = eventDetailsContent?.venue || DEFAULT_VENUE;
+  const registrationFee = eventDetailsContent?.registrationFee || DEFAULT_FEE;
+  const eligibilityCriteria = eventDetailsContent?.eligibilityCriteria || DEFAULT_ELIGIBILITY;
+
+  const eventInfo = [
+    { icon: Calendar, label: 'Event Date', value: eventDate, sub: 'Wednesday' },
+    { icon: MapPin, label: 'Venue', value: venue, sub: 'Nagapattinam, Tamil Nadu' },
+    { icon: IndianRupee, label: 'Registration Fee', value: registrationFee, sub: 'Per head' },
+    { icon: Users, label: 'Eligibility', value: eligibilityCriteria, sub: 'UG & PG (Any College)' },
+  ];
+
+  const categories =
+    eventDetailsContent?.projectCategories && eventDetailsContent.projectCategories.length > 0
+      ? eventDetailsContent.projectCategories.map((name, i) => ({
+          name,
+          color: CATEGORY_COLORS[i % CATEGORY_COLORS.length],
+        }))
+      : DEFAULT_CATEGORIES;
+
+  const timeline: TimelineItemData[] =
+    eventDetailsContent?.timelineMilestones && eventDetailsContent.timelineMilestones.length > 0
+      ? eventDetailsContent.timelineMilestones.map((m, i) => ({
+          date: m.date,
+          title: m.milestoneLabel,
+          desc: '',
+          side: i % 2 === 0 ? 'left' : 'right',
+        }))
+      : DEFAULT_TIMELINE;
 
   return (
     <section id="event-details" className="py-24 bg-expo-darker relative overflow-hidden">
@@ -113,7 +159,7 @@ export default function EventDetails() {
 
         {/* Info Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
-          {eventInfo.map(({ icon: Icon, label, value, sub }, i) => (
+          {eventInfo.map(({ icon: Icon, label, value, sub }) => (
             <div
               key={label}
               className="glass-card rounded-2xl p-5 border border-white/10 hover:border-expo-green-start/40 hover:shadow-lg hover:shadow-expo-green-start/10 transition-all duration-300 hover:-translate-y-1"
@@ -135,9 +181,9 @@ export default function EventDetails() {
             <h3 className="text-xl font-bold text-white">Project Categories</h3>
           </div>
           <div className="flex flex-wrap gap-3">
-            {categories.map((cat) => (
+            {categories.map((cat, i) => (
               <span
-                key={cat.name}
+                key={cat.name + i}
                 className={`px-4 py-2 rounded-full text-sm font-semibold border ${cat.color} backdrop-blur-sm`}
               >
                 {cat.name}
@@ -158,7 +204,7 @@ export default function EventDetails() {
             <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-expo-green-start/50 via-expo-green-start/20 to-transparent -translate-x-1/2" />
             <div className="space-y-8">
               {timeline.map((item, i) => (
-                <TimelineItem key={item.title} item={item} index={i} />
+                <TimelineItem key={item.title + i} item={item} index={i} />
               ))}
             </div>
           </div>
@@ -166,7 +212,7 @@ export default function EventDetails() {
           {/* Mobile */}
           <div className="md:hidden space-y-0">
             {timeline.map((item, i) => (
-              <TimelineItem key={item.title} item={item} index={i} />
+              <TimelineItem key={item.title + i} item={item} index={i} />
             ))}
           </div>
         </div>

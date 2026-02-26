@@ -1,23 +1,12 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { useQueryClient } from '@tanstack/react-query';
-import {
-  Search,
-  Download,
-  Trash2,
-  LogOut,
-  Users,
-  BarChart3,
-  Loader2,
-  Zap,
-  RefreshCw,
-  Pencil,
-  X,
-} from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { useAdminAuth } from '../context/AdminAuthContext';
+import { useGetRegistrations, useDeleteRegistration, useUpdateRegistration } from '../hooks/useQueries';
+import type { Registration } from '../backend';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
   TableBody,
@@ -27,6 +16,13 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -35,34 +31,27 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  DialogClose,
-} from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
-import { useAdminAuth } from '../context/AdminAuthContext';
-import { useGetRegistrations, useDeleteRegistration, useUpdateRegistration } from '../hooks/useQueries';
-import { exportRegistrationsToCSV } from '../utils/csvExport';
-import type { Registration } from '../backend';
+  LogOut,
+  Search,
+  Users,
+  Trash2,
+  Edit,
+  Eye,
+  ChevronLeft,
+  ChevronRight,
+  LayoutDashboard,
+  FileText,
+} from 'lucide-react';
 import { toast } from 'sonner';
+import AdminContentManagement from '../components/AdminContentManagement';
 
-function formatDate(timestamp: bigint): string {
-  const ms = Number(timestamp) / 1_000_000;
-  return new Date(ms).toLocaleDateString('en-IN', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
+const ITEMS_PER_PAGE = 10;
 
 const CATEGORY_COLORS: Record<string, string> = {
   'IoT & Embedded Systems': 'bg-blue-500/20 text-blue-300 border-blue-500/30',
@@ -73,570 +62,546 @@ const CATEGORY_COLORS: Record<string, string> = {
   'Others / Interdisciplinary': 'bg-green-500/20 text-green-300 border-green-500/30',
 };
 
-const CATEGORIES = [
-  'IoT & Embedded Systems',
-  'AI / Machine Learning',
-  'Robotics & Automation',
-  'Software Development',
-  'Electronics & VLSI',
-  'Others / Interdisciplinary',
-];
-
-function DeleteButton({ registration, onDelete }: { registration: Registration; onDelete: () => void }) {
-  const deleteMutation = useDeleteRegistration();
-
-  const handleDelete = async () => {
-    await deleteMutation.mutateAsync(registration.id);
-    onDelete();
-  };
-
-  return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-colors"
-        >
-          <Trash2 className="w-4 h-4" />
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent className="bg-expo-darker border border-white/10 text-white">
-        <AlertDialogHeader>
-          <AlertDialogTitle className="text-white">Delete Registration</AlertDialogTitle>
-          <AlertDialogDescription className="text-white/50">
-            Are you sure you want to delete the registration for{' '}
-            <strong className="text-white">{registration.fullName}</strong>? This action cannot be undone.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel className="bg-white/5 border-white/10 text-white hover:bg-white/10">
-            Cancel
-          </AlertDialogCancel>
-          <AlertDialogAction
-            onClick={handleDelete}
-            className="bg-red-500 hover:bg-red-600 text-white border-0"
-            disabled={deleteMutation.isPending}
-          >
-            {deleteMutation.isPending ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              'Delete'
-            )}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  );
-}
-
-interface EditFormState {
-  fullName: string;
-  email: string;
-  phoneNumber: string;
-  collegeName: string;
-  department: string;
-  projectTitle: string;
-  category: string;
-  abstract: string;
-}
-
-function EditModal({
-  registration,
-  open,
-  onClose,
+function DetailField({
+  label,
+  value,
+  children,
 }: {
-  registration: Registration | null;
-  open: boolean;
-  onClose: () => void;
+  label: string;
+  value?: string;
+  children?: React.ReactNode;
 }) {
-  const updateMutation = useUpdateRegistration();
-  const [form, setForm] = useState<EditFormState>({
-    fullName: '',
-    email: '',
-    phoneNumber: '',
-    collegeName: '',
-    department: '',
-    projectTitle: '',
-    category: '',
-    abstract: '',
-  });
-  const [error, setError] = useState('');
-
-  // Sync form when registration changes
-  useState(() => {
-    if (registration) {
-      setForm({
-        fullName: registration.fullName,
-        email: registration.email,
-        phoneNumber: registration.phoneNumber,
-        collegeName: registration.collegeName,
-        department: registration.department,
-        projectTitle: registration.projectTitle,
-        category: registration.category,
-        abstract: registration.abstract,
-      });
-      setError('');
-    }
-  });
-
-  // Reset form when modal opens with new registration
-  const handleOpenChange = (isOpen: boolean) => {
-    if (isOpen && registration) {
-      setForm({
-        fullName: registration.fullName,
-        email: registration.email,
-        phoneNumber: registration.phoneNumber,
-        collegeName: registration.collegeName,
-        department: registration.department,
-        projectTitle: registration.projectTitle,
-        category: registration.category,
-        abstract: registration.abstract,
-      });
-      setError('');
-    }
-    if (!isOpen) onClose();
-  };
-
-  const handleChange = (field: keyof EditFormState, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!registration) return;
-    setError('');
-    try {
-      const success = await updateMutation.mutateAsync({
-        id: registration.id,
-        ...form,
-      });
-      if (success) {
-        toast.success('Registration updated successfully!');
-        onClose();
-      } else {
-        setError('Update failed: Registration not found.');
-      }
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'An unexpected error occurred.';
-      setError(message);
-    }
-  };
-
-  if (!registration) return null;
-
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="bg-expo-darker border border-white/10 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-white flex items-center gap-2">
-            <span className="w-7 h-7 rounded-lg bg-gradient-to-br from-expo-green-start to-expo-green-end flex items-center justify-center">
-              <Pencil className="w-3.5 h-3.5 text-white" />
-            </span>
-            Edit Registration #{registration.id.toString()}
-          </DialogTitle>
-          <DialogDescription className="text-white/40">
-            Update the details for <span className="text-white/70">{registration.fullName}</span>.
-          </DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-4 mt-2">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Full Name */}
-            <div className="space-y-1.5">
-              <Label className="text-white/60 text-xs uppercase tracking-wider">Full Name</Label>
-              <Input
-                value={form.fullName}
-                onChange={(e) => handleChange('fullName', e.target.value)}
-                required
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-expo-green-start/60"
-              />
-            </div>
-
-            {/* Email */}
-            <div className="space-y-1.5">
-              <Label className="text-white/60 text-xs uppercase tracking-wider">Email</Label>
-              <Input
-                type="email"
-                value={form.email}
-                onChange={(e) => handleChange('email', e.target.value)}
-                required
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-expo-green-start/60"
-              />
-            </div>
-
-            {/* Phone */}
-            <div className="space-y-1.5">
-              <Label className="text-white/60 text-xs uppercase tracking-wider">Phone Number</Label>
-              <Input
-                value={form.phoneNumber}
-                onChange={(e) => handleChange('phoneNumber', e.target.value)}
-                required
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-expo-green-start/60"
-              />
-            </div>
-
-            {/* College */}
-            <div className="space-y-1.5">
-              <Label className="text-white/60 text-xs uppercase tracking-wider">College Name</Label>
-              <Input
-                value={form.collegeName}
-                onChange={(e) => handleChange('collegeName', e.target.value)}
-                required
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-expo-green-start/60"
-              />
-            </div>
-
-            {/* Department */}
-            <div className="space-y-1.5">
-              <Label className="text-white/60 text-xs uppercase tracking-wider">Department</Label>
-              <Input
-                value={form.department}
-                onChange={(e) => handleChange('department', e.target.value)}
-                required
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-expo-green-start/60"
-              />
-            </div>
-
-            {/* Project Title */}
-            <div className="space-y-1.5">
-              <Label className="text-white/60 text-xs uppercase tracking-wider">Project Title</Label>
-              <Input
-                value={form.projectTitle}
-                onChange={(e) => handleChange('projectTitle', e.target.value)}
-                required
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-expo-green-start/60"
-              />
-            </div>
-          </div>
-
-          {/* Category */}
-          <div className="space-y-1.5">
-            <Label className="text-white/60 text-xs uppercase tracking-wider">Category</Label>
-            <select
-              value={form.category}
-              onChange={(e) => handleChange('category', e.target.value)}
-              required
-              className="w-full rounded-md bg-white/5 border border-white/10 text-white text-sm px-3 py-2 focus:outline-none focus:border-expo-green-start/60 focus:ring-1 focus:ring-expo-green-start/40"
-            >
-              <option value="" disabled className="bg-expo-darker">
-                Select a category
-              </option>
-              {CATEGORIES.map((cat) => (
-                <option key={cat} value={cat} className="bg-expo-darker text-white">
-                  {cat}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Abstract */}
-          <div className="space-y-1.5">
-            <Label className="text-white/60 text-xs uppercase tracking-wider">Abstract</Label>
-            <Textarea
-              value={form.abstract}
-              onChange={(e) => handleChange('abstract', e.target.value)}
-              required
-              rows={4}
-              className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-expo-green-start/60 resize-none"
-            />
-          </div>
-
-          {error && (
-            <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-red-400 text-sm flex items-start gap-2">
-              <X className="w-4 h-4 mt-0.5 shrink-0" />
-              <span>{error}</span>
-            </div>
-          )}
-
-          <DialogFooter className="gap-2 pt-2">
-            <DialogClose asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                className="bg-white/5 border border-white/10 text-white hover:bg-white/10"
-              >
-                Cancel
-              </Button>
-            </DialogClose>
-            <Button
-              type="submit"
-              disabled={updateMutation.isPending}
-              className="bg-gradient-to-r from-expo-green-start to-expo-green-end text-white font-semibold hover:shadow-lg hover:shadow-expo-green-start/30 transition-all border-0 gap-2"
-            >
-              {updateMutation.isPending ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Saving…
-                </>
-              ) : (
-                <>
-                  <Pencil className="w-4 h-4" />
-                  Save Changes
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+    <div>
+      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5">{label}</p>
+      {children ? (
+        children
+      ) : (
+        <p className="text-sm text-foreground bg-background/50 border border-border/40 rounded-lg px-3 py-2">
+          {value || <span className="text-muted-foreground italic">—</span>}
+        </p>
+      )}
+    </div>
   );
 }
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const { logout } = useAdminAuth();
+  const { data: registrations = [], isLoading } = useGetRegistrations();
+  const deleteRegistration = useDeleteRegistration();
+  const updateRegistration = useUpdateRegistration();
+
   const [searchQuery, setSearchQuery] = useState('');
-  const [editingRegistration, setEditingRegistration] = useState<Registration | null>(null);
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const { data: registrations = [], isLoading, refetch } = useGetRegistrations();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [deleteId, setDeleteId] = useState<bigint | null>(null);
+  const [viewRegistration, setViewRegistration] = useState<Registration | null>(null);
+  const [editRegistration, setEditRegistration] = useState<Registration | null>(null);
+  const [editForm, setEditForm] = useState<Partial<Registration>>({});
 
   const handleLogout = () => {
     logout();
-    queryClient.clear();
-    navigate({ to: '/' });
+    navigate({ to: '/admin/login' });
   };
 
-  const handleEditOpen = (reg: Registration) => {
-    setEditingRegistration(reg);
-    setEditModalOpen(true);
-  };
-
-  const handleEditClose = () => {
-    setEditModalOpen(false);
-    setTimeout(() => setEditingRegistration(null), 300);
-  };
-
-  const filteredRegistrations = useMemo(() => {
-    if (!searchQuery.trim()) return registrations;
+  const filteredRegistrations = registrations.filter((reg) => {
     const q = searchQuery.toLowerCase();
-    return registrations.filter(
-      (r) =>
-        r.fullName.toLowerCase().includes(q) ||
-        r.collegeName.toLowerCase().includes(q) ||
-        r.projectTitle.toLowerCase().includes(q) ||
-        r.email.toLowerCase().includes(q) ||
-        r.category.toLowerCase().includes(q)
+    return (
+      reg.fullName.toLowerCase().includes(q) ||
+      reg.email.toLowerCase().includes(q) ||
+      reg.collegeName.toLowerCase().includes(q) ||
+      reg.department.toLowerCase().includes(q) ||
+      reg.projectTitle.toLowerCase().includes(q) ||
+      reg.category.toLowerCase().includes(q)
     );
-  }, [registrations, searchQuery]);
+  });
 
-  const categoryCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    registrations.forEach((r) => {
-      counts[r.category] = (counts[r.category] || 0) + 1;
-    });
-    return Object.entries(counts).sort((a, b) => b[1] - a[1]);
-  }, [registrations]);
+  const totalPages = Math.max(1, Math.ceil(filteredRegistrations.length / ITEMS_PER_PAGE));
+  const paginatedRegistrations = filteredRegistrations.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
+  };
+
+  const handleDelete = async () => {
+    if (deleteId === null) return;
+    try {
+      await deleteRegistration.mutateAsync(deleteId);
+      toast.success('Registration deleted successfully');
+    } catch {
+      toast.error('Failed to delete registration');
+    } finally {
+      setDeleteId(null);
+    }
+  };
+
+  const openEdit = (reg: Registration) => {
+    setEditRegistration(reg);
+    setEditForm({ ...reg });
+  };
+
+  const handleEditSave = async () => {
+    if (!editRegistration || !editForm) return;
+    try {
+      await updateRegistration.mutateAsync({
+        id: editRegistration.id,
+        fullName: editForm.fullName ?? '',
+        email: editForm.email ?? '',
+        phoneNumber: editForm.phoneNumber ?? '',
+        collegeName: editForm.collegeName ?? '',
+        department: editForm.department ?? '',
+        projectTitle: editForm.projectTitle ?? '',
+        category: editForm.category ?? '',
+        abstract: editForm.abstract ?? '',
+      });
+      toast.success('Registration updated successfully');
+      setEditRegistration(null);
+    } catch {
+      toast.error('Failed to update registration');
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-expo-darkest text-white">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
-      <header className="bg-expo-dark/80 backdrop-blur-xl border-b border-white/5 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <header className="border-b border-border/40 bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-expo-green-start to-expo-green-end flex items-center justify-center">
-              <Zap className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+              <LayoutDashboard className="w-4 h-4 text-primary" />
             </div>
             <div>
-              <p className="text-white font-bold text-sm">Admin Dashboard</p>
-              <p className="text-white/40 text-xs">Project Expo 2026</p>
+              <h1 className="text-base font-semibold text-foreground">Admin Dashboard</h1>
+              <p className="text-xs text-muted-foreground">EGS Pillay Expo 2026</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => refetch()}
-              className="text-white/50 hover:text-white hover:bg-white/5"
-            >
-              <RefreshCw className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleLogout}
-              className="text-white/50 hover:text-red-400 hover:bg-red-500/10 gap-2"
-            >
-              <LogOut className="w-4 h-4" />
-              <span className="hidden sm:inline">Logout</span>
-            </Button>
-          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleLogout}
+            className="gap-2 text-muted-foreground hover:text-foreground"
+          >
+            <LogOut className="w-4 h-4" />
+            <span className="hidden sm:inline">Logout</span>
+          </Button>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Analytics Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="glass-card rounded-2xl p-5 border border-white/10 col-span-1 sm:col-span-2 lg:col-span-1">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-expo-green-start/20 flex items-center justify-center">
-                <Users className="w-5 h-5 text-expo-green-end" />
-              </div>
-              <p className="text-white/50 text-sm">Total Registrations</p>
-            </div>
-            <p className="text-4xl font-extrabold text-white">{registrations.length}</p>
-          </div>
-
-          {categoryCounts.slice(0, 3).map(([cat, count]) => (
-            <div key={cat} className="glass-card rounded-2xl p-5 border border-white/10">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-expo-green-start/20 flex items-center justify-center">
-                  <BarChart3 className="w-5 h-5 text-expo-green-end" />
+      <main className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+          <Card className="bg-card/60 border-border/40">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
+                  <Users className="w-5 h-5 text-primary" />
                 </div>
-                <p className="text-white/50 text-xs leading-tight">{cat}</p>
+                <div>
+                  <p className="text-2xl font-bold text-foreground">{registrations.length}</p>
+                  <p className="text-sm text-muted-foreground">Total Registrations</p>
+                </div>
               </div>
-              <p className="text-3xl font-extrabold text-white">{count}</p>
-            </div>
-          ))}
+            </CardContent>
+          </Card>
+          <Card className="bg-card/60 border-border/40">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center">
+                  <Search className="w-5 h-5 text-accent-foreground" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-foreground">{filteredRegistrations.length}</p>
+                  <p className="text-sm text-muted-foreground">Filtered Results</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-card/60 border-border/40">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-secondary/20 flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-secondary-foreground" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-foreground">
+                    {[...new Set(registrations.map((r) => r.category))].length}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Categories</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Category Breakdown */}
-        {categoryCounts.length > 0 && (
-          <div className="glass-card rounded-2xl p-5 border border-white/10 mb-6">
-            <h3 className="text-white font-semibold text-sm mb-4 flex items-center gap-2">
-              <BarChart3 className="w-4 h-4 text-expo-green-end" />
-              Registrations by Category
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {categoryCounts.map(([cat, count]) => (
-                <span
-                  key={cat}
-                  className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
-                    CATEGORY_COLORS[cat] || 'bg-white/10 text-white/60 border-white/20'
-                  }`}
-                >
-                  {cat}: <strong>{count}</strong>
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
+        <Tabs defaultValue="registrations">
+          <TabsList className="mb-6 bg-card/60 border border-border/40">
+            <TabsTrigger value="registrations" className="gap-2">
+              <Users className="w-4 h-4" />
+              Registrations
+            </TabsTrigger>
+            <TabsTrigger value="content" className="gap-2">
+              <FileText className="w-4 h-4" />
+              Content Management
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Table Controls */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
-            <Input
-              placeholder="Search by name, college, project, email..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-expo-green-start/60"
-            />
-          </div>
-          <Button
-            onClick={() => exportRegistrationsToCSV(registrations)}
-            disabled={registrations.length === 0}
-            className="bg-gradient-to-r from-expo-green-start to-expo-green-end text-white font-semibold hover:shadow-lg hover:shadow-expo-green-start/30 transition-all gap-2 border-0"
-          >
-            <Download className="w-4 h-4" />
-            Export CSV
-          </Button>
-        </div>
+          {/* Registrations Tab */}
+          <TabsContent value="registrations">
+            <Card className="bg-card/60 border-border/40">
+              <CardHeader className="pb-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <CardTitle className="text-lg font-semibold">All Registrations</CardTitle>
+                  <div className="relative w-full sm:w-72">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search by name, email, college..."
+                      value={searchQuery}
+                      onChange={(e) => handleSearchChange(e.target.value)}
+                      className="pl-9 bg-background/50 border-border/40"
+                    />
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                {isLoading ? (
+                  <div className="p-6 space-y-3">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Skeleton key={i} className="h-12 w-full" />
+                    ))}
+                  </div>
+                ) : filteredRegistrations.length === 0 ? (
+                  <div className="p-12 text-center text-muted-foreground">
+                    <Users className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                    <p className="text-sm">No registrations found</p>
+                  </div>
+                ) : (
+                  <>
+                    <ScrollArea className="w-full">
+                      <div className="min-w-[900px]">
+                        <Table>
+                          <TableHeader>
+                            <TableRow className="border-border/40 hover:bg-transparent">
+                              <TableHead className="text-muted-foreground font-medium w-16">ID</TableHead>
+                              <TableHead className="text-muted-foreground font-medium">Full Name</TableHead>
+                              <TableHead className="text-muted-foreground font-medium">Email</TableHead>
+                              <TableHead className="text-muted-foreground font-medium">Phone</TableHead>
+                              <TableHead className="text-muted-foreground font-medium">College</TableHead>
+                              <TableHead className="text-muted-foreground font-medium">Department</TableHead>
+                              <TableHead className="text-muted-foreground font-medium">Project Title</TableHead>
+                              <TableHead className="text-muted-foreground font-medium">Category</TableHead>
+                              <TableHead className="text-muted-foreground font-medium text-right">Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {paginatedRegistrations.map((reg) => (
+                              <TableRow
+                                key={reg.id.toString()}
+                                className="border-border/40 hover:bg-muted/20"
+                              >
+                                <TableCell className="font-mono text-xs text-muted-foreground">
+                                  #{reg.id.toString()}
+                                </TableCell>
+                                <TableCell className="font-medium text-foreground whitespace-nowrap">
+                                  {reg.fullName}
+                                </TableCell>
+                                <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
+                                  {reg.email}
+                                </TableCell>
+                                <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
+                                  {reg.phoneNumber}
+                                </TableCell>
+                                <TableCell className="text-muted-foreground text-sm max-w-[160px] truncate">
+                                  {reg.collegeName}
+                                </TableCell>
+                                <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
+                                  {reg.department}
+                                </TableCell>
+                                <TableCell className="text-muted-foreground text-sm max-w-[160px] truncate">
+                                  {reg.projectTitle}
+                                </TableCell>
+                                <TableCell>
+                                  <span
+                                    className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${
+                                      CATEGORY_COLORS[reg.category] ??
+                                      'bg-muted/30 text-muted-foreground border-border/40'
+                                    }`}
+                                  >
+                                    {reg.category}
+                                  </span>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <div className="flex items-center justify-end gap-1">
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-8 w-8 text-muted-foreground hover:text-primary"
+                                      onClick={() => setViewRegistration(reg)}
+                                      title="View details"
+                                    >
+                                      <Eye className="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-8 w-8 text-muted-foreground hover:text-primary"
+                                      onClick={() => openEdit(reg)}
+                                      title="Edit"
+                                    >
+                                      <Edit className="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                      onClick={() => setDeleteId(reg.id)}
+                                      title="Delete"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </ScrollArea>
 
-        {/* Table */}
-        <div className="glass-card rounded-2xl border border-white/10 overflow-hidden">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-20">
-              <Loader2 className="w-8 h-8 text-expo-green-end animate-spin" />
-            </div>
-          ) : filteredRegistrations.length === 0 ? (
-            <div className="text-center py-20 text-white/30">
-              <Users className="w-12 h-12 mx-auto mb-3 opacity-30" />
-              <p className="text-lg font-medium">
-                {searchQuery ? 'No results found' : 'No registrations yet'}
-              </p>
-              <p className="text-sm mt-1">
-                {searchQuery ? 'Try a different search term' : 'Registrations will appear here'}
-              </p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-white/10 hover:bg-transparent">
-                    <TableHead className="text-white/50 text-xs uppercase tracking-wider">ID</TableHead>
-                    <TableHead className="text-white/50 text-xs uppercase tracking-wider">Name</TableHead>
-                    <TableHead className="text-white/50 text-xs uppercase tracking-wider">Email</TableHead>
-                    <TableHead className="text-white/50 text-xs uppercase tracking-wider">Phone</TableHead>
-                    <TableHead className="text-white/50 text-xs uppercase tracking-wider">College</TableHead>
-                    <TableHead className="text-white/50 text-xs uppercase tracking-wider">Dept</TableHead>
-                    <TableHead className="text-white/50 text-xs uppercase tracking-wider">Project</TableHead>
-                    <TableHead className="text-white/50 text-xs uppercase tracking-wider">Category</TableHead>
-                    <TableHead className="text-white/50 text-xs uppercase tracking-wider">Date</TableHead>
-                    <TableHead className="text-white/50 text-xs uppercase tracking-wider w-20 text-center">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredRegistrations.map((reg) => (
-                    <TableRow
-                      key={reg.id.toString()}
-                      className="border-white/5 hover:bg-white/3 transition-colors"
-                    >
-                      <TableCell className="text-white/40 text-xs font-mono">
-                        #{reg.id.toString()}
-                      </TableCell>
-                      <TableCell className="text-white font-medium text-sm whitespace-nowrap">
-                        {reg.fullName}
-                      </TableCell>
-                      <TableCell className="text-white/60 text-xs">{reg.email}</TableCell>
-                      <TableCell className="text-white/60 text-xs whitespace-nowrap">
-                        {reg.phoneNumber}
-                      </TableCell>
-                      <TableCell className="text-white/60 text-xs max-w-[150px] truncate">
-                        {reg.collegeName}
-                      </TableCell>
-                      <TableCell className="text-white/60 text-xs">{reg.department}</TableCell>
-                      <TableCell className="text-white/70 text-xs max-w-[150px] truncate">
-                        {reg.projectTitle}
-                      </TableCell>
-                      <TableCell>
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-xs font-medium border ${
-                            CATEGORY_COLORS[reg.category] || 'bg-white/10 text-white/60 border-white/20'
-                          }`}
+                    {/* Pagination */}
+                    <div className="flex items-center justify-between px-6 py-4 border-t border-border/40">
+                      <p className="text-sm text-muted-foreground">
+                        Showing{' '}
+                        {Math.min((currentPage - 1) * ITEMS_PER_PAGE + 1, filteredRegistrations.length)}–
+                        {Math.min(currentPage * ITEMS_PER_PAGE, filteredRegistrations.length)} of{' '}
+                        {filteredRegistrations.length} registrations
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                          disabled={currentPage === 1}
+                          className="h-8 gap-1 border-border/40"
                         >
-                          {reg.category.split(' ')[0]}
+                          <ChevronLeft className="w-4 h-4" />
+                          Prev
+                        </Button>
+                        <span className="text-sm text-muted-foreground px-2">
+                          {currentPage} / {totalPages}
                         </span>
-                      </TableCell>
-                      <TableCell className="text-white/40 text-xs whitespace-nowrap">
-                        {formatDate(reg.timestamp)}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center justify-center gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleEditOpen(reg)}
-                            className="text-white/30 hover:text-expo-green-end hover:bg-expo-green-start/10 transition-colors"
-                            title="Edit registration"
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </Button>
-                          <DeleteButton registration={reg} onDelete={() => {}} />
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                          disabled={currentPage === totalPages}
+                          className="h-8 gap-1 border-border/40"
+                        >
+                          Next
+                          <ChevronRight className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        {filteredRegistrations.length > 0 && (
-          <p className="text-white/30 text-xs mt-3 text-right">
-            Showing {filteredRegistrations.length} of {registrations.length} registrations
-          </p>
-        )}
+          {/* Content Management Tab */}
+          <TabsContent value="content">
+            <AdminContentManagement />
+          </TabsContent>
+        </Tabs>
       </main>
 
-      {/* Edit Modal */}
-      <EditModal
-        registration={editingRegistration}
-        open={editModalOpen}
-        onClose={handleEditClose}
-      />
+      {/* View Details Dialog */}
+      <Dialog open={!!viewRegistration} onOpenChange={(open) => !open && setViewRegistration(null)}>
+        <DialogContent className="max-w-2xl bg-card border-border/40">
+          <DialogHeader>
+            <DialogTitle className="text-foreground flex items-center gap-2">
+              <Eye className="w-5 h-5 text-primary" />
+              Registration Details
+            </DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              Full details for registration #{viewRegistration?.id.toString()}
+            </DialogDescription>
+          </DialogHeader>
+          {viewRegistration && (
+            <ScrollArea className="max-h-[70vh]">
+              <div className="space-y-4 pr-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <DetailField label="Registration ID" value={`#${viewRegistration.id.toString()}`} />
+                  <DetailField label="Category">
+                    <span
+                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${
+                        CATEGORY_COLORS[viewRegistration.category] ??
+                        'bg-muted/30 text-muted-foreground border-border/40'
+                      }`}
+                    >
+                      {viewRegistration.category}
+                    </span>
+                  </DetailField>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <DetailField label="Full Name" value={viewRegistration.fullName} />
+                  <DetailField label="Phone Number" value={viewRegistration.phoneNumber} />
+                </div>
+                <DetailField label="Email Address" value={viewRegistration.email} />
+                <div className="grid grid-cols-2 gap-4">
+                  <DetailField label="College Name" value={viewRegistration.collegeName} />
+                  <DetailField label="Department" value={viewRegistration.department} />
+                </div>
+                <DetailField label="Project Title" value={viewRegistration.projectTitle} />
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5">
+                    Abstract
+                  </p>
+                  <div className="bg-background/50 border border-border/40 rounded-lg p-3 text-sm text-foreground leading-relaxed whitespace-pre-wrap">
+                    {viewRegistration.abstract || (
+                      <span className="text-muted-foreground italic">No abstract provided</span>
+                    )}
+                  </div>
+                </div>
+                <DetailField
+                  label="Submitted At"
+                  value={new Date(Number(viewRegistration.timestamp) / 1_000_000).toLocaleString()}
+                />
+              </div>
+            </ScrollArea>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Dialog */}
+      <Dialog open={!!editRegistration} onOpenChange={(open) => !open && setEditRegistration(null)}>
+        <DialogContent className="max-w-2xl bg-card border-border/40">
+          <DialogHeader>
+            <DialogTitle className="text-foreground flex items-center gap-2">
+              <Edit className="w-5 h-5 text-primary" />
+              Edit Registration
+            </DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              Update registration #{editRegistration?.id.toString()}
+            </DialogDescription>
+          </DialogHeader>
+          {editRegistration && (
+            <ScrollArea className="max-h-[70vh]">
+              <div className="space-y-4 pr-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-muted-foreground uppercase tracking-wider">Full Name</Label>
+                    <Input
+                      value={editForm.fullName ?? ''}
+                      onChange={(e) => setEditForm((f) => ({ ...f, fullName: e.target.value }))}
+                      className="bg-background/50 border-border/40"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-muted-foreground uppercase tracking-wider">Phone Number</Label>
+                    <Input
+                      value={editForm.phoneNumber ?? ''}
+                      onChange={(e) => setEditForm((f) => ({ ...f, phoneNumber: e.target.value }))}
+                      className="bg-background/50 border-border/40"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground uppercase tracking-wider">Email</Label>
+                  <Input
+                    value={editForm.email ?? ''}
+                    onChange={(e) => setEditForm((f) => ({ ...f, email: e.target.value }))}
+                    className="bg-background/50 border-border/40"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-muted-foreground uppercase tracking-wider">College Name</Label>
+                    <Input
+                      value={editForm.collegeName ?? ''}
+                      onChange={(e) => setEditForm((f) => ({ ...f, collegeName: e.target.value }))}
+                      className="bg-background/50 border-border/40"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-muted-foreground uppercase tracking-wider">Department</Label>
+                    <Input
+                      value={editForm.department ?? ''}
+                      onChange={(e) => setEditForm((f) => ({ ...f, department: e.target.value }))}
+                      className="bg-background/50 border-border/40"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground uppercase tracking-wider">Project Title</Label>
+                  <Input
+                    value={editForm.projectTitle ?? ''}
+                    onChange={(e) => setEditForm((f) => ({ ...f, projectTitle: e.target.value }))}
+                    className="bg-background/50 border-border/40"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground uppercase tracking-wider">Category</Label>
+                  <Input
+                    value={editForm.category ?? ''}
+                    onChange={(e) => setEditForm((f) => ({ ...f, category: e.target.value }))}
+                    className="bg-background/50 border-border/40"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground uppercase tracking-wider">Abstract</Label>
+                  <Textarea
+                    value={editForm.abstract ?? ''}
+                    onChange={(e) => setEditForm((f) => ({ ...f, abstract: e.target.value }))}
+                    rows={5}
+                    className="bg-background/50 border-border/40 resize-none"
+                  />
+                </div>
+                <div className="flex justify-end gap-3 pt-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setEditRegistration(null)}
+                    className="border-border/40"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleEditSave}
+                    disabled={updateRegistration.isPending}
+                    className="bg-primary hover:bg-primary/90"
+                  >
+                    {updateRegistration.isPending ? 'Saving...' : 'Save Changes'}
+                  </Button>
+                </div>
+              </div>
+            </ScrollArea>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={deleteId !== null} onOpenChange={(open) => !open && setDeleteId(null)}>
+        <AlertDialogContent className="bg-card border-border/40">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-foreground">Delete Registration</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              Are you sure you want to delete this registration? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-border/40">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+            >
+              {deleteRegistration.isPending ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -1,6 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import type { Registration } from '../backend';
+import type {
+  Registration,
+  HeroContent,
+  AboutContent,
+  EventDetailsContent,
+  CoordinatorsContent,
+  ContactContent,
+} from '../backend';
 
 export function useGetRegistrationCount() {
   const { actor, isFetching } = useActor();
@@ -136,5 +143,149 @@ export function useGetRegistrationByEmail(email: string) {
     },
     enabled: !!actor && !isFetching && email.trim().length > 0,
     retry: false,
+  });
+}
+
+// ─── Content Getter Hooks ────────────────────────────────────────────────────
+
+export function useGetHeroContent() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<HeroContent | null>({
+    queryKey: ['heroContent'],
+    queryFn: async () => {
+      if (!actor) return null;
+      return actor.getHeroContent();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useGetAboutContent() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<AboutContent | null>({
+    queryKey: ['aboutContent'],
+    queryFn: async () => {
+      if (!actor) return null;
+      return actor.getAboutContent();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useGetEventDetailsContent() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<EventDetailsContent | null>({
+    queryKey: ['eventDetailsContent'],
+    queryFn: async () => {
+      if (!actor) return null;
+      return actor.getEventDetailsContent();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useGetCoordinatorsContent() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<CoordinatorsContent | null>({
+    queryKey: ['coordinatorsContent'],
+    queryFn: async () => {
+      if (!actor) return null;
+      return actor.getCoordinatorsContent();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useGetContactContent() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<ContactContent | null>({
+    queryKey: ['contactContent'],
+    queryFn: async () => {
+      if (!actor) return null;
+      return actor.getContactContent();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+// ─── Content Mutation Hooks ──────────────────────────────────────────────────
+
+export function useUpdateHeroContent() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (content: HeroContent) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.updateHeroContent(content);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['heroContent'] });
+    },
+  });
+}
+
+export function useUpdateAboutContent() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (content: AboutContent) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.updateAboutContent(content);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['aboutContent'] });
+    },
+  });
+}
+
+export function useUpdateEventDetailsContent() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (content: EventDetailsContent) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.updateEventDetailsContent(content);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['eventDetailsContent'] });
+    },
+  });
+}
+
+export function useUpdateCoordinatorsContent() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (content: CoordinatorsContent) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.updateCoordinatorsContent(content);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['coordinatorsContent'] });
+    },
+  });
+}
+
+export function useUpdateContactContent() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (content: ContactContent) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.updateContactContent(content);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['contactContent'] });
+    },
   });
 }

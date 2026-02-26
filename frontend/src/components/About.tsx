@@ -1,9 +1,13 @@
 import { Lightbulb, Globe, Award } from 'lucide-react';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
+import { useGetAboutContent } from '../hooks/useQueries';
 
-const features = [
+const DEFAULT_DESCRIPTION = `The <strong>National Level Project Expo 2026</strong> is a prestigious technical event organized by the Department of Electronics and Communication Engineering at <strong>E.G.S. Pillay Engineering College, Nagapattinam</strong>. This expo provides a dynamic platform for engineering students to present their innovative projects, gain exposure to real-world challenges, and compete for recognition at the national level.`;
+
+const DEFAULT_FEATURES = [
   {
     icon: Lightbulb,
+    iconName: 'Lightbulb',
     title: 'Innovation Hub',
     description:
       'A platform to showcase cutting-edge projects across IoT, AI/ML, Robotics, and more. Push the boundaries of technology and present your ideas to industry experts.',
@@ -12,6 +16,7 @@ const features = [
   },
   {
     icon: Globe,
+    iconName: 'Globe',
     title: 'Inter-College Participation',
     description:
       'Open to all engineering colleges across Tamil Nadu and beyond. Connect with brilliant minds, exchange ideas, and build lasting professional networks.',
@@ -20,6 +25,7 @@ const features = [
   },
   {
     icon: Award,
+    iconName: 'Award',
     title: 'Certificates & Prizes',
     description:
       'Win exciting cash prizes, trophies, and certificates of merit. All participants receive participation certificates recognized by E.G.S. Pillay Engineering College.',
@@ -28,14 +34,32 @@ const features = [
   },
 ];
 
-function FeatureCard({
-  icon: Icon,
-  title,
-  description,
-  color,
-  iconColor,
-  delay,
-}: (typeof features)[0] & { delay: number }) {
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  Lightbulb,
+  Globe,
+  Award,
+};
+
+function getIconComponent(iconName: string) {
+  return ICON_MAP[iconName] || Lightbulb;
+}
+
+const CARD_STYLES = [
+  { color: 'from-yellow-500/20 to-orange-500/20', iconColor: 'text-yellow-400' },
+  { color: 'from-blue-500/20 to-cyan-500/20', iconColor: 'text-blue-400' },
+  { color: 'from-expo-green-start/20 to-expo-green-end/20', iconColor: 'text-expo-green-end' },
+];
+
+interface FeatureCardProps {
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  description: string;
+  color: string;
+  iconColor: string;
+  delay: number;
+}
+
+function FeatureCard({ icon: Icon, title, description, color, iconColor, delay }: FeatureCardProps) {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
 
   return (
@@ -59,6 +83,19 @@ function FeatureCard({
 
 export default function About() {
   const { ref: headingRef, isVisible: headingVisible } = useScrollAnimation({ threshold: 0.3 });
+  const { data: aboutContent } = useGetAboutContent();
+
+  const sectionDescription = aboutContent?.sectionDescription || DEFAULT_DESCRIPTION;
+
+  const featureCards = aboutContent?.featureCards && aboutContent.featureCards.length > 0
+    ? aboutContent.featureCards.map((card, i) => ({
+        icon: getIconComponent(card.icon),
+        title: card.title,
+        description: card.description,
+        color: CARD_STYLES[i % CARD_STYLES.length].color,
+        iconColor: CARD_STYLES[i % CARD_STYLES.length].iconColor,
+      }))
+    : DEFAULT_FEATURES;
 
   return (
     <section id="about" className="py-24 bg-expo-dark relative overflow-hidden">
@@ -83,13 +120,10 @@ export default function About() {
               Innovation
             </span>
           </h2>
-          <p className="text-white/60 max-w-3xl mx-auto text-base sm:text-lg leading-relaxed">
-            The <strong className="text-white">National Level Project Expo 2026</strong> is a prestigious
-            technical event organized by the Department of Electronics and Communication Engineering at{' '}
-            <strong className="text-white">E.G.S. Pillay Engineering College, Nagapattinam</strong>. This
-            expo provides a dynamic platform for engineering students to present their innovative projects,
-            gain exposure to real-world challenges, and compete for recognition at the national level.
-          </p>
+          <p
+            className="text-white/60 max-w-3xl mx-auto text-base sm:text-lg leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: sectionDescription }}
+          />
           <p className="text-white/50 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed mt-4">
             Established in 1984, E.G.S. Pillay Engineering College is one of Tamil Nadu's premier
             engineering institutions, committed to fostering technical excellence, research, and innovation
@@ -99,8 +133,8 @@ export default function About() {
 
         {/* Feature Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {features.map((feature, i) => (
-            <FeatureCard key={feature.title} {...feature} delay={i * 150} />
+          {featureCards.map((feature, i) => (
+            <FeatureCard key={feature.title + i} {...feature} delay={i * 150} />
           ))}
         </div>
       </div>

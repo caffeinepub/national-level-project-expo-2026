@@ -1,83 +1,53 @@
 {
   "kind": "build_request",
-  "title": "Admin-only registration management with edit capability",
-  "projectName": "Project Expo 2026",
-  "priority": "normal",
+  "title": "Fix admin login password mismatch",
+  "priority": "high",
   "requirements": [
     {
-      "id": "REQ-23",
-      "text": "Add an `updateRegistration` function to the backend canister that accepts a registration ID and updated field values (Full Name, Email, Phone Number, College Name, Department, Project Title, Category, Abstract) and overwrites the existing record. This function must be admin-protected — it must only succeed when called with a valid admin session or after credential verification.",
+      "id": "REQ-41",
+      "text": "Update the hardcoded admin credentials in `backend/main.mo` so that the `verifyAdminCredentials` function accepts exactly email `athiakash1977@gmail.com` and password `Akash@8667099605`. Ensure the stored password value and the comparison logic match this exact string with correct casing and special characters. The admin name should remain `Akash A`.",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-last"
         ],
         "quotes": [
-          "only he can see who all are registred in it and he can change the details in it"
+          "the password is wrong it showing"
         ]
       },
       "acceptanceCriteria": [
-        "A public `updateRegistration(id: Text, fields: UpdateFields): async Result` function exists in main.mo",
-        "The function requires admin credential verification before updating",
-        "It returns an error variant if the registration ID does not exist",
-        "It returns an error variant if admin credentials are invalid",
-        "On success, the stored record reflects all updated field values"
+        "Calling `verifyAdminCredentials` with email `athiakash1977@gmail.com` and password `Akash@8667099605` returns a successful result (truthy/valid session token).",
+        "Calling `verifyAdminCredentials` with an incorrect password returns a failure result.",
+        "The admin name associated with the credentials is `Akash A`."
       ]
     },
     {
-      "id": "REQ-24",
-      "text": "Add an 'Edit Registration' feature to the Admin Dashboard (`/admin/dashboard`). Each row in the registrations table must have an 'Edit' button that opens an inline modal or drawer pre-filled with that registration's current field values. The admin can modify any field (Full Name, Email, Phone Number, College Name, Department, Project Title, Category, Abstract) and submit the changes, which calls the `updateRegistration` backend function. Show a success toast on completion and refresh the registrations table. Show an error message if the update fails.",
+      "id": "REQ-42",
+      "text": "Update `frontend/src/pages/AdminLogin.tsx` to ensure the login form submits the password exactly as typed (no trimming, no transformation) and that the credential verification call uses the raw input values. Confirm the placeholder or pre-filled email field shows `athiakash1977@gmail.com`.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-last"
         ],
         "quotes": [
-          "he can change the details in it"
+          "the password is wrong it showing"
         ]
       },
       "acceptanceCriteria": [
-        "Each row in the Admin Dashboard table has an 'Edit' button",
-        "Clicking 'Edit' opens a modal/drawer pre-filled with the registration's current values",
-        "All fields (Full Name, Email, Phone, College Name, Department, Project Title, Category, Abstract) are editable in the form",
-        "Submitting the form calls `updateRegistration` via the existing actor hook pattern in useQueries.ts",
-        "A success toast/notification is shown after a successful update",
-        "The registrations table is refreshed/invalidated after a successful update",
-        "An error message is displayed if the update call fails",
-        "The Edit modal/drawer uses the existing green gradient and glassmorphism styling consistent with the rest of the admin UI"
-      ]
-    },
-    {
-      "id": "REQ-25",
-      "text": "Add a `useUpdateRegistration` mutation hook in `frontend/src/hooks/useQueries.ts` that calls the `updateRegistration` backend function. It should accept a registration ID and updated field values, and invalidate the registrations list query on success, following the same pattern as the existing `useDeleteRegistration` mutation hook.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "he can change the details in it"
-        ]
-      },
-      "acceptanceCriteria": [
-        "A `useUpdateRegistration` mutation hook is exported from useQueries.ts",
-        "The hook calls `actor.updateRegistration(id, fields)` on mutation",
-        "On success, it invalidates the registrations list query key",
-        "The hook follows the same structure as the existing `useDeleteRegistration` hook"
+        "Entering email `athiakash1977@gmail.com` and password `Akash@8667099605` on the Admin Login page and clicking Submit successfully authenticates and redirects to `/admin/dashboard`.",
+        "The email input field has placeholder or pre-filled value `athiakash1977@gmail.com`.",
+        "An incorrect password still shows the existing error message without crashing."
       ]
     }
   ],
   "constraints": [
-    "All admin-protected backend functions must verify credentials before performing state mutations",
-    "Do not modify files in frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui",
-    "The public-facing Registration Lookup page (/check-registration) must NOT expose the edit capability — editing is admin-only",
-    "Preserve all existing routes and backend functions"
+    "Do not change any other backend functions or data models.",
+    "Do not modify immutable frontend paths listed in the system context."
   ],
   "nonGoals": [
-    "Adding new admin accounts or multi-admin role management",
-    "Allowing regular users/registrants to edit their own registrations from the public site",
-    "Changing the existing admin authentication mechanism",
-    "Adding email notifications on registration update"
+    "Changing the admin email address.",
+    "Adding a password reset or forgot-password flow.",
+    "Implementing external authentication (Firebase, Auth0, etc.)."
   ],
   "imageRequirements": {
     "required": [],

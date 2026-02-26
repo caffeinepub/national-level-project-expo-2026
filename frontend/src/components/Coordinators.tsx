@@ -1,73 +1,40 @@
 import { Phone, Mail } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
+import { useGetCoordinatorsContent } from '../hooks/useQueries';
 
-const facultyCoordinators = [
-  {
-    name: 'Dr. R. Senthilkumar',
-    role: 'Head of Department, ECE',
-    phone: '+91 98765 43210',
-    email: 'hod.ece@egspillay.ac.in',
-    initials: 'RS',
-  },
-  {
-    name: 'Prof. S. Meenakshi',
-    role: 'Associate Professor, ECE',
-    phone: '+91 98765 43211',
-    email: 'meenakshi.ece@egspillay.ac.in',
-    initials: 'SM',
-  },
-  {
-    name: 'Dr. K. Vijayakumar',
-    role: 'Assistant Professor, ECE',
-    phone: '+91 98765 43212',
-    email: 'vijay.ece@egspillay.ac.in',
-    initials: 'KV',
-  },
+const DEFAULT_FACULTY = [
+  { name: 'Dr. R. Senthilkumar', role: 'Head of Department, ECE', phone: '+91 98765 43210', email: 'hod.ece@egspillay.ac.in' },
+  { name: 'Prof. S. Meenakshi', role: 'Associate Professor, ECE', phone: '+91 98765 43211', email: 'meenakshi.ece@egspillay.ac.in' },
+  { name: 'Dr. K. Vijayakumar', role: 'Assistant Professor, ECE', phone: '+91 98765 43212', email: 'vijay.ece@egspillay.ac.in' },
 ];
 
-const studentCoordinators = [
-  {
-    name: 'Arun Kumar S',
-    role: 'Student Coordinator (IV Year)',
-    phone: '+91 90123 45678',
-    email: 'arun.s@student.egspillay.ac.in',
-    initials: 'AK',
-  },
-  {
-    name: 'Priya Dharshini R',
-    role: 'Student Coordinator (IV Year)',
-    phone: '+91 90123 45679',
-    email: 'priya.r@student.egspillay.ac.in',
-    initials: 'PD',
-  },
-  {
-    name: 'Karthik M',
-    role: 'Student Coordinator (III Year)',
-    phone: '+91 90123 45680',
-    email: 'karthik.m@student.egspillay.ac.in',
-    initials: 'KM',
-  },
-  {
-    name: 'Divya Bharathi N',
-    role: 'Student Coordinator (III Year)',
-    phone: '+91 90123 45681',
-    email: 'divya.n@student.egspillay.ac.in',
-    initials: 'DB',
-  },
+const DEFAULT_STUDENTS = [
+  { name: 'AKASH A', role: 'Student Coordinator', phone: '8667099605', email: 'athiakash1977@gmail.com' },
+  { name: 'KEERTHIVASAN R', role: 'Student Coordinator', phone: '9597245927', email: 'skeerthivasan410@gmail.com' },
+  { name: 'AKASH P', role: 'Student Coordinator', phone: '', email: 'akashpece' },
 ];
+
+function getInitials(name: string): string {
+  return name
+    .split(' ')
+    .map((w) => w[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+}
 
 interface CoordinatorCardProps {
   name: string;
   role: string;
   phone: string;
   email: string;
-  initials: string;
   delay: number;
 }
 
-function CoordinatorCard({ name, role, phone, email, initials, delay }: CoordinatorCardProps) {
+function CoordinatorCard({ name, role, phone, email, delay }: CoordinatorCardProps) {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
+  const initials = getInitials(name);
 
   return (
     <div
@@ -86,15 +53,17 @@ function CoordinatorCard({ name, role, phone, email, initials, delay }: Coordina
         <h4 className="text-white font-bold text-base mb-1">{name}</h4>
         <p className="text-expo-green-end text-xs font-medium mb-4 uppercase tracking-wide">{role}</p>
         <div className="w-full space-y-2">
+          {phone && (
+            <a
+              href={`tel:${phone}`}
+              className="flex items-center gap-2 text-white/50 hover:text-expo-green-end transition-colors text-sm group/link"
+            >
+              <Phone className="w-3.5 h-3.5 flex-shrink-0 group-hover/link:text-expo-green-end" />
+              <span className="truncate">{phone}</span>
+            </a>
+          )}
           <a
-            href={`tel:${phone}`}
-            className="flex items-center gap-2 text-white/50 hover:text-expo-green-end transition-colors text-sm group/link"
-          >
-            <Phone className="w-3.5 h-3.5 flex-shrink-0 group-hover/link:text-expo-green-end" />
-            <span className="truncate">{phone}</span>
-          </a>
-          <a
-            href={`mailto:${email}`}
+            href={email.includes('@') ? `mailto:${email}` : undefined}
             className="flex items-center gap-2 text-white/50 hover:text-expo-green-end transition-colors text-sm group/link"
           >
             <Mail className="w-3.5 h-3.5 flex-shrink-0 group-hover/link:text-expo-green-end" />
@@ -108,6 +77,17 @@ function CoordinatorCard({ name, role, phone, email, initials, delay }: Coordina
 
 export default function Coordinators() {
   const { ref: headingRef, isVisible: headingVisible } = useScrollAnimation({ threshold: 0.3 });
+  const { data: coordinatorsContent } = useGetCoordinatorsContent();
+
+  const facultyCoordinators =
+    coordinatorsContent?.facultyCoordinators && coordinatorsContent.facultyCoordinators.length > 0
+      ? coordinatorsContent.facultyCoordinators
+      : DEFAULT_FACULTY;
+
+  const studentCoordinators =
+    coordinatorsContent?.studentCoordinators && coordinatorsContent.studentCoordinators.length > 0
+      ? coordinatorsContent.studentCoordinators
+      : DEFAULT_STUDENTS;
 
   return (
     <section id="coordinators" className="py-24 bg-expo-dark relative overflow-hidden">
@@ -145,7 +125,7 @@ export default function Coordinators() {
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {facultyCoordinators.map((coord, i) => (
-              <CoordinatorCard key={coord.name} {...coord} delay={i * 100} />
+              <CoordinatorCard key={coord.name + i} {...coord} delay={i * 100} />
             ))}
           </div>
         </div>
@@ -157,9 +137,9 @@ export default function Coordinators() {
             Student Coordinators
             <span className="flex-1 h-px bg-white/10" />
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {studentCoordinators.map((coord, i) => (
-              <CoordinatorCard key={coord.name} {...coord} delay={i * 100} />
+              <CoordinatorCard key={coord.name + i} {...coord} delay={i * 100} />
             ))}
           </div>
         </div>

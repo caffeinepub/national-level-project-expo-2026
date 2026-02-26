@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 9,
+  "projectStateVersion": 27,
   "summary": "Premium animated event website for 'National Level Project Expo 2026' organized by E.G.S. Pillay Engineering College (ECE Dept). Green gradient theme (#0f9d58 → #22c55e), glassmorphism UI, smooth scroll animations, Poppins/Inter fonts, fully responsive. Features 9 sections separated into distinct pages: Home, About, Event Details (timeline), Coordinators (profile cards), Registration (form + validation + success popup), Admin Login (Firebase Auth), Admin Dashboard (table, search, delete, CSV export, analytics), Contact, and Footer.",
   "architectural_notes": [
     "Green gradient theme: #0f9d58 → #22c55e with glassmorphism cards (blur + hover glow)",
@@ -9,10 +9,13 @@
     "Firebase Authentication used for Admin Login",
     "Registration data stored/retrieved via Firebase for Admin Dashboard",
     "Multi-page routing: Home, About, and Event Details are separate pages/routes rather than scroll sections",
-    "Admin-only access: only the authenticated host/admin can view all registrations and edit registration details"
+    "Admin-only access: only the authenticated host/admin can view all registrations and edit registration details",
+    "All site content (event details, coordinators, about info, etc.) must be editable by the authenticated admin (athiakash1977@gmail.com)"
   ],
-  "known_issues": [],
-  "isFixRequest": false,
+  "known_issues": [
+    "Admin login password mismatch — user reports 'password is wrong' when attempting to log in with Akash@8667099605"
+  ],
+  "isFixRequest": true,
   "existing_features": [
     {
       "id": "feature-implement-a-sticky-transparent-navbar-that-becomes-semi-opaque-on-scroll-with-smooth-anchor-navigation-to-all-sections-a-hamburger-menu-on-mobile-and-a-scroll-progress-indicator-bar-at-the-top-of-the-viewport-use-poppins-or-inter-font-throughout-the-entire-site",
@@ -189,6 +192,102 @@
         "REQ-25"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-update-all-registration-fee-displays-across-the-site-registration-section-event-details-section-and-any-other-references-to-show-rs-150-per-head",
+      "title": "Update all registration fee displays across the site (Registration section, Event Details section, and any other references) to show 'Rs. 150 per head'.",
+      "reqIds": [
+        "REQ-26"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-the-registration-section-frontend-src-components-registration-tsx-add-a-upi-payment-block-above-or-below-the-form-submit-button-display-1-a-heading-pay-registration-fee-2-the-fee-amount-rs-150-per-head-3-a-upi-qr-code-image-generated-for-upi-id-athiakash1977-oksbi-4-the-upi-id-as-copyable-text-and-5-a-note-after-payment-complete-registration-below-style-the-block-with-glassmorphism-styling-consistent-with-the-rest-of-the-site-this-is-display-only-no-payment-verification-logic-is-required",
+      "title": "In the Registration section (`frontend/src/components/Registration.tsx`), add a UPI payment block above or below the form submit button. Display: (1) a heading 'Pay Registration Fee', (2) the fee amount 'Rs. 150 per head', (3) a UPI QR code image generated for UPI ID `athiakash1977@oksbi`, (4) the UPI ID as copyable text, and (5) a note 'After payment, complete registration below'. Style the block with glassmorphism styling consistent with the rest of the site. This is display-only — no payment verification logic is required.",
+      "reqIds": [
+        "REQ-27"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-display-the-host-admin-contact-details-in-the-admin-dashboard-frontend-src-pages-admindashboard-tsx-add-a-small-info-card-or-header-section-showing-name-akash-a-email-athiakash1977-gmail-com-phone-8667099605-style-it-consistently-with-the-dashboard-s-existing-glassmorphism-and-green-accent-theme",
+      "title": "Display the host/admin contact details in the Admin Dashboard (`frontend/src/pages/AdminDashboard.tsx`). Add a small info card or header section showing: Name: 'Akash A', Email: 'athiakash1977@gmail.com', Phone: '8667099605'. Style it consistently with the dashboard's existing glassmorphism and green accent theme.",
+      "reqIds": [
+        "REQ-29"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-admin-login-page-frontend-src-pages-adminlogin-tsx-so-that-the-pre-filled-or-placeholder-email-field-reflects-athiakash1977-gmail-com-and-ensure-login-with-the-updated-credentials-succeeds-and-redirects-to-admin-dashboard",
+      "title": "Update the Admin Login page (`frontend/src/pages/AdminLogin.tsx`) so that the pre-filled or placeholder email field reflects `athiakash1977@gmail.com`, and ensure login with the updated credentials succeeds and redirects to `/admin/dashboard`.",
+      "reqIds": [
+        "REQ-31"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-host-admin-info-card-in-frontend-src-pages-admindashboard-tsx-displays-the-updated-details-name-akash-a-email-athiakash1977-gmail-com-phone-8667099605-consistent-with-the-dashboard-s-glassmorphism-and-green-accent-theme",
+      "title": "Ensure the host/admin info card in `frontend/src/pages/AdminDashboard.tsx` displays the updated details: Name: 'Akash A', Email: 'athiakash1977@gmail.com', Phone: '8667099605', consistent with the dashboard's glassmorphism and green accent theme.",
+      "reqIds": [
+        "REQ-32"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-all-registration-fee-displays-across-the-site-including-the-registration-section-frontend-src-components-registration-tsx-the-event-details-section-frontend-src-components-eventdetails-tsx-and-any-other-components-or-pages-that-reference-a-registration-fee-to-show-rs-150-per-head",
+      "title": "Update all registration fee displays across the site — including the Registration section (`frontend/src/components/Registration.tsx`), the Event Details section (`frontend/src/components/EventDetails.tsx`), and any other components or pages that reference a registration fee — to show 'Rs. 150 per head'.",
+      "reqIds": [
+        "REQ-33"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-frontend-src-components-registration-tsx-replace-or-supplement-the-existing-registration-form-with-a-prominent-link-and-or-embedded-iframe-pointing-to-the-google-form-at-https-forms-gle-cxhmtehdujb8d11da-display-a-clearly-visible-register-now-button-link-that-opens-the-google-form-url-opens-in-a-new-tab-and-optionally-embed-the-google-form-as-an-iframe-within-the-registration-section-retain-the-existing-upi-payment-block-qr-code-upi-id-instructions-above-the-form-area-style-the-google-form-link-button-using-the-existing-green-gradient-0f9d58-22c55e-and-glassmorphism-styling-consistent-with-the-rest-of-the-site-if-using-an-iframe-embed-wrap-it-in-a-glassmorphism-container-with-rounded-corners-and-appropriate-height-min-600px",
+      "title": "In `frontend/src/components/Registration.tsx`, replace or supplement the existing registration form with a prominent link and/or embedded iframe pointing to the Google Form at https://forms.gle/CXHMtehDUjb8D11DA. Display a clearly visible 'Register Now' button/link that opens the Google Form URL (opens in a new tab), and optionally embed the Google Form as an iframe within the Registration section. Retain the existing UPI payment block (QR code, UPI ID, instructions) above the form area. Style the Google Form link/button using the existing green gradient (#0f9d58 → #22c55e) and glassmorphism styling consistent with the rest of the site. If using an iframe embed, wrap it in a glassmorphism container with rounded corners and appropriate height (min 600px).",
+      "reqIds": [
+        "REQ-34"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-student-coordinator-entries-in-frontend-src-components-coordinators-tsx-to-replace-the-existing-student-coordinators-with-the-following-three-entries-1-name-akash-a-email-athiakash1977-gmail-com-phone-8667099605-2-name-keerthivasan-r-email-skeerthivasan410-gmail-com-phone-9597245927-3-name-akash-p-email-akashpece-display-as-is-since-no-full-email-was-provided-render-the-email-field-with-the-value-akashpece-update-the-avatar-initials-fallback-for-each-card-to-match-the-new-names-e-g-aa-kr-ap-preserve-all-existing-card-layout-glassmorphism-styling-hover-lift-and-glow-animations-role-designation-labels-and-scroll-triggered-entrance-animations-unchanged",
+      "title": "Update the student coordinator entries in `frontend/src/components/Coordinators.tsx` to replace the existing student coordinators with the following three entries: (1) Name: 'AKASH A', Email: 'athiakash1977@gmail.com', Phone: '8667099605'; (2) Name: 'KEERTHIVASAN R', Email: 'skeerthivasan410@gmail.com', Phone: '9597245927'; (3) Name: 'AKASH P', Email: 'akashpece' (display as-is since no full email was provided — render the email field with the value 'akashpece'). Update the avatar initials fallback for each card to match the new names (e.g., 'AA', 'KR', 'AP'). Preserve all existing card layout, glassmorphism styling, hover lift-and-glow animations, role/designation labels, and scroll-triggered entrance animations unchanged.",
+      "reqIds": [
+        "REQ-36"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-content-management-tab-or-section-inside-the-admin-dashboard-frontend-src-pages-admindashboard-tsx-accessible-only-to-authenticated-admins-the-cms-ui-must-allow-the-admin-to-view-and-edit-all-of-the-following-site-content-inline-1-hero-section-fields-event-title-tagline-event-date-college-dept-branding-text-2-about-section-description-paragraph-and-the-3-feature-card-titles-descriptions-3-event-details-event-date-venue-registration-fee-eligibility-criteria-project-categories-list-and-timeline-milestones-label-date-pairs-with-add-remove-4-coordinators-faculty-and-student-coordinator-cards-name-role-designation-phone-email-with-add-remove-card-support-5-contact-address-lines-phone-email-website-each-editable-block-must-have-a-clearly-labelled-form-with-a-save-button-that-calls-the-corresponding-update-section-content-backend-function-show-a-success-toast-on-save-and-an-error-message-on-failure-style-all-editor-forms-with-the-existing-glassmorphism-and-green-accent-theme-consistent-with-the-rest-of-the-dashboard",
+      "title": "Add a Content Management tab or section inside the Admin Dashboard (`frontend/src/pages/AdminDashboard.tsx`) accessible only to authenticated admins. The CMS UI must allow the admin to view and edit all of the following site content inline: (1) Hero section fields: event title, tagline, event date, college/dept branding text; (2) About section: description paragraph and the 3 feature card titles + descriptions; (3) Event Details: event date, venue, registration fee, eligibility criteria, project categories list, and timeline milestones (label + date pairs with add/remove); (4) Coordinators: faculty and student coordinator cards (name, role/designation, phone, email) with add/remove card support; (5) Contact: address lines, phone, email, website. Each editable block must have a clearly labelled form with a 'Save' button that calls the corresponding `update<Section>Content` backend function. Show a success toast on save and an error message on failure. Style all editor forms with the existing glassmorphism and green accent theme consistent with the rest of the dashboard.",
+      "reqIds": [
+        "REQ-38"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-all-frontend-sections-hero-frontend-src-components-hero-tsx-about-frontend-src-components-about-tsx-eventdetails-frontend-src-components-eventdetails-tsx-coordinators-frontend-src-components-coordinators-tsx-and-contact-frontend-src-components-contact-tsx-to-fetch-their-display-content-from-the-corresponding-backend-get-section-content-functions-via-react-query-hooks-in-frontend-src-hooks-usequeries-ts-instead-of-using-hardcoded-static-values-if-the-backend-returns-no-content-yet-fall-back-gracefully-to-the-existing-hardcoded-defaults-so-the-ui-renders-correctly-add-the-corresponding-useget-section-content-query-hooks-in-usequeries-ts-following-the-same-pattern-as-existing-hooks",
+      "title": "Update all frontend sections — Hero (`frontend/src/components/Hero.tsx`), About (`frontend/src/components/About.tsx`), EventDetails (`frontend/src/components/EventDetails.tsx`), Coordinators (`frontend/src/components/Coordinators.tsx`), and Contact (`frontend/src/components/Contact.tsx`) — to fetch their display content from the corresponding backend `get<Section>Content` functions (via React Query hooks in `frontend/src/hooks/useQueries.ts`) instead of using hardcoded static values. If the backend returns no content yet, fall back gracefully to the existing hardcoded defaults so the UI renders correctly. Add the corresponding `useGet<Section>Content` query hooks in `useQueries.ts` following the same pattern as existing hooks.",
+      "reqIds": [
+        "REQ-39"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-the-admin-dashboard-frontend-src-pages-admindashboard-tsx-ensure-the-registrations-tab-displays-a-fully-populated-searchable-and-paginated-table-showing-all-registration-records-fetched-from-the-backend-each-row-must-display-all-fields-registration-id-full-name-email-phone-number-college-name-department-project-title-category-and-abstract-the-table-must-load-and-render-correctly-reflecting-the-current-state-of-all-submitted-registrations",
+      "title": "In the Admin Dashboard (`frontend/src/pages/AdminDashboard.tsx`), ensure the Registrations tab displays a fully populated, searchable, and paginated table showing all registration records fetched from the backend. Each row must display all fields: Registration ID, Full Name, Email, Phone Number, College Name, Department, Project Title, Category, and Abstract. The table must load and render correctly, reflecting the current state of all submitted registrations.",
+      "reqIds": [
+        "REQ-40"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-frontend-src-pages-adminlogin-tsx-to-ensure-the-login-form-submits-the-password-exactly-as-typed-no-trimming-no-transformation-and-that-the-credential-verification-call-uses-the-raw-input-values-confirm-the-placeholder-or-pre-filled-email-field-shows-athiakash1977-gmail-com",
+      "title": "Update `frontend/src/pages/AdminLogin.tsx` to ensure the login form submits the password exactly as typed (no trimming, no transformation) and that the credential verification call uses the raw input values. Confirm the placeholder or pre-filled email field shows `athiakash1977@gmail.com`.",
+      "reqIds": [
+        "REQ-42"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -285,6 +384,82 @@
       "summary": "Add an `updateRegistration` function to the backend canister that accepts a registration ID and updated field values (Full Name, Email, Phone Number, College Name, Department, Project Title, Category, Abstract) and overwrites the existing record. This function must be admin-protected — it must only succeed when called with a valid admin session or after credential verification.",
       "reqIds": [
         "REQ-23"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-27",
+      "summary": "Update registration fee display to Rs. 150 per head across the site",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-28",
+      "summary": "Add UPI payment QR code on registration page for UPI ID athiakash1977@oksbi with payment instructions (display-only, no payment verification)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-29",
+      "summary": "Update admin credentials to Akash A / athiakash1977@gmail.com / 8667099605 and display host contact details in admin area",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-32",
+      "summary": "Update the hardcoded admin credentials in the backend canister (`backend/main.mo`) to: email = `athiakash1977@gmail.com`, password = `Akash@8667099605` (or a secure derivation), and admin name = `Akash A`. The `verifyAdminCredentials` function must accept the new email and password.",
+      "reqIds": [
+        "REQ-28"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-33",
+      "summary": "Update the hardcoded admin credentials in `backend/main.mo` so that `verifyAdminCredentials` accepts email `athiakash1977@gmail.com` and password `Akash@8667099605`. The admin name stored/returned should be `Akash A`.",
+      "reqIds": [
+        "REQ-30"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-34",
+      "summary": "Replace or supplement the existing registration form with a link/embed to the Google Form at https://forms.gle/CXHMtehDUjb8D11DA for the Registration section",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-35",
+      "summary": "Update/change the student coordinator names in the Coordinators section",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-36",
+      "summary": "Update the student coordinator names in `frontend/src/components/Coordinators.tsx`. Replace the existing student coordinator entries with the following new names (user will provide the exact names — prompt the user to supply them before implementing, or use placeholder names if the user has already provided them in context). Ensure all other card fields (role, phone, email, avatar initials) are updated consistently with the new names. The card layout, glassmorphism styling, hover lift-and-glow animations, and scroll-triggered entrance animations must remain unchanged.",
+      "reqIds": [
+        "REQ-35"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-37",
+      "summary": "All site content (event details, coordinators, about info, etc.) should be editable by the admin (athiakash1977@gmail.com) through the admin dashboard or a CMS-like interface",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-38",
+      "summary": "Add backend Motoko functions to support editable site content sections. Create or extend the backend actor in `backend/main.mo` to store and retrieve editable content records for the following site sections: (1) Hero (event title, tagline, event date, college name), (2) About (section description, and the 3 feature card titles + descriptions), (3) Event Details (event date, venue, registration fee, eligibility criteria, project categories, and timeline milestones — each with label and date), (4) Coordinators (faculty and student coordinator entries — each with name, role/designation, phone, email), (5) Contact (address lines, phone, email, website URL). Each section must have a `get<Section>Content` (public, no auth) and `update<Section>Content` (admin-protected, requires valid admin session token) pair of functions. All content must be stored as stable variables so it persists across upgrades.",
+      "reqIds": [
+        "REQ-37"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-39",
+      "summary": "Update the hardcoded admin credentials in `backend/main.mo` so that the `verifyAdminCredentials` function accepts exactly email `athiakash1977@gmail.com` and password `Akash@8667099605`. Ensure the stored password value and the comparison logic match this exact string with correct casing and special characters. The admin name should remain `Akash A`.",
+      "reqIds": [
+        "REQ-41"
       ],
       "status": "pending"
     }

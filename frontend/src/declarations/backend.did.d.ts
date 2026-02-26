@@ -10,6 +10,46 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export interface AboutContent {
+  'sectionDescription' : string,
+  'featureCards' : Array<FeatureCard>,
+}
+export interface ContactContent {
+  'email' : string,
+  'website' : string,
+  'addressLine1' : string,
+  'addressLine2' : string,
+  'phone' : string,
+}
+export interface Coordinator {
+  'name' : string,
+  'role' : string,
+  'email' : string,
+  'phone' : string,
+}
+export interface CoordinatorsContent {
+  'studentCoordinators' : Array<Coordinator>,
+  'facultyCoordinators' : Array<Coordinator>,
+}
+export interface EventDetailsContent {
+  'venue' : string,
+  'timelineMilestones' : Array<TimelineMilestone>,
+  'projectCategories' : Array<string>,
+  'eligibilityCriteria' : string,
+  'registrationFee' : string,
+  'eventDate' : string,
+}
+export interface FeatureCard {
+  'title' : string,
+  'icon' : string,
+  'description' : string,
+}
+export interface HeroContent {
+  'tagline' : string,
+  'collegeName' : string,
+  'eventTitle' : string,
+  'eventDate' : string,
+}
 export interface Registration {
   'id' : bigint,
   'collegeName' : string,
@@ -22,6 +62,10 @@ export interface Registration {
   'department' : string,
   'phoneNumber' : string,
 }
+export interface TimelineMilestone {
+  'milestoneLabel' : string,
+  'date' : string,
+}
 export interface UserProfile { 'name' : string, 'email' : string }
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
@@ -30,8 +74,13 @@ export interface _SERVICE {
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'deleteRegistration' : ActorMethod<[bigint], boolean>,
+  'getAboutContent' : ActorMethod<[], [] | [AboutContent]>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
+  'getContactContent' : ActorMethod<[], [] | [ContactContent]>,
+  'getCoordinatorsContent' : ActorMethod<[], [] | [CoordinatorsContent]>,
+  'getEventDetailsContent' : ActorMethod<[], [] | [EventDetailsContent]>,
+  'getHeroContent' : ActorMethod<[], [] | [HeroContent]>,
   'getRegistrationByEmail' : ActorMethod<[string], [] | [Registration]>,
   'getRegistrationCount' : ActorMethod<[], bigint>,
   'getRegistrations' : ActorMethod<[], Array<Registration>>,
@@ -42,6 +91,11 @@ export interface _SERVICE {
     [string, string, string, string, string, string, string, string],
     bigint
   >,
+  'updateAboutContent' : ActorMethod<[AboutContent], undefined>,
+  'updateContactContent' : ActorMethod<[ContactContent], undefined>,
+  'updateCoordinatorsContent' : ActorMethod<[CoordinatorsContent], undefined>,
+  'updateEventDetailsContent' : ActorMethod<[EventDetailsContent], undefined>,
+  'updateHeroContent' : ActorMethod<[HeroContent], undefined>,
   'updateRegistration' : ActorMethod<
     [bigint, string, string, string, string, string, string, string, string],
     boolean

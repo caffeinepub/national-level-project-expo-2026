@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { CheckCircle, Loader2, X } from 'lucide-react';
+import { CheckCircle, Loader2, IndianRupee, ExternalLink, FileText } from 'lucide-react';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 import { useSubmitRegistration } from '../hooks/useQueries';
 import { Input } from '@/components/ui/input';
@@ -42,10 +42,13 @@ const categories = [
   'Others / Interdisciplinary',
 ];
 
+const GOOGLE_FORM_URL = 'https://forms.gle/CXHMtehDUjb8D11DA';
+
 export default function Registration() {
   const { ref: headingRef, isVisible: headingVisible } = useScrollAnimation({ threshold: 0.2 });
   const [showSuccess, setShowSuccess] = useState(false);
   const [registrationId, setRegistrationId] = useState<string>('');
+  const [showEmbeddedForm, setShowEmbeddedForm] = useState(false);
   const submitMutation = useSubmitRegistration();
 
   const {
@@ -92,6 +95,109 @@ export default function Registration() {
           <p className="text-white/50 text-sm sm:text-base">
             Fill in the details below to secure your spot at the National Level Project Expo 2026.
           </p>
+        </div>
+
+        {/* Registration Fee Notice */}
+        <div className="mb-6 flex items-center gap-3 px-4 py-3 rounded-xl bg-expo-green-start/10 border border-expo-green-start/30">
+          <div className="w-8 h-8 rounded-lg bg-expo-green-start/20 flex items-center justify-center flex-shrink-0">
+            <IndianRupee className="w-4 h-4 text-expo-green-end" />
+          </div>
+          <p className="text-sm text-white/80">
+            <span className="font-bold text-expo-green-end">Registration Fee:</span>{' '}
+            Rs. 150 per head
+          </p>
+        </div>
+
+        {/* Google Form CTA Block */}
+        <div className="mb-8 rounded-2xl backdrop-blur-md bg-white/5 border border-expo-green-start/30 p-6 sm:p-8">
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            <div className="w-14 h-14 rounded-xl bg-expo-green-start/20 flex items-center justify-center flex-shrink-0">
+              <FileText className="w-7 h-7 text-expo-green-end" />
+            </div>
+            <div className="flex-1 text-center sm:text-left">
+              <h3 className="text-white font-bold text-lg mb-1">Official Registration Form</h3>
+              <p className="text-white/50 text-sm">
+                Use the official Google Form to register your team for the expo. Quick and easy!
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+              <a
+                href={GOOGLE_FORM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-expo-green-start to-expo-green-end hover:shadow-lg hover:shadow-expo-green-start/40 hover:scale-[1.02] transition-all duration-300 text-sm whitespace-nowrap"
+              >
+                <ExternalLink className="w-4 h-4" />
+                Register Now
+              </a>
+              <button
+                onClick={() => setShowEmbeddedForm((prev) => !prev)}
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold text-expo-green-end border border-expo-green-start/40 bg-expo-green-start/10 hover:bg-expo-green-start/20 transition-all duration-300 text-sm whitespace-nowrap"
+              >
+                {showEmbeddedForm ? 'Hide Form' : 'Open Here'}
+              </button>
+            </div>
+          </div>
+
+          {/* Embedded Google Form */}
+          {showEmbeddedForm && (
+            <div className="mt-6 rounded-xl overflow-hidden border border-white/10">
+              <iframe
+                src="https://docs.google.com/forms/d/e/1FAIpQLSfhXMtehDUjb8D11DA/viewform?embedded=true"
+                width="100%"
+                style={{ minHeight: '640px', border: 'none', background: 'transparent' }}
+                title="Registration Form"
+                loading="lazy"
+                allowFullScreen
+              >
+                Loading form…
+              </iframe>
+            </div>
+          )}
+        </div>
+
+        {/* UPI Payment Block */}
+        <div className="mb-8 rounded-2xl backdrop-blur-md bg-white/5 border border-expo-green-start/20 p-6 sm:p-8">
+          <h3 className="text-white font-bold text-lg mb-4 text-center">
+            Payment Details
+          </h3>
+          <div className="flex flex-col sm:flex-row items-center gap-6">
+            <div className="flex-shrink-0">
+              <div className="rounded-xl overflow-hidden border border-white/10 bg-white p-2">
+                <img
+                  src="/assets/generated/upi-qr-code.dim_300x300.png"
+                  alt="UPI QR Code"
+                  className="w-40 h-40 object-contain"
+                />
+              </div>
+            </div>
+            <div className="flex-1 text-center sm:text-left space-y-3">
+              <div>
+                <p className="text-white/50 text-xs uppercase tracking-widest mb-1">UPI ID</p>
+                <p className="text-expo-green-end font-bold text-lg font-mono">
+                  athiakash1977@oksbi
+                </p>
+              </div>
+              <div className="space-y-1.5 text-sm text-white/60">
+                <p>• Scan the QR code or use the UPI ID above to pay.</p>
+                <p>
+                  • Amount:{' '}
+                  <span className="text-expo-green-end font-semibold">Rs. 150 per head</span>
+                </p>
+                <p>• Keep the payment screenshot for your records.</p>
+                <p>• Payment confirmation will be sent to your registered email.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div className="flex items-center gap-4 mb-8">
+          <div className="flex-1 h-px bg-white/10" />
+          <span className="text-white/30 text-xs uppercase tracking-widest px-2">
+            Or fill the form below
+          </span>
+          <div className="flex-1 h-px bg-white/10" />
         </div>
 
         {/* Form */}
@@ -258,6 +364,11 @@ export default function Registration() {
               </div>
             )}
 
+            {/* Fee reminder before submit */}
+            <p className="text-white/40 text-xs text-center">
+              A registration fee of <span className="text-expo-green-end font-semibold">Rs. 150 per head</span> is applicable. Payment details will be shared after submission.
+            </p>
+
             {/* Submit */}
             <Button
               type="submit"
@@ -295,7 +406,7 @@ export default function Registration() {
             </DialogDescription>
           </DialogHeader>
           <div className="mt-4 p-4 rounded-xl bg-expo-green-start/10 border border-expo-green-start/20 text-sm text-white/70 text-center">
-            We'll contact you at your registered email with further details. See you at the Expo on{' '}
+            Registration fee of <strong className="text-expo-green-end">Rs. 150 per head</strong> is applicable. Payment details will be shared via your registered email. See you at the Expo on{' '}
             <strong className="text-white">April 15, 2026</strong>!
           </div>
           <Button
