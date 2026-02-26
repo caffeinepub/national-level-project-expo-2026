@@ -1,20 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useRouter } from '@tanstack/react-router';
+import { useState, useEffect } from 'react';
+import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { Menu, X, Zap } from 'lucide-react';
 
 const navLinks = [
   { label: 'Home', path: '/' },
-  { label: 'About', path: '/about' },
-  { label: 'Event Details', path: '/event-details' },
+  { label: 'About', path: '/#about' },
+  { label: 'Event Details', path: '/#event-details' },
   { label: 'Gallery', path: '/gallery' },
-  { label: 'Check Registration', path: '/check-registration' },
+  { label: 'Register', path: '/#register' },
+  { label: 'Contact', path: '/#contact' },
 ];
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const router = useRouter();
-  const pathname = router.state.location.pathname;
+  const navigate = useNavigate();
+  const routerState = useRouterState();
+  const currentPath = routerState.location.pathname;
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -22,80 +24,92 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const handleNavClick = (path: string) => {
+    setIsOpen(false);
+    if (path.startsWith('/#')) {
+      const id = path.slice(2);
+      if (currentPath !== '/') {
+        navigate({ to: '/' }).then(() => {
+          setTimeout(() => {
+            document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+          }, 300);
+        });
+      } else {
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      navigate({ to: path });
+    }
+  };
+
   const isActive = (path: string) => {
-    if (path === '/') return pathname === '/';
-    return pathname.startsWith(path);
+    if (path === '/') return currentPath === '/';
+    if (path.startsWith('/#')) return currentPath === '/';
+    return currentPath === path;
   };
 
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? 'bg-black/80 backdrop-blur-md border-b border-white/10 shadow-lg'
-          : 'bg-transparent'
+        scrolled ? 'bg-card/95 backdrop-blur-md border-b border-border shadow-lg' : 'bg-transparent'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#0f9d58] to-[#22c55e] flex items-center justify-center shadow-lg group-hover:shadow-[0_0_16px_rgba(15,157,88,0.5)] transition-shadow duration-300">
-              <Zap className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-bold text-white text-lg tracking-tight">
-              Innovative<span className="text-[#0f9d58]">Link</span>
-            </span>
-          </Link>
+          <button
+            onClick={() => handleNavClick('/')}
+            className="flex items-center gap-2 text-primary font-bold text-lg hover:opacity-80 transition-opacity"
+          >
+            <Zap className="w-6 h-6" />
+            <span>InnoLink Expo</span>
+          </button>
 
-          {/* Desktop nav */}
+          {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => (
-              <Link
+              <button
                 key={link.path}
-                to={link.path}
+                onClick={() => handleNavClick(link.path)}
                 className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                   isActive(link.path)
-                    ? 'text-[#0f9d58] bg-[#0f9d58]/10'
-                    : 'text-white/70 hover:text-white hover:bg-white/5'
+                    ? 'bg-primary/20 text-primary'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                 }`}
               >
                 {link.label}
-              </Link>
+              </button>
             ))}
           </div>
 
-          {/* Mobile menu button */}
+          {/* Mobile Menu Button */}
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden p-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors"
-            aria-label="Toggle menu"
+            className="md:hidden p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
           >
             {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
-      </div>
 
-      {/* Mobile menu */}
-      {isOpen && (
-        <div className="md:hidden bg-black/95 backdrop-blur-md border-b border-white/10">
-          <div className="px-4 py-3 space-y-1">
+        {/* Mobile Menu */}
+        {isOpen && (
+          <div className="md:hidden bg-card border-t border-border py-3 space-y-1">
             {navLinks.map((link) => (
-              <Link
+              <button
                 key={link.path}
-                to={link.path}
-                onClick={() => setIsOpen(false)}
-                className={`block px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                onClick={() => handleNavClick(link.path)}
+                className={`w-full text-left px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${
                   isActive(link.path)
-                    ? 'text-[#0f9d58] bg-[#0f9d58]/10'
-                    : 'text-white/70 hover:text-white hover:bg-white/5'
+                    ? 'bg-primary/20 text-primary'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                 }`}
               >
                 {link.label}
-              </Link>
+              </button>
             ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </nav>
   );
 }

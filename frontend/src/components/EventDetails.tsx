@@ -1,159 +1,129 @@
-import { useEffect, useRef } from 'react';
-import { Calendar, MapPin, DollarSign, Users, Tag, Clock } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { useGetEventDetailsContent } from '../hooks/useQueries';
+import { Calendar, MapPin, DollarSign, Users, Tag, Clock } from 'lucide-react';
 
 const defaultContent = {
   eventDate: 'March 15, 2026',
-  venue: 'Sri Eshwar College of Engineering, Coimbatore',
+  venue: 'Main Auditorium & Exhibition Hall',
   registrationFee: '₹500 per team',
-  eligibilityCriteria: 'Open to all undergraduate and postgraduate engineering students',
-  projectCategories: [
-    'Artificial Intelligence & Machine Learning',
-    'Internet of Things',
-    'Web & Mobile Development',
-    'Robotics & Automation',
-    'Cybersecurity',
-    'Blockchain Technology',
-  ],
+  eligibilityCriteria: 'Open to all undergraduate and postgraduate students',
+  projectCategories: ['AI & Machine Learning', 'IoT & Embedded Systems', 'Web & Mobile Apps', 'Robotics', 'Green Technology'],
   timelineMilestones: [
-    { milestoneLabel: 'Registration Opens', date: 'January 1, 2026' },
-    { milestoneLabel: 'Abstract Submission', date: 'February 15, 2026' },
-    { milestoneLabel: 'Selection Results', date: 'March 1, 2026' },
-    { milestoneLabel: 'Event Day', date: 'March 15, 2026' },
+    { milestoneLabel: 'Registration Opens', date: 'Jan 1, 2026' },
+    { milestoneLabel: 'Abstract Submission', date: 'Feb 1, 2026' },
+    { milestoneLabel: 'Selection Results', date: 'Feb 15, 2026' },
+    { milestoneLabel: 'Expo Day', date: 'Mar 15, 2026' },
   ],
 };
 
 export default function EventDetails() {
-  const { data: eventDetailsContent } = useGetEventDetailsContent();
-  const content = eventDetailsContent ?? defaultContent;
+  const { data: eventContent } = useGetEventDetailsContent();
+  const [visibleItems, setVisibleItems] = useState<Set<number>>(new Set());
+  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  const sectionRef = useRef<HTMLElement>(null);
+  const content = eventContent || defaultContent;
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            entry.target.querySelectorAll('.reveal-item').forEach((el, i) => {
-              (el as HTMLElement).style.animationDelay = `${i * 0.1}s`;
-              el.classList.add('bounce-in');
-            });
+            const index = parseInt(entry.target.getAttribute('data-index') || '0');
+            setVisibleItems((prev) => new Set([...prev, index]));
           }
         });
       },
       { threshold: 0.15 }
     );
-    if (sectionRef.current) observer.observe(sectionRef.current);
+    itemRefs.current.forEach((ref) => ref && observer.observe(ref));
     return () => observer.disconnect();
-  }, []);
+  }, [eventContent]);
+
+  const infoCards = [
+    { icon: Calendar, label: 'Event Date', value: content.eventDate },
+    { icon: MapPin, label: 'Venue', value: content.venue },
+    { icon: DollarSign, label: 'Registration Fee', value: content.registrationFee },
+    { icon: Users, label: 'Eligibility', value: content.eligibilityCriteria },
+  ];
 
   return (
-    <section id="event-details" ref={sectionRef} className="relative py-24 bg-background overflow-hidden">
-      {/* Glow orbs */}
-      <div
-        className="glow-orb glow-orb-1"
-        style={{
-          width: '400px',
-          height: '400px',
-          background: 'radial-gradient(circle, oklch(0.65 0.18 150 / 0.18) 0%, transparent 70%)',
-          top: '5%',
-          left: '-8%',
-        }}
-      />
-      <div
-        className="glow-orb glow-orb-3"
-        style={{
-          width: '350px',
-          height: '350px',
-          background: 'radial-gradient(circle, oklch(0.55 0.22 145 / 0.15) 0%, transparent 70%)',
-          bottom: '5%',
-          right: '-5%',
-        }}
-      />
+    <section id="event-details" className="relative py-20 px-4 bg-background overflow-hidden">
+      {/* Drifting Orbs */}
+      <div className="absolute top-20 left-1/4 w-64 h-64 rounded-full bg-primary/8 blur-3xl drift-orb-1 pointer-events-none" />
+      <div className="absolute bottom-20 right-1/4 w-72 h-72 rounded-full bg-accent/8 blur-3xl drift-orb-2 pointer-events-none" />
 
-      <div className="relative z-10 max-w-6xl mx-auto px-4">
-        {/* Section header */}
-        <div className="text-center mb-16">
-          <p className="text-primary text-sm font-semibold tracking-widest uppercase mb-3">Event Information</p>
-          <h2 className="text-3xl md:text-4xl font-black text-foreground mb-4">
-            <span className="gradient-text-animated">Event Details</span>
-          </h2>
+      <div className="relative z-10 max-w-6xl mx-auto">
+        <div className="text-center mb-14">
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">Event Details</h2>
+          <p className="text-muted-foreground text-lg">Everything you need to know about the expo</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Left column: key info */}
-          <div className="space-y-6">
-            {[
-              { icon: Calendar, label: 'Event Date', value: content.eventDate },
-              { icon: MapPin, label: 'Venue', value: content.venue },
-              { icon: DollarSign, label: 'Registration Fee', value: content.registrationFee },
-              { icon: Users, label: 'Eligibility', value: content.eligibilityCriteria },
-            ].map(({ icon: Icon, label, value }, i) => (
+        {/* Info Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          {infoCards.map((card, i) => {
+            const Icon = card.icon;
+            return (
               <div
-                key={label}
-                className="reveal-item opacity-0 flex items-start gap-4 bg-card/60 backdrop-blur-sm border border-primary/20 rounded-xl p-5 hover:border-primary/40 transition-all duration-300"
+                key={i}
+                data-index={i}
+                ref={(el) => { itemRefs.current[i] = el; }}
+                className={`bg-card border border-border rounded-xl p-6 hover:border-primary/50 transition-all duration-500 hover:shadow-lg hover:shadow-primary/10 ${
+                  visibleItems.has(i) ? 'bounce-in' : 'opacity-0'
+                }`}
+                style={{ animationDelay: `${i * 100}ms` }}
               >
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center mb-4">
                   <Icon className="w-5 h-5 text-primary" />
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">{label}</p>
-                  <p className="text-foreground font-medium">{value}</p>
-                </div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">{card.label}</p>
+                <p className="text-foreground font-semibold">{card.value}</p>
               </div>
-            ))}
+            );
+          })}
+        </div>
 
-            {/* Project categories */}
-            <div className="reveal-item opacity-0 bg-card/60 backdrop-blur-sm border border-primary/20 rounded-xl p-5">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Tag className="w-5 h-5 text-primary" />
-                </div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wider">Project Categories</p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {content.projectCategories.map((cat, i) => (
-                  <span
-                    key={i}
-                    className="text-xs bg-primary/10 border border-primary/20 text-primary px-3 py-1 rounded-full"
-                  >
-                    {cat}
-                  </span>
-                ))}
-              </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Project Categories */}
+          <div
+            data-index={4}
+            ref={(el) => { itemRefs.current[4] = el; }}
+            className={`bg-card border border-border rounded-xl p-6 ${visibleItems.has(4) ? 'bounce-in' : 'opacity-0'}`}
+            style={{ animationDelay: '400ms' }}
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <Tag className="w-5 h-5 text-primary" />
+              <h3 className="text-lg font-bold text-foreground">Project Categories</h3>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {content.projectCategories.map((cat, i) => (
+                <span key={i} className="bg-primary/20 text-primary text-sm px-3 py-1 rounded-full border border-primary/30">
+                  {cat}
+                </span>
+              ))}
             </div>
           </div>
 
-          {/* Right column: timeline */}
-          <div>
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Clock className="w-5 h-5 text-primary" />
-              </div>
-              <h3 className="text-xl font-bold text-foreground">Timeline</h3>
+          {/* Timeline */}
+          <div
+            data-index={5}
+            ref={(el) => { itemRefs.current[5] = el; }}
+            className={`bg-card border border-border rounded-xl p-6 ${visibleItems.has(5) ? 'bounce-in' : 'opacity-0'}`}
+            style={{ animationDelay: '500ms' }}
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <Clock className="w-5 h-5 text-primary" />
+              <h3 className="text-lg font-bold text-foreground">Timeline</h3>
             </div>
-
-            <div className="relative">
-              {/* Vertical line */}
-              <div className="absolute left-5 top-0 bottom-0 w-px bg-gradient-to-b from-primary/60 via-primary/30 to-transparent" />
-
-              <div className="space-y-8">
-                {content.timelineMilestones.map((milestone, i) => (
-                  <div
-                    key={i}
-                    className="reveal-item opacity-0 relative flex items-start gap-6 pl-14"
-                  >
-                    {/* Dot */}
-                    <div className="absolute left-3 top-1 w-5 h-5 rounded-full bg-primary border-2 border-background shadow-lg shadow-primary/40 flex items-center justify-center">
-                      <div className="w-2 h-2 rounded-full bg-background" />
-                    </div>
-                    <div className="bg-card/60 backdrop-blur-sm border border-primary/20 rounded-xl p-4 flex-1 hover:border-primary/40 transition-all duration-300">
-                      <p className="text-primary font-semibold text-sm mb-1">{milestone.milestoneLabel}</p>
-                      <p className="text-muted-foreground text-sm">{milestone.date}</p>
-                    </div>
+            <div className="space-y-3">
+              {content.timelineMilestones.map((milestone, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
+                  <div className="flex-1 flex items-center justify-between">
+                    <span className="text-foreground text-sm font-medium">{milestone.milestoneLabel}</span>
+                    <span className="text-muted-foreground text-xs">{milestone.date}</span>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>

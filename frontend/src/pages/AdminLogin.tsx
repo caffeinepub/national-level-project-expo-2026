@@ -1,162 +1,113 @@
 import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { useForm } from 'react-hook-form';
-import { Loader2, Lock, Mail, Zap, Eye, EyeOff } from 'lucide-react';
+import { useVerifyAdminCredentials } from '../hooks/useQueries';
+import { useAdminAuth } from '../context/AdminAuthContext';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { useAdminAuth } from '../context/AdminAuthContext';
-import { useVerifyAdminCredentials } from '../hooks/useQueries';
-
-interface LoginForm {
-  email: string;
-  password: string;
-}
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Lock, Loader2, AlertCircle } from 'lucide-react';
 
 export default function AdminLogin() {
+  const [email, setEmail] = useState('athiakash1977@gmail.com');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { login } = useAdminAuth();
-  const verifyMutation = useVerifyAdminCredentials();
-  const [showPassword, setShowPassword] = useState(false);
-  const [loginError, setLoginError] = useState('');
+  const { adminLogin } = useAdminAuth();
+  const { mutate: verifyCredentials, isPending } = useVerifyAdminCredentials();
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginForm>({
-    defaultValues: {
-      email: 'athiakash1977@gmail.com',
-      password: '',
-    },
-  });
-
-  const onSubmit = async (data: LoginForm) => {
-    setLoginError('');
-    try {
-      // Pass email and password exactly as typed — no trimming or transformation
-      const isValid = await verifyMutation.mutateAsync({
-        email: data.email,
-        password: data.password,
-      });
-      if (isValid) {
-        login();
-        navigate({ to: '/admin/dashboard' });
-      } else {
-        setLoginError('Invalid email or password. Please try again.');
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    verifyCredentials(
+      { email, password },
+      {
+        onSuccess: (isAdmin) => {
+          if (isAdmin) {
+            adminLogin();
+            navigate({ to: '/admin/dashboard' });
+          } else {
+            setError('Access denied. You do not have admin privileges.');
+          }
+        },
+        onError: (err: any) => {
+          const msg = err?.message || '';
+          if (msg.includes('Unauthorized') || msg.includes('trap')) {
+            setError('Access denied. You do not have admin privileges.');
+          } else {
+            setError('Login failed. Please try again.');
+          }
+        },
       }
-    } catch {
-      setLoginError('Authentication failed. Please check your connection and try again.');
-    }
+    );
   };
 
   return (
-    <div className="min-h-screen bg-expo-darkest flex items-center justify-center px-4 relative overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(15,157,88,0.08),transparent_70%)]" />
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-expo-green-start/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-expo-green-end/5 rounded-full blur-3xl" />
-
-      <div className="relative w-full max-w-md">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-expo-green-start to-expo-green-end shadow-xl shadow-expo-green-start/30 mb-4">
-            <Zap className="w-8 h-8 text-white" />
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      <Card className="w-full max-w-md bg-card border-border shadow-2xl">
+        <CardHeader className="text-center pb-2">
+          <div className="flex justify-center mb-4">
+            <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center">
+              <Lock className="w-7 h-7 text-primary" />
+            </div>
           </div>
-          <h1 className="text-2xl font-extrabold text-white">Admin Portal</h1>
-          <p className="text-white/40 text-sm mt-1">National Level Project Expo 2026</p>
-        </div>
-
-        {/* Card */}
-        <div className="glass-card rounded-2xl p-8 border border-white/10">
-          <h2 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-            <Lock className="w-4 h-4 text-expo-green-end" />
-            Secure Login
-          </h2>
-
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" autoComplete="off">
-            <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-white/70 text-sm">
-                Email Address
-              </Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
-                <Input
-                  id="email"
-                  type="text"
-                  autoComplete="off"
-                  placeholder="athiakash1977@gmail.com"
-                  className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/20 focus:border-expo-green-start/60"
-                  {...register('email', {
-                    required: 'Email is required',
-                    pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Invalid email' },
-                  })}
-                />
-              </div>
-              {errors.email && <p className="text-red-400 text-xs">{errors.email.message}</p>}
+          <CardTitle className="text-2xl font-bold text-foreground">Admin Login</CardTitle>
+          <CardDescription className="text-muted-foreground">
+            Sign in to access the admin dashboard
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pt-4">
+          <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-foreground">Email</Label>
+              <Input
+                id="email"
+                type="text"
+                autoComplete="off"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="bg-background border-border text-foreground"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-foreground">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                autoComplete="new-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="bg-background border-border text-foreground"
+                placeholder="Enter admin password"
+                required
+              />
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="password" className="text-white/70 text-sm">
-                Password
-              </Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
-                <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  placeholder="Enter your password"
-                  className="pl-10 pr-10 bg-white/5 border-white/10 text-white placeholder:text-white/20 focus:border-expo-green-start/60"
-                  {...register('password', { required: 'Password is required' })}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-              {errors.password && <p className="text-red-400 text-xs">{errors.password.message}</p>}
-            </div>
-
-            {loginError && (
-              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
-                {loginError}
+            {error && (
+              <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-sm">
+                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                <span>{error}</span>
               </div>
             )}
 
             <Button
               type="submit"
-              disabled={verifyMutation.isPending}
-              className="w-full py-5 font-bold bg-gradient-to-r from-expo-green-start to-expo-green-end text-white border-0 hover:shadow-lg hover:shadow-expo-green-start/40 hover:scale-[1.02] transition-all duration-300"
+              disabled={isPending}
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
             >
-              {verifyMutation.isPending ? (
+              {isPending ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   Verifying...
                 </>
               ) : (
-                'Login to Dashboard'
+                'Sign In'
               )}
             </Button>
           </form>
-
-          <div className="mt-6 pt-5 border-t border-white/5 text-center">
-            <a
-              href="/"
-              onClick={(e) => {
-                e.preventDefault();
-                navigate({ to: '/' });
-              }}
-              className="text-white/30 hover:text-expo-green-end text-sm transition-colors"
-            >
-              ← Back to Event Website
-            </a>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

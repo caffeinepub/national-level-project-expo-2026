@@ -1,53 +1,51 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 interface AdminAuthContextType {
   isAdminAuthenticated: boolean;
-  login: () => void;
-  logout: () => void;
+  adminLogin: () => void;
+  adminLogout: () => void;
 }
 
-const AdminAuthContext = createContext<AdminAuthContextType | undefined>(undefined);
-
-const SESSION_KEY = 'expo_admin_auth';
+const AdminAuthContext = createContext<AdminAuthContextType>({
+  isAdminAuthenticated: false,
+  adminLogin: () => {},
+  adminLogout: () => {},
+});
 
 export function AdminAuthProvider({ children }: { children: ReactNode }) {
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
     try {
-      return sessionStorage.getItem(SESSION_KEY) === 'true';
+      return sessionStorage.getItem('adminAuthenticated') === 'true';
     } catch {
       return false;
     }
   });
 
-  const login = () => {
+  const adminLogin = () => {
     setIsAdminAuthenticated(true);
     try {
-      sessionStorage.setItem(SESSION_KEY, 'true');
+      sessionStorage.setItem('adminAuthenticated', 'true');
     } catch {
       // ignore
     }
   };
 
-  const logout = () => {
+  const adminLogout = () => {
     setIsAdminAuthenticated(false);
     try {
-      sessionStorage.removeItem(SESSION_KEY);
+      sessionStorage.removeItem('adminAuthenticated');
     } catch {
       // ignore
     }
   };
 
   return (
-    <AdminAuthContext.Provider value={{ isAdminAuthenticated, login, logout }}>
+    <AdminAuthContext.Provider value={{ isAdminAuthenticated, adminLogin, adminLogout }}>
       {children}
     </AdminAuthContext.Provider>
   );
 }
 
 export function useAdminAuth() {
-  const context = useContext(AdminAuthContext);
-  if (!context) {
-    throw new Error('useAdminAuth must be used within AdminAuthProvider');
-  }
-  return context;
+  return useContext(AdminAuthContext);
 }

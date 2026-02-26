@@ -1,186 +1,112 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Enhance site-wide animations and visual polish",
+  "title": "Revert to Stable Working Version",
   "requirements": [
     {
-      "id": "REQ-72",
-      "summary": "Add smooth page transition animation (fade-in + slide-up) when navigating between routes",
+      "id": "REQ-1",
+      "summary": "Revert the application to the last known stable state before recent changes, restoring both frontend and backend code to ensure the app builds, deploys, and functions correctly with working registration, gallery, admin dashboard, and CMS content features",
       "acceptanceCriteria": [
-        "Navigating to any route triggers a visible fade-in + slide-up transition on the page content.",
-        "Transition duration is smooth (200–400ms) and does not feel jarring.",
-        "All existing routes continue to render correctly."
+        "The application builds without errors",
+        "The application deploys successfully to the network",
+        "All previously working features (registration, gallery, admin dashboard, CMS content) function correctly",
+        "The admin login and dashboard data loading work as expected"
       ],
       "file_operations": [
         {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Wrap the Outlet component with a transition wrapper that applies fade-in and slide-up animations on route changes. Use CSS classes and key-based re-mounting to trigger the animation on each navigation."
+          "description": "Restore the stable router configuration and route definitions, ensuring all routes (home, about, event details, gallery, registration lookup, admin login/dashboard) are properly registered with correct component imports and path mappings"
         },
         {
-          "path": "frontend/src/index.css",
+          "path": "frontend/src/components/AdminContentManagement.tsx",
           "operation": "modify",
-          "description": "Add CSS keyframe animations for page-transition-enter (fade-in + translateY slide-up) with 300ms duration and ease-out timing. Define the .page-transition class to apply these animations."
-        }
-      ]
-    },
-    {
-      "id": "REQ-73",
-      "summary": "Add floating animated glow orbs/gradient blobs as decorative background elements on Hero, About, and Event Details pages",
-      "acceptanceCriteria": [
-        "Glowing orb/blob elements are visible in the Hero section background.",
-        "Glowing orb/blob elements appear on the About and Event Details pages.",
-        "Orbs animate continuously (drift or pulse) with a slow, smooth CSS keyframe animation.",
-        "Orbs do not overlap or obscure any text or interactive elements."
-      ],
-      "file_operations": [
+          "description": "Revert any problematic changes to the CMS component, restoring stable state management, form handling, and backend mutation calls for Hero, About, Event Details, Coordinators, and Contact content sections"
+        },
+        {
+          "path": "frontend/src/components/Registration.tsx",
+          "operation": "modify",
+          "description": "Restore the working registration form component with proper validation, submission handling, and success dialog display, ensuring the mutation hook integration works correctly"
+        },
+        {
+          "path": "frontend/src/pages/AdminDashboard.tsx",
+          "operation": "modify",
+          "description": "Revert the admin dashboard to its stable state with functioning tabs for registrations, gallery, and content management, including working search, CSV export, delete operations, and data loading from React Query hooks"
+        },
+        {
+          "path": "frontend/src/pages/AdminLogin.tsx",
+          "operation": "modify",
+          "description": "Restore the stable admin login page with correct form handling and backend authentication integration, ensuring successful redirect to dashboard after login"
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Revert any breaking changes to the query and mutation hooks, restoring stable React Query integration with proper error handling, cache management, and backend actor calls for all CRUD operations"
+        },
+        {
+          "path": "frontend/src/hooks/useActor.ts",
+          "operation": "modify",
+          "description": "Restore the stable actor initialization logic with correct identity handling, query invalidation on identity changes, and proper actor caching to ensure reliable backend communication"
+        },
+        {
+          "path": "frontend/src/context/AdminAuthContext.tsx",
+          "operation": "modify",
+          "description": "Revert any changes to the admin authentication context, ensuring stable session storage persistence and correct login/logout state management"
+        },
         {
           "path": "frontend/src/components/Hero.tsx",
           "operation": "modify",
-          "description": "Add two or three absolutely positioned div elements with large radial-gradient backgrounds (green gradient colors) behind the hero content. Position them with z-index below text content and apply the drift-orb CSS animation class."
+          "description": "Restore the stable hero section with working countdown timer, registration count display, typewriter effect, and CMS content integration with proper fallback defaults"
         },
         {
           "path": "frontend/src/components/About.tsx",
           "operation": "modify",
-          "description": "Add two absolutely positioned gradient orb div elements as decorative background elements, positioned to not obscure the feature cards. Apply the drift-orb CSS animation class."
+          "description": "Revert to the stable About component with functioning scroll animations, feature card rendering, and CMS content fetching with correct fallback handling"
         },
         {
           "path": "frontend/src/components/EventDetails.tsx",
           "operation": "modify",
-          "description": "Add two absolutely positioned gradient orb div elements as background decoration, ensuring they remain behind the timeline and event details content. Apply the drift-orb CSS animation class."
+          "description": "Restore the stable event details component with proper content display, timeline rendering, and scroll-triggered animations working correctly"
         },
-        {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Add CSS keyframe animation 'drift-orb' with slow continuous movement (translate + scale pulses over 20-30s) and define the .glow-orb utility class with blur filter and appropriate z-index."
-        }
-      ]
-    },
-    {
-      "id": "REQ-74",
-      "summary": "Enhance Coordinators section cards with a shimmer/shine sweep animation on hover",
-      "acceptanceCriteria": [
-        "Hovering a coordinator card triggers a visible left-to-right shine/shimmer sweep animation.",
-        "The shimmer uses a semi-transparent white or light-green gradient.",
-        "Existing hover lift-and-glow animations are preserved and not broken.",
-        "Animation is smooth and does not flicker."
-      ],
-      "file_operations": [
         {
           "path": "frontend/src/components/Coordinators.tsx",
           "operation": "modify",
-          "description": "Add a CSS class to coordinator cards that includes a ::before pseudo-element with a linear-gradient shimmer overlay. On hover, trigger a translateX animation that sweeps the shimmer from left to right over 600-800ms."
+          "description": "Revert the coordinators component to its working state with proper data fetching and card rendering for faculty and student coordinators"
         },
         {
-          "path": "frontend/src/index.css",
+          "path": "frontend/src/components/Contact.tsx",
           "operation": "modify",
-          "description": "Add CSS keyframe animation 'shimmer-sweep' that translates a gradient overlay from -100% to 200% horizontally. Define .coordinator-card-shimmer class with ::before pseudo-element styling and hover trigger."
-        }
-      ]
-    },
-    {
-      "id": "REQ-75",
-      "summary": "Add typewriter text animation to the event tagline in the Hero section",
-      "acceptanceCriteria": [
-        "The hero tagline text animates in as a typewriter effect (characters appear one by one).",
-        "The typewriter effect starts after the hero section's entrance fade-in animation.",
-        "The effect completes within 2–4 seconds.",
-        "A blinking cursor is shown at the end of the tagline while typing, then disappears or fades out."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/Hero.tsx",
-          "operation": "modify",
-          "description": "Wrap the tagline text in a component that implements a typewriter effect using a React state hook and useEffect. Display characters incrementally with a setTimeout interval. Add a blinking cursor span that is removed after typing completes. Start the effect after a 500ms delay to allow initial fade-in."
+          "description": "Restore the stable contact section with working map embed, social links, and CMS content integration"
         },
         {
-          "path": "frontend/src/index.css",
+          "path": "frontend/src/pages/GalleryPage.tsx",
           "operation": "modify",
-          "description": "Add CSS keyframe animation 'blink-cursor' for the typewriter cursor with opacity toggle every 500ms. Define .typewriter-cursor utility class."
-        }
-      ]
-    },
-    {
-      "id": "REQ-76",
-      "summary": "Add staggered bounce-in animation to analytics cards and tab buttons in Admin Dashboard",
-      "acceptanceCriteria": [
-        "Admin Dashboard analytics cards animate in with a staggered scale-up + fade-in on first load.",
-        "Each card has an incremental delay (e.g., 0ms, 100ms, 200ms).",
-        "Animation is smooth and does not affect layout or data display.",
-        "Existing dashboard functionality (tabs, table, search) is unaffected."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/AdminDashboard.tsx",
-          "operation": "modify",
-          "description": "Apply staggered animation classes to the analytics cards at the top of the dashboard. Use inline style with animationDelay (0ms, 100ms, 200ms, 300ms) for each card. Add the bounce-in animation class to each card element."
-        },
-        {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Add CSS keyframe animation 'bounce-in' with scale-up (0.8 to 1) and fade-in (opacity 0 to 1) over 400ms with ease-out timing. Define .bounce-in utility class with animation-fill-mode: both."
-        }
-      ]
-    },
-    {
-      "id": "REQ-77",
-      "summary": "Add pulsing ring/ripple animation around the 'Register Now' CTA button on Landing Page and Hero section",
-      "acceptanceCriteria": [
-        "The CTA button on LandingPage.tsx has a continuously looping ripple/pulse ring animation.",
-        "The CTA button in Hero.tsx has the same ripple/pulse ring animation.",
-        "The ring is green/semi-transparent and expands outward before fading.",
-        "Animation loops indefinitely without pausing.",
-        "Button remains fully clickable and functional."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/Hero.tsx",
-          "operation": "modify",
-          "description": "Wrap the 'Register Now' button in a relative-positioned container div. Add an absolutely positioned ::before pseudo-element to the button with a green border and scale + opacity animation. Apply the pulse-ring CSS animation class to the button wrapper."
+          "description": "Revert the gallery page to its stable state with functioning image loading, grid display, and scroll animations"
         },
         {
           "path": "frontend/src/pages/HomePage.tsx",
           "operation": "modify",
-          "description": "If there is a separate 'Register Now' CTA button on the landing/home page outside the Hero component, wrap it in a relative-positioned container and apply the same pulse-ring animation class."
+          "description": "Restore the stable home page layout with all section components properly composed and rendered"
+        },
+        {
+          "path": "frontend/src/pages/RegistrationLookupPage.tsx",
+          "operation": "modify",
+          "description": "Revert the registration lookup page to its working state with correct email search functionality and result display"
+        },
+        {
+          "path": "frontend/src/main.tsx",
+          "operation": "modify",
+          "description": "Restore the stable React app entry point with correct provider wrapping order and initialization"
         },
         {
           "path": "frontend/src/index.css",
           "operation": "modify",
-          "description": "Add CSS keyframe animation 'pulse-ring' that scales from 1 to 1.5-2x and fades opacity from 0.6 to 0 over 2s, looping infinitely. Define .pulse-ring-btn class with ::before pseudo-element for the expanding ring effect."
-        }
-      ]
-    },
-    {
-      "id": "REQ-78",
-      "summary": "Add smooth number count-up animation to the registration counter in the Hero section",
-      "acceptanceCriteria": [
-        "The registration counter in the Hero section animates from 0 to the fetched value on load.",
-        "The count-up animation takes approximately 1–2 seconds.",
-        "If the backend returns 0 or is loading, the animation either skips or shows 0.",
-        "The final displayed value matches the actual backend registration count."
-      ],
-      "file_operations": [
+          "description": "Revert any CSS changes that may have broken styling, restoring stable global styles, theme variables, and animation keyframes"
+        },
         {
-          "path": "frontend/src/components/Hero.tsx",
+          "path": "frontend/tailwind.config.js",
           "operation": "modify",
-          "description": "Implement a count-up animation using requestAnimationFrame or a setInterval-based approach in a useEffect hook. When the registration count data is fetched, animate the displayed number from 0 to the target value over 1500ms with easing. Use a local state variable for the animated count display."
-        }
-      ]
-    },
-    {
-      "id": "REQ-79",
-      "summary": "Add subtle parallax scrolling effect to the Hero section background",
-      "acceptanceCriteria": [
-        "The hero background moves at a visibly slower pace than the page content when scrolling.",
-        "The parallax effect is smooth and does not cause layout shifts or jank.",
-        "The foreground hero content (title, timer, buttons) scrolls at normal speed.",
-        "The effect is disabled or gracefully degraded on mobile if it causes performance issues."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/Hero.tsx",
-          "operation": "modify",
-          "description": "Add a scroll event listener using useEffect that calculates the scroll offset and applies a transform: translateY() style to the hero background layer (particles canvas or background image container). Use requestAnimationFrame for smooth updates. Apply the parallax effect only on desktop viewports (min-width: 768px). The background should move at 0.5x the scroll speed."
+          "description": "Restore the stable Tailwind configuration with correct color tokens, plugins, and theme settings"
         }
       ]
     }

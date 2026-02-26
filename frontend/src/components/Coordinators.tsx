@@ -1,66 +1,42 @@
+import { useEffect, useRef, useState } from 'react';
 import { useGetCoordinatorsContent } from '../hooks/useQueries';
-import { Phone, Mail } from 'lucide-react';
+import { Phone, Mail, User } from 'lucide-react';
+import type { Coordinator } from '../backend';
 
-interface Coordinator {
-  name: string;
-  role: string;
-  phone: string;
-  email: string;
-}
+const defaultFaculty: Coordinator[] = [
+  { name: 'Dr. Faculty Name', role: 'Faculty Coordinator', phone: '+91 98765 43210', email: 'faculty@college.edu' },
+];
 
-function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
-}
+const defaultStudents: Coordinator[] = [
+  { name: 'Student Name 1', role: 'Student Coordinator', phone: '+91 98765 43211', email: 'student1@college.edu' },
+  { name: 'Student Name 2', role: 'Student Coordinator', phone: '+91 98765 43212', email: 'student2@college.edu' },
+];
 
-const defaultContent = {
-  facultyCoordinators: [
-    { name: 'Dr. Faculty Coordinator', role: 'Faculty Coordinator', phone: '+91 98765 43210', email: 'faculty@sece.ac.in' },
-  ],
-  studentCoordinators: [
-    { name: 'Student Coordinator One', role: 'Student Coordinator', phone: '+91 98765 43211', email: 'student1@sece.ac.in' },
-    { name: 'Student Coordinator Two', role: 'Student Coordinator', phone: '+91 98765 43212', email: 'student2@sece.ac.in' },
-  ],
-};
-
-function CoordinatorCard({ coordinator, index }: { coordinator: Coordinator; index: number }) {
-  const initials = getInitials(coordinator.name);
-
+function CoordinatorCard({ coord, index, visible }: { coord: Coordinator; index: number; visible: boolean }) {
   return (
     <div
-      className="coordinator-card-shimmer group relative bg-card/60 backdrop-blur-sm border border-primary/20 rounded-2xl p-6 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/15 hover:-translate-y-2 transition-all duration-300"
-      style={{ animationDelay: `${index * 0.1}s` }}
+      className={`coordinator-card-shimmer group relative bg-card border border-border rounded-xl p-6 hover:border-primary/50 transition-all duration-500 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1 ${
+        visible ? 'bounce-in' : 'opacity-0'
+      }`}
+      style={{ animationDelay: `${index * 100}ms` }}
     >
-      {/* Avatar */}
-      <div className="flex items-center gap-4 mb-5">
-        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 border-2 border-primary/30 flex items-center justify-center flex-shrink-0 group-hover:border-primary/60 transition-colors duration-300">
-          <span className="text-primary font-bold text-lg">{initials}</span>
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+          <User className="w-6 h-6 text-primary" />
         </div>
         <div>
-          <h3 className="text-foreground font-bold text-base leading-tight">{coordinator.name}</h3>
-          <p className="text-primary text-xs font-medium mt-0.5">{coordinator.role}</p>
+          <h4 className="font-bold text-foreground">{coord.name}</h4>
+          <p className="text-xs text-primary">{coord.role}</p>
         </div>
       </div>
-
-      {/* Contact info */}
-      <div className="space-y-2 relative z-10">
-        <a
-          href={`tel:${coordinator.phone}`}
-          className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-200 text-sm"
-        >
-          <Phone className="w-4 h-4 flex-shrink-0" />
-          <span>{coordinator.phone}</span>
+      <div className="space-y-2">
+        <a href={`tel:${coord.phone}`} className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors text-sm">
+          <Phone className="w-4 h-4" />
+          <span>{coord.phone}</span>
         </a>
-        <a
-          href={`mailto:${coordinator.email}`}
-          className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-200 text-sm"
-        >
-          <Mail className="w-4 h-4 flex-shrink-0" />
-          <span className="truncate">{coordinator.email}</span>
+        <a href={`mailto:${coord.email}`} className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors text-sm">
+          <Mail className="w-4 h-4" />
+          <span>{coord.email}</span>
         </a>
       </div>
     </div>
@@ -68,54 +44,71 @@ function CoordinatorCard({ coordinator, index }: { coordinator: Coordinator; ind
 }
 
 export default function Coordinators() {
-  const { data: coordinatorsContent } = useGetCoordinatorsContent();
-  const content = coordinatorsContent ?? defaultContent;
+  const { data: coordContent } = useGetCoordinatorsContent();
+  const [visibleCards, setVisibleCards] = useState<Set<number>>(new Set());
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const faculty = coordContent?.facultyCoordinators?.length ? coordContent.facultyCoordinators : defaultFaculty;
+  const students = coordContent?.studentCoordinators?.length ? coordContent.studentCoordinators : defaultStudents;
+  const allCoords = [...faculty, ...students];
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const index = parseInt(entry.target.getAttribute('data-index') || '0');
+            setVisibleCards((prev) => new Set([...prev, index]));
+          }
+        });
+      },
+      { threshold: 0.2 }
+    );
+    cardRefs.current.forEach((ref) => ref && observer.observe(ref));
+    return () => observer.disconnect();
+  }, [coordContent]);
 
   return (
-    <section id="coordinators" className="relative py-24 bg-background overflow-hidden">
-      {/* Subtle background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/3 to-transparent pointer-events-none" />
-
-      <div className="relative z-10 max-w-6xl mx-auto px-4">
-        {/* Section header */}
-        <div className="text-center mb-16">
-          <p className="text-primary text-sm font-semibold tracking-widest uppercase mb-3">Meet the Team</p>
-          <h2 className="text-3xl md:text-4xl font-black text-foreground mb-4">
-            <span className="gradient-text-animated">Coordinators</span>
-          </h2>
-          <p className="text-muted-foreground max-w-xl mx-auto">
-            Get in touch with our coordinators for any queries or assistance.
-          </p>
+    <section id="coordinators" className="py-20 px-4 bg-card/30">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-14">
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">Coordinators</h2>
+          <p className="text-muted-foreground text-lg">Meet the team behind Innovative Link Expo</p>
         </div>
 
-        {/* Faculty Coordinators */}
-        {content.facultyCoordinators.length > 0 && (
-          <div className="mb-12">
-            <h3 className="text-lg font-bold text-foreground/70 uppercase tracking-widest text-center mb-8 flex items-center justify-center gap-3">
-              <span className="h-px flex-1 bg-border max-w-[100px]" />
-              Faculty Coordinators
-              <span className="h-px flex-1 bg-border max-w-[100px]" />
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-              {content.facultyCoordinators.map((coord, i) => (
-                <CoordinatorCard key={i} coordinator={coord} index={i} />
+        {faculty.length > 0 && (
+          <div className="mb-10">
+            <h3 className="text-xl font-semibold text-primary mb-6 text-center">Faculty Coordinators</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {faculty.map((coord, i) => (
+                <div
+                  key={i}
+                  data-index={i}
+                  ref={(el) => { cardRefs.current[i] = el; }}
+                >
+                  <CoordinatorCard coord={coord} index={i} visible={visibleCards.has(i)} />
+                </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* Student Coordinators */}
-        {content.studentCoordinators.length > 0 && (
+        {students.length > 0 && (
           <div>
-            <h3 className="text-lg font-bold text-foreground/70 uppercase tracking-widest text-center mb-8 flex items-center justify-center gap-3">
-              <span className="h-px flex-1 bg-border max-w-[100px]" />
-              Student Coordinators
-              <span className="h-px flex-1 bg-border max-w-[100px]" />
-            </h3>
+            <h3 className="text-xl font-semibold text-primary mb-6 text-center">Student Coordinators</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {content.studentCoordinators.map((coord, i) => (
-                <CoordinatorCard key={i} coordinator={coord} index={i + content.facultyCoordinators.length} />
-              ))}
+              {students.map((coord, i) => {
+                const globalIndex = faculty.length + i;
+                return (
+                  <div
+                    key={i}
+                    data-index={globalIndex}
+                    ref={(el) => { cardRefs.current[globalIndex] = el; }}
+                  >
+                    <CoordinatorCard coord={coord} index={globalIndex} visible={visibleCards.has(globalIndex)} />
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

@@ -13,7 +13,6 @@ import { ExternalBlob } from '../backend';
 
 export function useGetRegistrationCount() {
   const { actor, isFetching } = useActor();
-
   return useQuery<bigint>({
     queryKey: ['registrationCount'],
     queryFn: async () => {
@@ -27,27 +26,19 @@ export function useGetRegistrationCount() {
 
 export function useGetRegistrations() {
   const { actor, isFetching } = useActor();
-
   return useQuery<Registration[]>({
     queryKey: ['registrations'],
     queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      const result = await actor.getRegistrations();
-      return Array.isArray(result) ? result : [];
+      if (!actor) return [];
+      return actor.getRegistrations();
     },
     enabled: !!actor && !isFetching,
-    retry: 1,
-    retryDelay: 1000,
-    staleTime: 0,
-    refetchOnMount: true,
-    refetchOnWindowFocus: false,
   });
 }
 
 export function useSubmitRegistration() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (data: {
       fullName: string;
@@ -68,7 +59,7 @@ export function useSubmitRegistration() {
         data.department,
         data.projectTitle,
         data.category,
-        data.abstract
+        data.abstract,
       );
     },
     onSuccess: () => {
@@ -81,7 +72,6 @@ export function useSubmitRegistration() {
 export function useDeleteRegistration() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (id: bigint) => {
       if (!actor) throw new Error('Actor not available');
@@ -94,72 +84,28 @@ export function useDeleteRegistration() {
   });
 }
 
-export function useUpdateRegistration() {
+export function useGetRegistrationByEmail() {
   const { actor } = useActor();
-  const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: async (data: {
-      id: bigint;
-      fullName: string;
-      email: string;
-      phoneNumber: string;
-      collegeName: string;
-      department: string;
-      projectTitle: string;
-      category: string;
-      abstract: string;
-    }) => {
+    mutationFn: async (email: string) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.updateRegistration(
-        data.id,
-        data.fullName,
-        data.email,
-        data.phoneNumber,
-        data.collegeName,
-        data.department,
-        data.projectTitle,
-        data.category,
-        data.abstract
-      );
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['registrations'] });
+      return actor.getRegistrationByEmail(email);
     },
   });
 }
 
 export function useVerifyAdminCredentials() {
   const { actor } = useActor();
-
   return useMutation({
     mutationFn: async (_credentials: { email: string; password: string }) => {
       if (!actor) throw new Error('Actor not available');
-      // Backend uses Internet Identity principal for admin verification
       return actor.isCallerAdmin();
     },
   });
 }
 
-export function useGetRegistrationByEmail(email: string) {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<Registration | null>({
-    queryKey: ['registrationByEmail', email],
-    queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.getRegistrationByEmail(email);
-    },
-    enabled: !!actor && !isFetching && email.trim().length > 0,
-    retry: false,
-  });
-}
-
-// ─── Content Getter Hooks ────────────────────────────────────────────────────
-
 export function useGetHeroContent() {
   const { actor, isFetching } = useActor();
-
   return useQuery<HeroContent | null>({
     queryKey: ['heroContent'],
     queryFn: async () => {
@@ -170,64 +116,9 @@ export function useGetHeroContent() {
   });
 }
 
-export function useGetAboutContent() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<AboutContent | null>({
-    queryKey: ['aboutContent'],
-    queryFn: async () => {
-      if (!actor) return null;
-      return actor.getAboutContent();
-    },
-    enabled: !!actor && !isFetching,
-  });
-}
-
-export function useGetEventDetailsContent() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<EventDetailsContent | null>({
-    queryKey: ['eventDetailsContent'],
-    queryFn: async () => {
-      if (!actor) return null;
-      return actor.getEventDetailsContent();
-    },
-    enabled: !!actor && !isFetching,
-  });
-}
-
-export function useGetCoordinatorsContent() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<CoordinatorsContent | null>({
-    queryKey: ['coordinatorsContent'],
-    queryFn: async () => {
-      if (!actor) return null;
-      return actor.getCoordinatorsContent();
-    },
-    enabled: !!actor && !isFetching,
-  });
-}
-
-export function useGetContactContent() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<ContactContent | null>({
-    queryKey: ['contactContent'],
-    queryFn: async () => {
-      if (!actor) return null;
-      return actor.getContactContent();
-    },
-    enabled: !!actor && !isFetching,
-  });
-}
-
-// ─── Content Mutation Hooks ──────────────────────────────────────────────────
-
 export function useUpdateHeroContent() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (content: HeroContent) => {
       if (!actor) throw new Error('Actor not available');
@@ -239,10 +130,21 @@ export function useUpdateHeroContent() {
   });
 }
 
+export function useGetAboutContent() {
+  const { actor, isFetching } = useActor();
+  return useQuery<AboutContent | null>({
+    queryKey: ['aboutContent'],
+    queryFn: async () => {
+      if (!actor) return null;
+      return actor.getAboutContent();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
 export function useUpdateAboutContent() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (content: AboutContent) => {
       if (!actor) throw new Error('Actor not available');
@@ -254,10 +156,21 @@ export function useUpdateAboutContent() {
   });
 }
 
+export function useGetEventDetailsContent() {
+  const { actor, isFetching } = useActor();
+  return useQuery<EventDetailsContent | null>({
+    queryKey: ['eventDetailsContent'],
+    queryFn: async () => {
+      if (!actor) return null;
+      return actor.getEventDetailsContent();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
 export function useUpdateEventDetailsContent() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (content: EventDetailsContent) => {
       if (!actor) throw new Error('Actor not available');
@@ -269,10 +182,21 @@ export function useUpdateEventDetailsContent() {
   });
 }
 
+export function useGetCoordinatorsContent() {
+  const { actor, isFetching } = useActor();
+  return useQuery<CoordinatorsContent | null>({
+    queryKey: ['coordinatorsContent'],
+    queryFn: async () => {
+      if (!actor) return null;
+      return actor.getCoordinatorsContent();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
 export function useUpdateCoordinatorsContent() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (content: CoordinatorsContent) => {
       if (!actor) throw new Error('Actor not available');
@@ -284,10 +208,21 @@ export function useUpdateCoordinatorsContent() {
   });
 }
 
+export function useGetContactContent() {
+  const { actor, isFetching } = useActor();
+  return useQuery<ContactContent | null>({
+    queryKey: ['contactContent'],
+    queryFn: async () => {
+      if (!actor) return null;
+      return actor.getContactContent();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
 export function useUpdateContactContent() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (content: ContactContent) => {
       if (!actor) throw new Error('Actor not available');
@@ -299,11 +234,8 @@ export function useUpdateContactContent() {
   });
 }
 
-// ─── Gallery Hooks ───────────────────────────────────────────────────────────
-
 export function useGetGalleryImages() {
   const { actor, isFetching } = useActor();
-
   return useQuery<GalleryImage[]>({
     queryKey: ['galleryImages'],
     queryFn: async () => {
@@ -317,11 +249,11 @@ export function useGetGalleryImages() {
 export function useAddGalleryImage() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: async (data: { title: string; imageBlob: ExternalBlob }) => {
+    mutationFn: async (data: { title: string; imageData: Uint8Array }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.addGalleryImage(data.title, data.imageBlob);
+      const blob = ExternalBlob.fromBytes(data.imageData as Uint8Array<ArrayBuffer>);
+      return actor.addGalleryImage(data.title, blob);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['galleryImages'] });
@@ -332,7 +264,6 @@ export function useAddGalleryImage() {
 export function useDeleteGalleryImage() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (id: string) => {
       if (!actor) throw new Error('Actor not available');

@@ -1,144 +1,110 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
 import FloatingSocialButtons from '../components/FloatingSocialButtons';
 import { useGetGalleryImages } from '../hooks/useQueries';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ImageIcon } from 'lucide-react';
 
-function useScrollAnimation(threshold = 0.15) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [threshold]);
-
-  return { ref, visible };
-}
-
-function GalleryCard({ image, index }: { image: { id: string; title: string; imageBlob: { getDirectURL: () => string } }; index: number }) {
-  const { ref, visible } = useScrollAnimation(0.1);
-
-  return (
-    <div
-      ref={ref}
-      className="group relative overflow-hidden rounded-xl backdrop-blur-md bg-white/5 border border-white/10 transition-all duration-500 cursor-pointer"
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? 'scale(1) translateY(0)' : 'scale(0.92) translateY(24px)',
-        transition: `opacity 0.6s ease ${index * 80}ms, transform 0.6s ease ${index * 80}ms, box-shadow 0.3s ease, border-color 0.3s ease`,
-      }}
-    >
-      <div className="aspect-square overflow-hidden">
-        <img
-          src={image.imageBlob.getDirectURL()}
-          alt={image.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-          loading="lazy"
-        />
-      </div>
-      <div
-        className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-        style={{ boxShadow: 'inset 0 0 0 2px rgba(15,157,88,0.6), 0 0 30px rgba(15,157,88,0.35)' }}
-      />
-      {image.title && (
-        <div className="px-3 py-2 bg-black/40 backdrop-blur-sm">
-          <p className="text-white/80 text-sm font-medium truncate">{image.title}</p>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function SkeletonCard({ index }: { index: number }) {
-  return (
-    <div
-      className="rounded-xl overflow-hidden bg-white/5 border border-white/10"
-      style={{ animationDelay: `${index * 100}ms` }}
-    >
-      <Skeleton className="aspect-square w-full bg-white/10 animate-pulse" />
-      <div className="px-3 py-2">
-        <Skeleton className="h-4 w-3/4 bg-white/10 animate-pulse" />
-      </div>
-    </div>
-  );
-}
-
 export default function GalleryPage() {
   const { data: images, isLoading } = useGetGalleryImages();
-  const headingAnim = useScrollAnimation(0.1);
+  const [visibleItems, setVisibleItems] = useState<Set<string>>(new Set());
+  const itemRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const currentYear = new Date().getFullYear();
+  const appId = encodeURIComponent(window.location.hostname || 'innovative-link-expo');
 
-  const sortedImages = images
-    ? [...images].sort((a, b) => Number(b.uploadedAt) - Number(a.uploadedAt))
-    : [];
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const id = entry.target.getAttribute('data-id');
+            if (id) {
+              setVisibleItems((prev) => new Set([...prev, id]));
+            }
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    itemRefs.current.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [images]);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col">
+    <div className="min-h-screen bg-background text-foreground">
       <Navbar />
-
-      <main className="flex-1 pt-24 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-        {/* Heading */}
-        <div
-          ref={headingAnim.ref}
-          className="text-center mb-14"
-          style={{
-            opacity: headingAnim.visible ? 1 : 0,
-            transform: headingAnim.visible ? 'translateY(0)' : 'translateY(32px)',
-            transition: 'opacity 0.7s ease, transform 0.7s ease',
-          }}
-        >
-          <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4 tracking-tight">
-            Gallery
-          </h1>
-          <div className="mx-auto h-1 w-24 rounded-full bg-gradient-to-r from-[#0f9d58] to-[#22c55e]" />
-          <p className="mt-4 text-white/50 text-base sm:text-lg max-w-xl mx-auto">
-            Moments captured from InnovativeLink Expo
+      <main className="pt-24 pb-16 px-4 max-w-7xl mx-auto">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold text-primary mb-4">Gallery</h1>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            Explore moments captured from Innovative Link Expo events
           </p>
         </div>
 
-        {/* Loading state */}
         {isLoading && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {Array.from({ length: 8 }).map((_, i) => (
-              <SkeletonCard key={i} index={i} />
+              <Skeleton key={i} className="aspect-square rounded-xl" />
             ))}
           </div>
         )}
 
-        {/* Empty state */}
-        {!isLoading && sortedImages.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-24 gap-4">
-            <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
-              <ImageIcon className="w-8 h-8 text-white/30" />
-            </div>
-            <p className="text-white/60 text-lg">No photos yet — check back soon!</p>
+        {!isLoading && (!images || images.length === 0) && (
+          <div className="flex flex-col items-center justify-center py-24 text-muted-foreground">
+            <ImageIcon className="w-16 h-16 mb-4 opacity-40" />
+            <p className="text-xl font-medium">No images yet</p>
+            <p className="text-sm mt-2">Check back soon for gallery updates!</p>
           </div>
         )}
 
-        {/* Image grid */}
-        {!isLoading && sortedImages.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-            {sortedImages.map((image, index) => (
-              <GalleryCard key={image.id} image={image} index={index} />
+        {!isLoading && images && images.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {images.map((image, index) => (
+              <div
+                key={image.id}
+                data-id={image.id}
+                ref={(el) => {
+                  if (el) itemRefs.current.set(image.id, el);
+                }}
+                className={`group relative overflow-hidden rounded-xl border border-border bg-card cursor-pointer transition-all duration-500 ${
+                  visibleItems.has(image.id)
+                    ? 'opacity-100 scale-100 translate-y-0'
+                    : 'opacity-0 scale-95 translate-y-4'
+                }`}
+                style={{ transitionDelay: `${(index % 8) * 60}ms` }}
+              >
+                <div className="aspect-square overflow-hidden">
+                  <img
+                    src={image.imageBlob.getDirectURL()}
+                    alt={image.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                  <p className="text-white font-medium text-sm truncate">{image.title}</p>
+                </div>
+                <div className="absolute inset-0 rounded-xl ring-2 ring-primary/0 group-hover:ring-primary/60 transition-all duration-300 pointer-events-none" />
+              </div>
             ))}
           </div>
         )}
       </main>
-
-      <Footer />
+      <footer className="bg-card border-t border-border py-6 text-center text-muted-foreground text-sm">
+        <p>&copy; {currentYear} Innovative Link Expo. All rights reserved.</p>
+        <p className="mt-1">
+          Built with <span className="text-primary">♥</span> using{' '}
+          <a
+            href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${appId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline"
+          >
+            caffeine.ai
+          </a>
+        </p>
+      </footer>
       <FloatingSocialButtons />
     </div>
   );

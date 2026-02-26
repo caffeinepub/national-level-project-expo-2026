@@ -1,174 +1,36 @@
 {
   "kind": "build_request",
-  "title": "Enhance site-wide animations and visual polish",
-  "projectName": "Project Expo 2026",
-  "priority": "normal",
+  "title": "Revert to a stable working version",
+  "priority": "high",
   "requirements": [
     {
-      "id": "REQ-72",
-      "text": "Add a smooth page transition animation (fade-in + slight upward slide) that plays whenever the user navigates between routes (/, /home, /about, /event-details, /check-registration, /gallery). Implement this as a wrapper component or CSS class applied at the route level in App.tsx or the individual page components.",
-      "target": "frontend",
+      "id": "REQ-1",
+      "text": "Revert the application to the last known stable state before the recent changes that caused issues. Restore both frontend and backend code to the previously working version, ensuring the app builds and deploys successfully.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-3"
+          "msg-latest"
         ],
         "quotes": [
-          "add some animation which looks good"
+          "it is not reverted"
         ]
       },
       "acceptanceCriteria": [
-        "Navigating to any route triggers a visible fade-in + slide-up transition on the page content.",
-        "Transition duration is smooth (200–400ms) and does not feel jarring.",
-        "All existing routes continue to render correctly."
-      ]
-    },
-    {
-      "id": "REQ-73",
-      "text": "Add a floating animated glow orb or gradient blob (two or three large blurred radial gradient circles) as decorative background elements on the Hero section, About page, and Event Details page. The orbs should slowly drift or pulse using CSS keyframe animations, reinforcing the dark green tech aesthetic without obscuring content.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-3"
-        ],
-        "quotes": [
-          "add some animation which looks good"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Glowing orb/blob elements are visible in the Hero section background.",
-        "Glowing orb/blob elements appear on the About and Event Details pages.",
-        "Orbs animate continuously (drift or pulse) with a slow, smooth CSS keyframe animation.",
-        "Orbs do not overlap or obscure any text or interactive elements."
-      ]
-    },
-    {
-      "id": "REQ-74",
-      "text": "Enhance the Coordinators section cards (`frontend/src/components/Coordinators.tsx`) with a shimmer/shine sweep animation on hover — a subtle light sweep effect that passes across the card surface from left to right when the user hovers over a card, using a CSS pseudo-element or gradient overlay.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-3"
-        ],
-        "quotes": [
-          "add some animation which looks good"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Hovering a coordinator card triggers a visible left-to-right shine/shimmer sweep animation.",
-        "The shimmer uses a semi-transparent white or light-green gradient.",
-        "Existing hover lift-and-glow animations are preserved and not broken.",
-        "Animation is smooth and does not flicker."
-      ]
-    },
-    {
-      "id": "REQ-75",
-      "text": "Add a typewriter text animation to the event tagline in the Hero section (`frontend/src/components/Hero.tsx`). The tagline text should appear character by character using a CSS or JavaScript typewriter effect on page load, after the initial fade-in entrance animation completes.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-3"
-        ],
-        "quotes": [
-          "add some animation which looks good"
-        ]
-      },
-      "acceptanceCriteria": [
-        "The hero tagline text animates in as a typewriter effect (characters appear one by one).",
-        "The typewriter effect starts after the hero section's entrance fade-in animation.",
-        "The effect completes within 2–4 seconds.",
-        "A blinking cursor is shown at the end of the tagline while typing, then disappears or fades out."
-      ]
-    },
-    {
-      "id": "REQ-76",
-      "text": "Add a staggered bounce-in or pop-in animation to the analytics cards and tab buttons in the Admin Dashboard (`frontend/src/pages/AdminDashboard.tsx`). When the dashboard first loads, each analytics card should animate in sequentially with a slight scale-up and fade-in (stagger delay of ~100ms between cards).",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-3"
-        ],
-        "quotes": [
-          "add some animation which looks good"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Admin Dashboard analytics cards animate in with a staggered scale-up + fade-in on first load.",
-        "Each card has an incremental delay (e.g., 0ms, 100ms, 200ms).",
-        "Animation is smooth and does not affect layout or data display.",
-        "Existing dashboard functionality (tabs, table, search) is unaffected."
-      ]
-    },
-    {
-      "id": "REQ-77",
-      "text": "Add a pulsing ring/ripple animation around the 'Register Now' CTA button on the Landing Page (`frontend/src/pages/LandingPage.tsx`) and Hero section (`frontend/src/components/Hero.tsx`). The ripple should be a continuously expanding semi-transparent green ring that fades out as it expands, drawing attention to the button.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-3"
-        ],
-        "quotes": [
-          "add some animation which looks good"
-        ]
-      },
-      "acceptanceCriteria": [
-        "The CTA button on LandingPage.tsx has a continuously looping ripple/pulse ring animation.",
-        "The CTA button in Hero.tsx has the same ripple/pulse ring animation.",
-        "The ring is green/semi-transparent and expands outward before fading.",
-        "Animation loops indefinitely without pausing.",
-        "Button remains fully clickable and functional."
-      ]
-    },
-    {
-      "id": "REQ-78",
-      "text": "Add a smooth number count-up animation to the registration counter displayed in the Hero section (`frontend/src/components/Hero.tsx`). When the registration count value is fetched and rendered, the number should animate from 0 up to the actual value over ~1.5 seconds using requestAnimationFrame or a CSS counter approach.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-3"
-        ],
-        "quotes": [
-          "add some animation which looks good"
-        ]
-      },
-      "acceptanceCriteria": [
-        "The registration counter in the Hero section animates from 0 to the fetched value on load.",
-        "The count-up animation takes approximately 1–2 seconds.",
-        "If the backend returns 0 or is loading, the animation either skips or shows 0.",
-        "The final displayed value matches the actual backend registration count."
-      ]
-    },
-    {
-      "id": "REQ-79",
-      "text": "Add a subtle parallax scrolling effect to the Hero section background (`frontend/src/components/Hero.tsx`). As the user scrolls down from the hero, the background image/particle canvas should scroll at a slower rate than the foreground content, creating a depth effect. Implement using a scroll event listener that adjusts the background's `transform: translateY()`.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-3"
-        ],
-        "quotes": [
-          "add some animation which looks good"
-        ]
-      },
-      "acceptanceCriteria": [
-        "The hero background moves at a visibly slower pace than the page content when scrolling.",
-        "The parallax effect is smooth and does not cause layout shifts or jank.",
-        "The foreground hero content (title, timer, buttons) scrolls at normal speed.",
-        "The effect is disabled or gracefully degraded on mobile if it causes performance issues."
+        "The application builds without errors",
+        "The application deploys successfully to the network",
+        "All previously working features (registration, gallery, admin dashboard, CMS content) function correctly",
+        "The admin login and dashboard data loading work as expected"
       ]
     }
   ],
   "constraints": [
-    "Do not modify any files listed in frontend.immutablePaths.",
-    "All new animations must use the existing green gradient (#0f9d58 → #22c55e) color palette and dark theme.",
-    "Animations must not degrade performance on mobile devices — use CSS animations over JS where possible.",
-    "All existing functionality (routing, form submission, admin dashboard, data fetching) must remain fully intact."
+    "Do not introduce new features or UI changes — only restore stable functionality",
+    "Preserve the existing data model and backend state"
   ],
   "nonGoals": [
-    "Adding any new pages or routes.",
-    "Changing the backend data model or API.",
-    "Introducing third-party animation libraries (e.g., Framer Motion, GSAP) unless already in the dependency tree.",
-    "Modifying any content data or coordinator/registration information.",
-    "Adding real-time or WebSocket-based animations."
+    "Adding new features",
+    "Redesigning any UI components",
+    "Changing the authentication mechanism"
   ],
   "imageRequirements": {
     "required": [],

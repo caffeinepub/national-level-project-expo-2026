@@ -1,115 +1,81 @@
-import { useEffect, useRef } from 'react';
-import { Lightbulb, Users, Trophy, Rocket, Star, Zap } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { useGetAboutContent } from '../hooks/useQueries';
 
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  Lightbulb,
-  Users,
-  Trophy,
-  Rocket,
-  Star,
-  Zap,
-};
-
-const defaultContent = {
-  sectionDescription:
-    'Innovative Link Expo 2K26 is a premier technical symposium that brings together the brightest minds from engineering colleges across the region. Showcase your projects, compete with the best, and connect with industry leaders.',
-  featureCards: [
-    {
-      title: 'Innovation Hub',
-      description: 'Present your groundbreaking projects to industry experts and fellow innovators in a dynamic showcase environment.',
-      icon: 'Lightbulb',
-    },
-    {
-      title: 'Networking',
-      description: 'Connect with students, faculty, and industry professionals from top institutions across the region.',
-      icon: 'Users',
-    },
-    {
-      title: 'Competitions',
-      description: 'Participate in exciting technical competitions with attractive prizes and recognition for outstanding work.',
-      icon: 'Trophy',
-    },
-  ],
-};
+const defaultCards = [
+  {
+    icon: '🚀',
+    title: 'Innovation Hub',
+    description: 'A platform for students to showcase groundbreaking projects and ideas that push the boundaries of technology.',
+  },
+  {
+    icon: '🤝',
+    title: 'Networking',
+    description: 'Connect with industry experts, faculty, and fellow innovators to build lasting professional relationships.',
+  },
+  {
+    icon: '🏆',
+    title: 'Recognition',
+    description: 'Get your work recognized by industry leaders and win exciting prizes for the most innovative projects.',
+  },
+];
 
 export default function About() {
   const { data: aboutContent } = useGetAboutContent();
-  const content = aboutContent ?? defaultContent;
-
-  const sectionRef = useRef<HTMLElement>(null);
+  const [visibleCards, setVisibleCards] = useState<Set<number>>(new Set());
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            entry.target.querySelectorAll('.reveal-card').forEach((el, i) => {
-              (el as HTMLElement).style.animationDelay = `${i * 0.15}s`;
-              el.classList.add('bounce-in');
-            });
+            const index = parseInt(entry.target.getAttribute('data-index') || '0');
+            setVisibleCards((prev) => new Set([...prev, index]));
           }
         });
       },
       { threshold: 0.2 }
     );
-    if (sectionRef.current) observer.observe(sectionRef.current);
+    cardRefs.current.forEach((ref) => ref && observer.observe(ref));
     return () => observer.disconnect();
-  }, []);
+  }, [aboutContent]);
+
+  const description = aboutContent?.sectionDescription ||
+    'Innovative Link Expo is a premier technical exhibition where students present their innovative projects, research, and ideas to industry experts and academic leaders.';
+
+  const cards = aboutContent?.featureCards?.length
+    ? aboutContent.featureCards
+    : defaultCards;
 
   return (
-    <section id="about" ref={sectionRef} className="relative py-24 bg-background overflow-hidden">
-      {/* Glow orbs */}
-      <div
-        className="glow-orb glow-orb-2"
-        style={{
-          width: '450px',
-          height: '450px',
-          background: 'radial-gradient(circle, oklch(0.65 0.18 150 / 0.2) 0%, transparent 70%)',
-          top: '-10%',
-          right: '-5%',
-        }}
-      />
-      <div
-        className="glow-orb glow-orb-3"
-        style={{
-          width: '350px',
-          height: '350px',
-          background: 'radial-gradient(circle, oklch(0.55 0.22 145 / 0.18) 0%, transparent 70%)',
-          bottom: '0%',
-          left: '-5%',
-        }}
-      />
+    <section id="about" className="relative py-20 px-4 bg-card/30 overflow-hidden">
+      {/* Drifting Orbs */}
+      <div className="absolute top-10 right-10 w-72 h-72 rounded-full bg-primary/8 blur-3xl drift-orb-2 pointer-events-none" />
+      <div className="absolute bottom-10 left-10 w-56 h-56 rounded-full bg-accent/8 blur-3xl drift-orb-3 pointer-events-none" />
 
-      <div className="relative z-10 max-w-6xl mx-auto px-4">
-        {/* Section header */}
-        <div className="text-center mb-16">
-          <p className="text-primary text-sm font-semibold tracking-widest uppercase mb-3">About the Event</p>
-          <h2 className="text-3xl md:text-4xl font-black text-foreground mb-6">
-            What is <span className="gradient-text-animated">Innovative Link Expo?</span>
-          </h2>
-          <p className="text-muted-foreground text-lg max-w-3xl mx-auto leading-relaxed">
-            {content.sectionDescription}
-          </p>
+      <div className="relative z-10 max-w-6xl mx-auto">
+        <div className="text-center mb-14">
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">About the Expo</h2>
+          <p className="text-muted-foreground text-lg max-w-3xl mx-auto leading-relaxed">{description}</p>
         </div>
 
-        {/* Feature cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {content.featureCards.map((card, index) => {
-            const IconComponent = iconMap[card.icon] ?? Lightbulb;
-            return (
-              <div
-                key={index}
-                className="reveal-card opacity-0 group relative bg-card/60 backdrop-blur-sm border border-primary/20 rounded-2xl p-8 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-1"
-              >
-                <div className="w-14 h-14 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors duration-300">
-                  <IconComponent className="w-7 h-7 text-primary" />
-                </div>
-                <h3 className="text-xl font-bold text-foreground mb-3">{card.title}</h3>
-                <p className="text-muted-foreground leading-relaxed">{card.description}</p>
-              </div>
-            );
-          })}
+          {cards.map((card, i) => (
+            <div
+              key={i}
+              data-index={i}
+              ref={(el) => { cardRefs.current[i] = el; }}
+              className={`group relative bg-card border border-border rounded-2xl p-8 hover:border-primary/50 transition-all duration-500 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1 ${
+                visibleCards.has(i) ? 'bounce-in' : 'opacity-0'
+              }`}
+              style={{ animationDelay: `${i * 150}ms` }}
+            >
+              <div className="text-4xl mb-4">{card.icon}</div>
+              <h3 className="text-xl font-bold text-foreground mb-3">{card.title}</h3>
+              <p className="text-muted-foreground leading-relaxed">{card.description}</p>
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+            </div>
+          ))}
         </div>
       </div>
     </section>

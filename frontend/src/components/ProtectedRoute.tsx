@@ -10,7 +10,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { isAdminAuthenticated } = useAdminAuth();
 
   if (!isAdminAuthenticated) {
-    return <Navigate to="/admin/login" />;
+    return <Navigate to="/admin" />;
   }
 
   return <>{children}</>;

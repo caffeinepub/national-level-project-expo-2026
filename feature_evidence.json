@@ -2,34 +2,23 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-a-smooth-page-transition-animation-fade-in-slight-upward-slide-that-plays-whenever-the-user-navigates-between-routes-home-about-event-details-check-registration-gallery-implement-this-as-a-wrapper-component-or-css-class-applied-at-the-route-level-in-app-tsx-or-the-individual-page-components",
-      "featureTitle": "Add a smooth page transition animation (fade-in + slight upward slide) that plays whenever the user navigates between routes (/, /home, /about, /event-details, /check-registration, /gallery). Implement this as a wrapper component or CSS class applied at the route level in App.tsx or the individual page components.",
+      "featureId": "feature-revert-the-application-to-the-last-known-stable-state-before-the-recent-changes-that-caused-issues-restore-both-frontend-and-backend-code-to-the-previously-working-version-ensuring-the-app-builds-and-deploys-successfully",
+      "featureTitle": "Revert the application to the last known stable state before the recent changes that caused issues. Restore both frontend and backend code to the previously working version, ensuring the app builds and deploys successfully.",
       "files": [
         "frontend/src/App.tsx",
-        "frontend/src/index.css"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-72"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-a-floating-animated-glow-orb-or-gradient-blob-two-or-three-large-blurred-radial-gradient-circles-as-decorative-background-elements-on-the-hero-section-about-page-and-event-details-page-the-orbs-should-slowly-drift-or-pulse-using-css-keyframe-animations-reinforcing-the-dark-green-tech-aesthetic-without-obscuring-content",
-      "featureTitle": "Add a floating animated glow orb or gradient blob (two or three large blurred radial gradient circles) as decorative background elements on the Hero section, About page, and Event Details page. The orbs should slowly drift or pulse using CSS keyframe animations, reinforcing the dark green tech aesthetic without obscuring content.",
-      "files": [
         "frontend/src/components/About.tsx",
+        "frontend/src/components/AdminContentManagement.tsx",
+        "frontend/src/components/Coordinators.tsx",
         "frontend/src/components/EventDetails.tsx",
         "frontend/src/components/Hero.tsx",
-        "frontend/src/index.css"
+        "frontend/src/components/Registration.tsx",
+        "frontend/src/context/AdminAuthContext.tsx",
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/pages/AdminDashboard.tsx",
+        "frontend/src/pages/AdminLogin.tsx",
+        "frontend/src/pages/GalleryPage.tsx",
+        "frontend/src/pages/HomePage.tsx",
+        "frontend/src/pages/RegistrationLookupPage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -41,132 +30,7 @@
         "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-73"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-enhance-the-coordinators-section-cards-frontend-src-components-coordinators-tsx-with-a-shimmer-shine-sweep-animation-on-hover-a-subtle-light-sweep-effect-that-passes-across-the-card-surface-from-left-to-right-when-the-user-hovers-over-a-card-using-a-css-pseudo-element-or-gradient-overlay",
-      "featureTitle": "Enhance the Coordinators section cards (`frontend/src/components/Coordinators.tsx`) with a shimmer/shine sweep animation on hover — a subtle light sweep effect that passes across the card surface from left to right when the user hovers over a card, using a CSS pseudo-element or gradient overlay.",
-      "files": [
-        "frontend/src/components/Coordinators.tsx",
-        "frontend/src/index.css"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-74"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-a-typewriter-text-animation-to-the-event-tagline-in-the-hero-section-frontend-src-components-hero-tsx-the-tagline-text-should-appear-character-by-character-using-a-css-or-javascript-typewriter-effect-on-page-load-after-the-initial-fade-in-entrance-animation-completes",
-      "featureTitle": "Add a typewriter text animation to the event tagline in the Hero section (`frontend/src/components/Hero.tsx`). The tagline text should appear character by character using a CSS or JavaScript typewriter effect on page load, after the initial fade-in entrance animation completes.",
-      "files": [
-        "frontend/src/components/Hero.tsx",
-        "frontend/src/index.css"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-75"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-a-staggered-bounce-in-or-pop-in-animation-to-the-analytics-cards-and-tab-buttons-in-the-admin-dashboard-frontend-src-pages-admindashboard-tsx-when-the-dashboard-first-loads-each-analytics-card-should-animate-in-sequentially-with-a-slight-scale-up-and-fade-in-stagger-delay-of-100ms-between-cards",
-      "featureTitle": "Add a staggered bounce-in or pop-in animation to the analytics cards and tab buttons in the Admin Dashboard (`frontend/src/pages/AdminDashboard.tsx`). When the dashboard first loads, each analytics card should animate in sequentially with a slight scale-up and fade-in (stagger delay of ~100ms between cards).",
-      "files": [
-        "frontend/src/index.css",
-        "frontend/src/pages/AdminDashboard.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-76"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-a-pulsing-ring-ripple-animation-around-the-register-now-cta-button-on-the-landing-page-frontend-src-pages-landingpage-tsx-and-hero-section-frontend-src-components-hero-tsx-the-ripple-should-be-a-continuously-expanding-semi-transparent-green-ring-that-fades-out-as-it-expands-drawing-attention-to-the-button",
-      "featureTitle": "Add a pulsing ring/ripple animation around the 'Register Now' CTA button on the Landing Page (`frontend/src/pages/LandingPage.tsx`) and Hero section (`frontend/src/components/Hero.tsx`). The ripple should be a continuously expanding semi-transparent green ring that fades out as it expands, drawing attention to the button.",
-      "files": [
-        "frontend/src/components/Hero.tsx",
-        "frontend/src/index.css",
-        "frontend/src/pages/HomePage.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-77"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-a-smooth-number-count-up-animation-to-the-registration-counter-displayed-in-the-hero-section-frontend-src-components-hero-tsx-when-the-registration-count-value-is-fetched-and-rendered-the-number-should-animate-from-0-up-to-the-actual-value-over-1-5-seconds-using-requestanimationframe-or-a-css-counter-approach",
-      "featureTitle": "Add a smooth number count-up animation to the registration counter displayed in the Hero section (`frontend/src/components/Hero.tsx`). When the registration count value is fetched and rendered, the number should animate from 0 up to the actual value over ~1.5 seconds using requestAnimationFrame or a CSS counter approach.",
-      "files": [
-        "frontend/src/components/Hero.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-78"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-a-subtle-parallax-scrolling-effect-to-the-hero-section-background-frontend-src-components-hero-tsx-as-the-user-scrolls-down-from-the-hero-the-background-image-particle-canvas-should-scroll-at-a-slower-rate-than-the-foreground-content-creating-a-depth-effect-implement-using-a-scroll-event-listener-that-adjusts-the-background-s-transform-translatey",
-      "featureTitle": "Add a subtle parallax scrolling effect to the Hero section background (`frontend/src/components/Hero.tsx`). As the user scrolls down from the hero, the background image/particle canvas should scroll at a slower rate than the foreground content, creating a depth effect. Implement using a scroll event listener that adjusts the background's `transform: translateY()`.",
-      "files": [
-        "frontend/src/components/Hero.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-79"
+        "REQ-1"
       ],
       "confidence": "high"
     }
