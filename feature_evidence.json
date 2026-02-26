@@ -2,8 +2,8 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-adminlogin-page-to-pre-populate-or-reference-the-admin-email-athiakash1977-gmail-com-as-the-expected-host-email-for-login-validation-on-the-frontend-side-ensuring-the-login-flow-matches-the-updated-backend-credential",
-      "featureTitle": "Update the AdminLogin page to pre-populate or reference the admin email 'athiakash1977@gmail.com' as the expected host email for login validation on the frontend side, ensuring the login flow matches the updated backend credential.",
+      "featureId": "feature-ensure-the-admin-email-athiakash1977-gmail-com-is-the-single-authorized-admin-credential-in-both-the-backend-authorization-logic-mixinauthorization-admin-verification-and-the-frontend-adminlogin-page-the-login-form-should-pre-populate-this-email-and-only-grant-access-to-this-exact-address",
+      "featureTitle": "Ensure the admin email 'athiakash1977@gmail.com' is the single authorized admin credential in both the backend authorization logic (MixinAuthorization / admin verification) and the frontend AdminLogin page. The login form should pre-populate this email and only grant access to this exact address.",
       "files": [
         "frontend/src/pages/AdminLogin.tsx"
       ],
@@ -17,7 +17,72 @@
         "blob-storage@4.0.0"
       ],
       "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-on-the-admin-dashboard-ensure-the-content-management-tab-admincontentmanagement-component-is-fully-functional-and-accessible-all-cms-sections-hero-about-event-details-coordinators-contact-must-load-current-backend-data-and-successfully-save-edits-via-the-backend-mutation-hooks",
+      "featureTitle": "On the Admin Dashboard, ensure the Content Management tab (AdminContentManagement component) is fully functional and accessible: all CMS sections (Hero, About, Event Details, Coordinators, Contact) must load current backend data and successfully save edits via the backend mutation hooks.",
+      "files": [
+        "frontend/src/components/AdminContentManagement.tsx",
+        "frontend/src/pages/AdminDashboard.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
         "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-on-the-admin-dashboard-ensure-the-registrations-tab-displays-a-full-list-of-all-registered-teams-participants-with-their-details-name-team-name-email-category-etc-include-search-filter-functionality-and-a-csv-export-option-each-registration-row-should-show-all-relevant-fields-stored-in-the-backend",
+      "featureTitle": "On the Admin Dashboard, ensure the Registrations tab displays a full list of all registered teams/participants with their details (name, team name, email, category, etc.). Include search/filter functionality and a CSV export option. Each registration row should show all relevant fields stored in the backend.",
+      "files": [
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/pages/AdminDashboard.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-a-dedicated-analytics-summary-card-at-the-top-of-the-admin-dashboard-showing-total-registered-teams-count-fetched-live-from-the-backend-ensure-the-protectedroute-guard-correctly-redirects-unauthenticated-visitors-away-from-all-admin-routes-to-the-adminlogin-page",
+      "featureTitle": "Add a dedicated analytics summary card at the top of the Admin Dashboard showing total registered teams count, fetched live from the backend. Ensure the ProtectedRoute guard correctly redirects unauthenticated visitors away from all /admin routes to the AdminLogin page.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/ProtectedRoute.tsx",
+        "frontend/src/pages/AdminDashboard.tsx",
+        "frontend/src/pages/AdminLogin.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
       ],
       "confidence": "high"
     }

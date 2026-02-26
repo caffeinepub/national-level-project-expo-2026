@@ -1,394 +1,333 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { toast } from 'sonner';
+import { Save, Plus, Trash2, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
 import {
-  useGetHeroContent,
-  useUpdateHeroContent,
-  useGetAboutContent,
-  useUpdateAboutContent,
-  useGetEventDetailsContent,
-  useUpdateEventDetailsContent,
-  useGetCoordinatorsContent,
-  useUpdateCoordinatorsContent,
-  useGetContactContent,
-  useUpdateContactContent,
+  useGetHeroContent, useUpdateHeroContent,
+  useGetAboutContent, useUpdateAboutContent,
+  useGetEventDetailsContent, useUpdateEventDetailsContent,
+  useGetCoordinatorsContent, useUpdateCoordinatorsContent,
+  useGetContactContent, useUpdateContactContent,
 } from '../hooks/useQueries';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Loader2, Save, Plus, Trash2 } from 'lucide-react';
-import type {
-  HeroContent,
-  AboutContent,
-  FeatureCard,
-  EventDetailsContent,
-  TimelineMilestone,
-  CoordinatorsContent,
-  Coordinator,
-  ContactContent,
-} from '../backend';
+import { HeroContent, AboutContent, EventDetailsContent, CoordinatorsContent, ContactContent, FeatureCard, Coordinator, TimelineMilestone } from '../backend';
 
-// ─── Hero Section ────────────────────────────────────────────────────────────
-function HeroSection() {
-  const { data: heroContent, isLoading } = useGetHeroContent();
-  const { mutate: updateHero, isPending } = useUpdateHeroContent();
-  const [form, setForm] = useState<HeroContent>({
-    eventTitle: '',
-    tagline: '',
-    eventDate: '',
-    collegeName: '',
-  });
-  const [initialized, setInitialized] = useState(false);
-  const [saved, setSaved] = useState(false);
-
-  if (!isLoading && heroContent && !initialized) {
-    setForm(heroContent);
-    setInitialized(true);
-  }
-
-  const handleSave = () => {
-    updateHero(form, {
-      onSuccess: () => {
-        setSaved(true);
-        setTimeout(() => setSaved(false), 2000);
-      },
-    });
-  };
-
+function SectionCard({ title, children, defaultOpen = false }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
+  const [open, setOpen] = useState(defaultOpen);
   return (
-    <Card className="bg-card border-border">
-      <CardHeader>
-        <CardTitle className="text-foreground text-base">Hero Section</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {isLoading ? (
-          <div className="flex items-center gap-2 text-muted-foreground"><Loader2 className="w-4 h-4 animate-spin" /> Loading...</div>
-        ) : (
-          <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <Label className="text-foreground text-sm">Event Title</Label>
-                <Input value={form.eventTitle} onChange={(e) => setForm({ ...form, eventTitle: e.target.value })} className="bg-background border-border text-foreground" />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-foreground text-sm">Event Date</Label>
-                <Input value={form.eventDate} onChange={(e) => setForm({ ...form, eventDate: e.target.value })} className="bg-background border-border text-foreground" />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-foreground text-sm">College Name</Label>
-                <Input value={form.collegeName} onChange={(e) => setForm({ ...form, collegeName: e.target.value })} className="bg-background border-border text-foreground" />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-foreground text-sm">Tagline</Label>
-                <Input value={form.tagline} onChange={(e) => setForm({ ...form, tagline: e.target.value })} className="bg-background border-border text-foreground" />
-              </div>
-            </div>
-            <Button onClick={handleSave} disabled={isPending} className="bg-primary hover:bg-primary/90 text-primary-foreground">
-              {isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-              {saved ? 'Saved!' : 'Save Hero'}
-            </Button>
-          </>
-        )}
-      </CardContent>
-    </Card>
+    <div className="rounded-xl overflow-hidden mb-4"
+      style={{ border: '1px solid oklch(0.28 0.08 145)', background: 'oklch(0.13 0.04 145)' }}>
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between px-5 py-4 text-left transition-colors hover:bg-white/5"
+      >
+        <span className="font-semibold text-foreground">{title}</span>
+        {open ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+      </button>
+      {open && (
+        <div className="px-5 pb-5 pt-1" style={{ borderTop: '1px solid oklch(0.22 0.06 145)' }}>
+          {children}
+        </div>
+      )}
+    </div>
   );
 }
 
-// ─── About Section ───────────────────────────────────────────────────────────
-function AboutSection() {
-  const { data: aboutContent, isLoading } = useGetAboutContent();
-  const { mutate: updateAbout, isPending } = useUpdateAboutContent();
-  const [form, setForm] = useState<AboutContent>({
-    sectionDescription: '',
-    featureCards: [],
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="mb-4">
+      <label className="block text-sm font-medium text-muted-foreground mb-1.5">{label}</label>
+      {children}
+    </div>
+  );
+}
+
+const inputCls = "w-full px-3 py-2 rounded-lg text-sm outline-none transition-all";
+const inputStyle = {
+  background: 'oklch(0.18 0.05 145)',
+  border: '1px solid oklch(0.32 0.09 145)',
+  color: 'oklch(0.9 0.05 145)',
+};
+
+function SaveButton({ onClick, loading }: { onClick: () => void; loading: boolean }) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={loading}
+      className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all mt-4 disabled:opacity-60"
+      style={{ background: 'oklch(0.45 0.16 145)', color: 'oklch(0.95 0.02 145)' }}
+    >
+      {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+      {loading ? 'Saving...' : 'Save Changes'}
+    </button>
+  );
+}
+
+// ─── Hero Section ─────────────────────────────────────────────────────────────
+function HeroSection() {
+  const { data } = useGetHeroContent();
+  const { mutate, isPending } = useUpdateHeroContent();
+  const [form, setForm] = useState<HeroContent>({
+    eventTitle: '', tagline: '', eventDate: '', collegeName: '',
   });
-  const [initialized, setInitialized] = useState(false);
-  const [saved, setSaved] = useState(false);
 
-  if (!isLoading && aboutContent && !initialized) {
-    setForm(aboutContent);
-    setInitialized(true);
-  }
+  useEffect(() => {
+    if (data) setForm(data);
+  }, [data]);
 
-  const handleSave = () => {
-    updateAbout(form, {
-      onSuccess: () => {
-        setSaved(true);
-        setTimeout(() => setSaved(false), 2000);
-      },
+  const save = () => {
+    mutate(form, {
+      onSuccess: () => toast.success('Hero content updated!'),
+      onError: () => toast.error('Failed to update hero content.'),
     });
   };
 
-  const addCard = () => {
-    setForm({ ...form, featureCards: [...form.featureCards, { title: '', description: '', icon: '🌟' }] });
+  return (
+    <SectionCard title="🎯 Hero Section" defaultOpen>
+      <Field label="Event Title">
+        <input className={inputCls} style={inputStyle} value={form.eventTitle}
+          onChange={e => setForm({ ...form, eventTitle: e.target.value })} />
+      </Field>
+      <Field label="Tagline">
+        <input className={inputCls} style={inputStyle} value={form.tagline}
+          onChange={e => setForm({ ...form, tagline: e.target.value })} />
+      </Field>
+      <Field label="Event Date">
+        <input className={inputCls} style={inputStyle} value={form.eventDate}
+          onChange={e => setForm({ ...form, eventDate: e.target.value })} />
+      </Field>
+      <Field label="College Name">
+        <input className={inputCls} style={inputStyle} value={form.collegeName}
+          onChange={e => setForm({ ...form, collegeName: e.target.value })} />
+      </Field>
+      <SaveButton onClick={save} loading={isPending} />
+    </SectionCard>
+  );
+}
+
+// ─── About Section ────────────────────────────────────────────────────────────
+function AboutSection() {
+  const { data } = useGetAboutContent();
+  const { mutate, isPending } = useUpdateAboutContent();
+  const [desc, setDesc] = useState('');
+  const [cards, setCards] = useState<FeatureCard[]>([]);
+
+  useEffect(() => {
+    if (data) {
+      setDesc(data.sectionDescription);
+      setCards(data.featureCards);
+    }
+  }, [data]);
+
+  const save = () => {
+    mutate({ sectionDescription: desc, featureCards: cards }, {
+      onSuccess: () => toast.success('About content updated!'),
+      onError: () => toast.error('Failed to update about content.'),
+    });
   };
 
-  const removeCard = (i: number) => {
-    setForm({ ...form, featureCards: form.featureCards.filter((_, idx) => idx !== i) });
-  };
-
-  const updateCard = (i: number, field: keyof FeatureCard, value: string) => {
-    const cards = [...form.featureCards];
-    cards[i] = { ...cards[i], [field]: value };
-    setForm({ ...form, featureCards: cards });
+  const addCard = () => setCards([...cards, { title: '', description: '', icon: '⭐' }]);
+  const removeCard = (i: number) => setCards(cards.filter((_, idx) => idx !== i));
+  const updateCard = (i: number, field: keyof FeatureCard, val: string) => {
+    setCards(cards.map((c, idx) => idx === i ? { ...c, [field]: val } : c));
   };
 
   return (
-    <Card className="bg-card border-border">
-      <CardHeader>
-        <CardTitle className="text-foreground text-base">About Section</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {isLoading ? (
-          <div className="flex items-center gap-2 text-muted-foreground"><Loader2 className="w-4 h-4 animate-spin" /> Loading...</div>
-        ) : (
-          <>
-            <div className="space-y-1">
-              <Label className="text-foreground text-sm">Section Description</Label>
-              <Textarea value={form.sectionDescription} onChange={(e) => setForm({ ...form, sectionDescription: e.target.value })} className="bg-background border-border text-foreground" rows={3} />
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label className="text-foreground text-sm">Feature Cards</Label>
-                <Button variant="outline" size="sm" onClick={addCard} className="border-border text-foreground hover:bg-muted h-7 text-xs">
-                  <Plus className="w-3 h-3 mr-1" /> Add Card
-                </Button>
+    <SectionCard title="📖 About Section">
+      <Field label="Section Description">
+        <textarea className={inputCls} style={{ ...inputStyle, minHeight: 80 }} value={desc}
+          onChange={e => setDesc(e.target.value)} />
+      </Field>
+      <div className="mb-2">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-sm font-medium text-muted-foreground">Feature Cards</span>
+          <button onClick={addCard}
+            className="flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors"
+            style={{ background: 'oklch(0.25 0.08 145)', color: 'oklch(0.75 0.15 145)' }}>
+            <Plus className="w-3 h-3" /> Add Card
+          </button>
+        </div>
+        {cards.map((card, i) => (
+          <div key={i} className="p-3 rounded-lg mb-2 relative"
+            style={{ background: 'oklch(0.17 0.05 145)', border: '1px solid oklch(0.28 0.08 145)' }}>
+            <button onClick={() => removeCard(i)}
+              className="absolute top-2 right-2 p-1 rounded transition-colors hover:bg-red-500/10"
+              style={{ color: 'oklch(0.55 0.15 25)' }}>
+              <Trash2 className="w-3 h-3" />
+            </button>
+            <div className="grid grid-cols-2 gap-2 pr-6">
+              <div>
+                <label className="text-xs text-muted-foreground">Icon</label>
+                <input className={inputCls} style={inputStyle} value={card.icon}
+                  onChange={e => updateCard(i, 'icon', e.target.value)} />
               </div>
-              {form.featureCards.map((card, i) => (
-                <div key={i} className="border border-border rounded-lg p-3 space-y-2 bg-muted/30">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">Card {i + 1}</span>
-                    <Button variant="ghost" size="icon" onClick={() => removeCard(i)} className="text-destructive hover:bg-destructive/10 h-6 w-6">
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <Input placeholder="Title" value={card.title} onChange={(e) => updateCard(i, 'title', e.target.value)} className="bg-background border-border text-foreground text-sm" />
-                    <Input placeholder="Icon (emoji)" value={card.icon} onChange={(e) => updateCard(i, 'icon', e.target.value)} className="bg-background border-border text-foreground text-sm" />
-                  </div>
-                  <Textarea placeholder="Description" value={card.description} onChange={(e) => updateCard(i, 'description', e.target.value)} className="bg-background border-border text-foreground text-sm" rows={2} />
-                </div>
-              ))}
+              <div>
+                <label className="text-xs text-muted-foreground">Title</label>
+                <input className={inputCls} style={inputStyle} value={card.title}
+                  onChange={e => updateCard(i, 'title', e.target.value)} />
+              </div>
+              <div className="col-span-2">
+                <label className="text-xs text-muted-foreground">Description</label>
+                <textarea className={inputCls} style={{ ...inputStyle, minHeight: 60 }} value={card.description}
+                  onChange={e => updateCard(i, 'description', e.target.value)} />
+              </div>
             </div>
-            <Button onClick={handleSave} disabled={isPending} className="bg-primary hover:bg-primary/90 text-primary-foreground">
-              {isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-              {saved ? 'Saved!' : 'Save About'}
-            </Button>
-          </>
-        )}
-      </CardContent>
-    </Card>
+          </div>
+        ))}
+      </div>
+      <SaveButton onClick={save} loading={isPending} />
+    </SectionCard>
   );
 }
 
 // ─── Event Details Section ────────────────────────────────────────────────────
 function EventDetailsSection() {
-  const { data: eventContent, isLoading } = useGetEventDetailsContent();
-  const { mutate: updateEvent, isPending } = useUpdateEventDetailsContent();
+  const { data } = useGetEventDetailsContent();
+  const { mutate, isPending } = useUpdateEventDetailsContent();
   const [form, setForm] = useState<EventDetailsContent>({
-    eventDate: '',
-    venue: '',
-    registrationFee: '',
-    eligibilityCriteria: '',
-    projectCategories: [],
-    timelineMilestones: [],
+    eventDate: '', venue: '', registrationFee: '', eligibilityCriteria: '',
+    projectCategories: [], timelineMilestones: [],
   });
-  const [initialized, setInitialized] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [newCategory, setNewCategory] = useState('');
 
-  if (!isLoading && eventContent && !initialized) {
-    setForm(eventContent);
-    setInitialized(true);
-  }
+  useEffect(() => {
+    if (data) setForm(data);
+  }, [data]);
 
-  const handleSave = () => {
-    updateEvent(form, {
-      onSuccess: () => {
-        setSaved(true);
-        setTimeout(() => setSaved(false), 2000);
-      },
+  const save = () => {
+    mutate(form, {
+      onSuccess: () => toast.success('Event details updated!'),
+      onError: () => toast.error('Failed to update event details.'),
     });
   };
 
-  const addCategory = () => {
-    if (!newCategory.trim()) return;
-    setForm({ ...form, projectCategories: [...form.projectCategories, newCategory.trim()] });
-    setNewCategory('');
-  };
+  const addCategory = () => setForm({ ...form, projectCategories: [...form.projectCategories, ''] });
+  const removeCategory = (i: number) => setForm({ ...form, projectCategories: form.projectCategories.filter((_, idx) => idx !== i) });
+  const updateCategory = (i: number, val: string) => setForm({ ...form, projectCategories: form.projectCategories.map((c, idx) => idx === i ? val : c) });
 
-  const removeCategory = (i: number) => {
-    setForm({ ...form, projectCategories: form.projectCategories.filter((_, idx) => idx !== i) });
-  };
-
-  const addMilestone = () => {
-    setForm({ ...form, timelineMilestones: [...form.timelineMilestones, { milestoneLabel: '', date: '' }] });
-  };
-
-  const removeMilestone = (i: number) => {
-    setForm({ ...form, timelineMilestones: form.timelineMilestones.filter((_, idx) => idx !== i) });
-  };
-
-  const updateMilestone = (i: number, field: keyof TimelineMilestone, value: string) => {
-    const milestones = [...form.timelineMilestones];
-    milestones[i] = { ...milestones[i], [field]: value };
-    setForm({ ...form, timelineMilestones: milestones });
+  const addMilestone = () => setForm({ ...form, timelineMilestones: [...form.timelineMilestones, { milestoneLabel: '', date: '' }] });
+  const removeMilestone = (i: number) => setForm({ ...form, timelineMilestones: form.timelineMilestones.filter((_, idx) => idx !== i) });
+  const updateMilestone = (i: number, field: keyof TimelineMilestone, val: string) => {
+    setForm({ ...form, timelineMilestones: form.timelineMilestones.map((m, idx) => idx === i ? { ...m, [field]: val } : m) });
   };
 
   return (
-    <Card className="bg-card border-border">
-      <CardHeader>
-        <CardTitle className="text-foreground text-base">Event Details Section</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {isLoading ? (
-          <div className="flex items-center gap-2 text-muted-foreground"><Loader2 className="w-4 h-4 animate-spin" /> Loading...</div>
-        ) : (
-          <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <Label className="text-foreground text-sm">Event Date</Label>
-                <Input value={form.eventDate} onChange={(e) => setForm({ ...form, eventDate: e.target.value })} className="bg-background border-border text-foreground" />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-foreground text-sm">Venue</Label>
-                <Input value={form.venue} onChange={(e) => setForm({ ...form, venue: e.target.value })} className="bg-background border-border text-foreground" />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-foreground text-sm">Registration Fee</Label>
-                <Input value={form.registrationFee} onChange={(e) => setForm({ ...form, registrationFee: e.target.value })} className="bg-background border-border text-foreground" />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-foreground text-sm">Eligibility Criteria</Label>
-                <Input value={form.eligibilityCriteria} onChange={(e) => setForm({ ...form, eligibilityCriteria: e.target.value })} className="bg-background border-border text-foreground" />
-              </div>
-            </div>
+    <SectionCard title="📅 Event Details">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Field label="Event Date">
+          <input className={inputCls} style={inputStyle} value={form.eventDate}
+            onChange={e => setForm({ ...form, eventDate: e.target.value })} />
+        </Field>
+        <Field label="Venue">
+          <input className={inputCls} style={inputStyle} value={form.venue}
+            onChange={e => setForm({ ...form, venue: e.target.value })} />
+        </Field>
+        <Field label="Registration Fee">
+          <input className={inputCls} style={inputStyle} value={form.registrationFee}
+            onChange={e => setForm({ ...form, registrationFee: e.target.value })} />
+        </Field>
+        <Field label="Eligibility Criteria">
+          <input className={inputCls} style={inputStyle} value={form.eligibilityCriteria}
+            onChange={e => setForm({ ...form, eligibilityCriteria: e.target.value })} />
+        </Field>
+      </div>
 
-            {/* Project Categories */}
-            <div className="space-y-2">
-              <Label className="text-foreground text-sm">Project Categories</Label>
-              <div className="flex gap-2">
-                <Input placeholder="Add category" value={newCategory} onChange={(e) => setNewCategory(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addCategory()} className="bg-background border-border text-foreground" />
-                <Button variant="outline" size="sm" onClick={addCategory} className="border-border text-foreground hover:bg-muted">
-                  <Plus className="w-4 h-4" />
-                </Button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {form.projectCategories.map((cat, i) => (
-                  <span key={i} className="flex items-center gap-1 bg-primary/20 text-primary text-xs px-2 py-1 rounded-full">
-                    {cat}
-                    <button onClick={() => removeCategory(i)} className="hover:text-destructive ml-1">×</button>
-                  </span>
-                ))}
-              </div>
-            </div>
+      <div className="mb-4">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-medium text-muted-foreground">Project Categories</span>
+          <button onClick={addCategory}
+            className="flex items-center gap-1 px-2 py-1 rounded text-xs"
+            style={{ background: 'oklch(0.25 0.08 145)', color: 'oklch(0.75 0.15 145)' }}>
+            <Plus className="w-3 h-3" /> Add
+          </button>
+        </div>
+        {form.projectCategories.map((cat, i) => (
+          <div key={i} className="flex gap-2 mb-2">
+            <input className={`${inputCls} flex-1`} style={inputStyle} value={cat}
+              onChange={e => updateCategory(i, e.target.value)} />
+            <button onClick={() => removeCategory(i)}
+              className="p-2 rounded-lg transition-colors hover:bg-red-500/10"
+              style={{ color: 'oklch(0.55 0.15 25)' }}>
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        ))}
+      </div>
 
-            {/* Timeline Milestones */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label className="text-foreground text-sm">Timeline Milestones</Label>
-                <Button variant="outline" size="sm" onClick={addMilestone} className="border-border text-foreground hover:bg-muted h-7 text-xs">
-                  <Plus className="w-3 h-3 mr-1" /> Add
-                </Button>
-              </div>
-              {form.timelineMilestones.map((m, i) => (
-                <div key={i} className="flex gap-2 items-center">
-                  <Input placeholder="Label" value={m.milestoneLabel} onChange={(e) => updateMilestone(i, 'milestoneLabel', e.target.value)} className="bg-background border-border text-foreground text-sm" />
-                  <Input placeholder="Date" value={m.date} onChange={(e) => updateMilestone(i, 'date', e.target.value)} className="bg-background border-border text-foreground text-sm" />
-                  <Button variant="ghost" size="icon" onClick={() => removeMilestone(i)} className="text-destructive hover:bg-destructive/10 h-8 w-8 flex-shrink-0">
-                    <Trash2 className="w-3 h-3" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-
-            <Button onClick={handleSave} disabled={isPending} className="bg-primary hover:bg-primary/90 text-primary-foreground">
-              {isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-              {saved ? 'Saved!' : 'Save Event Details'}
-            </Button>
-          </>
-        )}
-      </CardContent>
-    </Card>
+      <div className="mb-4">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-medium text-muted-foreground">Timeline Milestones</span>
+          <button onClick={addMilestone}
+            className="flex items-center gap-1 px-2 py-1 rounded text-xs"
+            style={{ background: 'oklch(0.25 0.08 145)', color: 'oklch(0.75 0.15 145)' }}>
+            <Plus className="w-3 h-3" /> Add
+          </button>
+        </div>
+        {form.timelineMilestones.map((m, i) => (
+          <div key={i} className="flex gap-2 mb-2">
+            <input className={`${inputCls} flex-1`} style={inputStyle} placeholder="Label" value={m.milestoneLabel}
+              onChange={e => updateMilestone(i, 'milestoneLabel', e.target.value)} />
+            <input className={`${inputCls} flex-1`} style={inputStyle} placeholder="Date" value={m.date}
+              onChange={e => updateMilestone(i, 'date', e.target.value)} />
+            <button onClick={() => removeMilestone(i)}
+              className="p-2 rounded-lg transition-colors hover:bg-red-500/10"
+              style={{ color: 'oklch(0.55 0.15 25)' }}>
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        ))}
+      </div>
+      <SaveButton onClick={save} loading={isPending} />
+    </SectionCard>
   );
 }
 
 // ─── Coordinators Section ─────────────────────────────────────────────────────
 function CoordinatorsSection() {
-  const { data: coordContent, isLoading } = useGetCoordinatorsContent();
-  const { mutate: updateCoord, isPending } = useUpdateCoordinatorsContent();
-  const [form, setForm] = useState<CoordinatorsContent>({
-    facultyCoordinators: [],
-    studentCoordinators: [],
-  });
-  const [initialized, setInitialized] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const { data } = useGetCoordinatorsContent();
+  const { mutate, isPending } = useUpdateCoordinatorsContent();
+  const [faculty, setFaculty] = useState<Coordinator[]>([]);
+  const [students, setStudents] = useState<Coordinator[]>([]);
 
-  if (!isLoading && coordContent && !initialized) {
-    setForm(coordContent);
-    setInitialized(true);
-  }
+  useEffect(() => {
+    if (data) {
+      setFaculty(data.facultyCoordinators);
+      setStudents(data.studentCoordinators);
+    }
+  }, [data]);
 
-  const handleSave = () => {
-    updateCoord(form, {
-      onSuccess: () => {
-        setSaved(true);
-        setTimeout(() => setSaved(false), 2000);
-      },
+  const save = () => {
+    mutate({ facultyCoordinators: faculty, studentCoordinators: students }, {
+      onSuccess: () => toast.success('Coordinators updated!'),
+      onError: () => toast.error('Failed to update coordinators.'),
     });
   };
 
-  const addCoordinator = (type: 'faculty' | 'student') => {
-    const empty: Coordinator = { name: '', role: '', phone: '', email: '' };
-    if (type === 'faculty') {
-      setForm({ ...form, facultyCoordinators: [...form.facultyCoordinators, empty] });
-    } else {
-      setForm({ ...form, studentCoordinators: [...form.studentCoordinators, empty] });
-    }
-  };
-
-  const removeCoordinator = (type: 'faculty' | 'student', i: number) => {
-    if (type === 'faculty') {
-      setForm({ ...form, facultyCoordinators: form.facultyCoordinators.filter((_, idx) => idx !== i) });
-    } else {
-      setForm({ ...form, studentCoordinators: form.studentCoordinators.filter((_, idx) => idx !== i) });
-    }
-  };
-
-  const updateCoordinator = (type: 'faculty' | 'student', i: number, field: keyof Coordinator, value: string) => {
-    if (type === 'faculty') {
-      const arr = [...form.facultyCoordinators];
-      arr[i] = { ...arr[i], [field]: value };
-      setForm({ ...form, facultyCoordinators: arr });
-    } else {
-      const arr = [...form.studentCoordinators];
-      arr[i] = { ...arr[i], [field]: value };
-      setForm({ ...form, studentCoordinators: arr });
-    }
-  };
-
-  const renderCoordinatorList = (type: 'faculty' | 'student', list: Coordinator[]) => (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <Label className="text-foreground text-sm capitalize">{type} Coordinators</Label>
-        <Button variant="outline" size="sm" onClick={() => addCoordinator(type)} className="border-border text-foreground hover:bg-muted h-7 text-xs">
-          <Plus className="w-3 h-3 mr-1" /> Add
-        </Button>
+  const CoordinatorList = ({
+    list, setList, label
+  }: { list: Coordinator[]; setList: (v: Coordinator[]) => void; label: string }) => (
+    <div className="mb-4">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-sm font-medium text-muted-foreground">{label}</span>
+        <button onClick={() => setList([...list, { name: '', role: '', phone: '', email: '' }])}
+          className="flex items-center gap-1 px-2 py-1 rounded text-xs"
+          style={{ background: 'oklch(0.25 0.08 145)', color: 'oklch(0.75 0.15 145)' }}>
+          <Plus className="w-3 h-3" /> Add
+        </button>
       </div>
-      {list.map((coord, i) => (
-        <div key={i} className="border border-border rounded-lg p-3 space-y-2 bg-muted/30">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">{type === 'faculty' ? 'Faculty' : 'Student'} {i + 1}</span>
-            <Button variant="ghost" size="icon" onClick={() => removeCoordinator(type, i)} className="text-destructive hover:bg-destructive/10 h-6 w-6">
-              <Trash2 className="w-3 h-3" />
-            </Button>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <Input placeholder="Name" value={coord.name} onChange={(e) => updateCoordinator(type, i, 'name', e.target.value)} className="bg-background border-border text-foreground text-sm" />
-            <Input placeholder="Role" value={coord.role} onChange={(e) => updateCoordinator(type, i, 'role', e.target.value)} className="bg-background border-border text-foreground text-sm" />
-            <Input placeholder="Phone" value={coord.phone} onChange={(e) => updateCoordinator(type, i, 'phone', e.target.value)} className="bg-background border-border text-foreground text-sm" />
-            <Input placeholder="Email" value={coord.email} onChange={(e) => updateCoordinator(type, i, 'email', e.target.value)} className="bg-background border-border text-foreground text-sm" />
+      {list.map((c, i) => (
+        <div key={i} className="p-3 rounded-lg mb-2 relative"
+          style={{ background: 'oklch(0.17 0.05 145)', border: '1px solid oklch(0.28 0.08 145)' }}>
+          <button onClick={() => setList(list.filter((_, idx) => idx !== i))}
+            className="absolute top-2 right-2 p-1 rounded hover:bg-red-500/10"
+            style={{ color: 'oklch(0.55 0.15 25)' }}>
+            <Trash2 className="w-3 h-3" />
+          </button>
+          <div className="grid grid-cols-2 gap-2 pr-6">
+            {(['name', 'role', 'phone', 'email'] as (keyof Coordinator)[]).map(field => (
+              <div key={field}>
+                <label className="text-xs text-muted-foreground capitalize">{field}</label>
+                <input className={inputCls} style={inputStyle} value={c[field]}
+                  onChange={e => setList(list.map((item, idx) => idx === i ? { ...item, [field]: e.target.value } : item))} />
+              </div>
+            ))}
           </div>
         </div>
       ))}
@@ -396,145 +335,61 @@ function CoordinatorsSection() {
   );
 
   return (
-    <Card className="bg-card border-border">
-      <CardHeader>
-        <CardTitle className="text-foreground text-base">Coordinators Section</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {isLoading ? (
-          <div className="flex items-center gap-2 text-muted-foreground"><Loader2 className="w-4 h-4 animate-spin" /> Loading...</div>
-        ) : (
-          <>
-            {renderCoordinatorList('faculty', form.facultyCoordinators)}
-            {renderCoordinatorList('student', form.studentCoordinators)}
-            <Button onClick={handleSave} disabled={isPending} className="bg-primary hover:bg-primary/90 text-primary-foreground">
-              {isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-              {saved ? 'Saved!' : 'Save Coordinators'}
-            </Button>
-          </>
-        )}
-      </CardContent>
-    </Card>
+    <SectionCard title="👥 Coordinators">
+      <CoordinatorList list={faculty} setList={setFaculty} label="Faculty Coordinators" />
+      <CoordinatorList list={students} setList={setStudents} label="Student Coordinators" />
+      <SaveButton onClick={save} loading={isPending} />
+    </SectionCard>
   );
 }
 
 // ─── Contact Section ──────────────────────────────────────────────────────────
 function ContactSection() {
-  const { data: contactContent, isLoading } = useGetContactContent();
-  const { mutate: updateContact, isPending } = useUpdateContactContent();
+  const { data } = useGetContactContent();
+  const { mutate, isPending } = useUpdateContactContent();
   const [form, setForm] = useState<ContactContent>({
-    addressLine1: '',
-    addressLine2: '',
-    phone: '',
-    email: '',
-    website: '',
+    addressLine1: '', addressLine2: '', phone: '', email: '', website: '',
   });
-  const [initialized, setInitialized] = useState(false);
-  const [saved, setSaved] = useState(false);
 
-  if (!isLoading && contactContent && !initialized) {
-    setForm(contactContent);
-    setInitialized(true);
-  }
+  useEffect(() => {
+    if (data) setForm(data);
+  }, [data]);
 
-  const handleSave = () => {
-    updateContact(form, {
-      onSuccess: () => {
-        setSaved(true);
-        setTimeout(() => setSaved(false), 2000);
-      },
+  const save = () => {
+    mutate(form, {
+      onSuccess: () => toast.success('Contact info updated!'),
+      onError: () => toast.error('Failed to update contact info.'),
     });
   };
 
   return (
-    <Card className="bg-card border-border">
-      <CardHeader>
-        <CardTitle className="text-foreground text-base">Contact Section</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {isLoading ? (
-          <div className="flex items-center gap-2 text-muted-foreground"><Loader2 className="w-4 h-4 animate-spin" /> Loading...</div>
-        ) : (
-          <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <Label className="text-foreground text-sm">Address Line 1</Label>
-                <Input value={form.addressLine1} onChange={(e) => setForm({ ...form, addressLine1: e.target.value })} className="bg-background border-border text-foreground" />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-foreground text-sm">Address Line 2</Label>
-                <Input value={form.addressLine2} onChange={(e) => setForm({ ...form, addressLine2: e.target.value })} className="bg-background border-border text-foreground" />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-foreground text-sm">Phone</Label>
-                <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="bg-background border-border text-foreground" />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-foreground text-sm">Email</Label>
-                <Input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="bg-background border-border text-foreground" />
-              </div>
-              <div className="space-y-1 sm:col-span-2">
-                <Label className="text-foreground text-sm">Website</Label>
-                <Input value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} className="bg-background border-border text-foreground" />
-              </div>
-            </div>
-            <Button onClick={handleSave} disabled={isPending} className="bg-primary hover:bg-primary/90 text-primary-foreground">
-              {isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-              {saved ? 'Saved!' : 'Save Contact'}
-            </Button>
-          </>
-        )}
-      </CardContent>
-    </Card>
+    <SectionCard title="📞 Contact Information">
+      {(Object.keys(form) as (keyof ContactContent)[]).map(field => (
+        <Field key={field} label={field.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase())}>
+          <input className={inputCls} style={inputStyle} value={form[field]}
+            onChange={e => setForm({ ...form, [field]: e.target.value })} />
+        </Field>
+      ))}
+      <SaveButton onClick={save} loading={isPending} />
+    </SectionCard>
   );
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function AdminContentManagement() {
   return (
-    <div className="space-y-4">
-      <Accordion type="multiple" className="space-y-4">
-        <AccordionItem value="hero" className="border-0">
-          <AccordionTrigger className="text-foreground font-semibold bg-muted/50 px-4 rounded-lg hover:no-underline hover:bg-muted">
-            Hero Content
-          </AccordionTrigger>
-          <AccordionContent className="pt-3">
-            <HeroSection />
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="about" className="border-0">
-          <AccordionTrigger className="text-foreground font-semibold bg-muted/50 px-4 rounded-lg hover:no-underline hover:bg-muted">
-            About Content
-          </AccordionTrigger>
-          <AccordionContent className="pt-3">
-            <AboutSection />
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="event" className="border-0">
-          <AccordionTrigger className="text-foreground font-semibold bg-muted/50 px-4 rounded-lg hover:no-underline hover:bg-muted">
-            Event Details Content
-          </AccordionTrigger>
-          <AccordionContent className="pt-3">
-            <EventDetailsSection />
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="coordinators" className="border-0">
-          <AccordionTrigger className="text-foreground font-semibold bg-muted/50 px-4 rounded-lg hover:no-underline hover:bg-muted">
-            Coordinators Content
-          </AccordionTrigger>
-          <AccordionContent className="pt-3">
-            <CoordinatorsSection />
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="contact" className="border-0">
-          <AccordionTrigger className="text-foreground font-semibold bg-muted/50 px-4 rounded-lg hover:no-underline hover:bg-muted">
-            Contact Content
-          </AccordionTrigger>
-          <AccordionContent className="pt-3">
-            <ContactSection />
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+    <div className="max-w-3xl mx-auto">
+      <div className="mb-6">
+        <h2 className="text-xl font-bold text-foreground">Content Management</h2>
+        <p className="text-sm text-muted-foreground mt-1">
+          Edit and update all public-facing content sections. Changes are saved to the blockchain and reflected immediately.
+        </p>
+      </div>
+      <HeroSection />
+      <AboutSection />
+      <EventDetailsSection />
+      <CoordinatorsSection />
+      <ContactSection />
     </div>
   );
 }

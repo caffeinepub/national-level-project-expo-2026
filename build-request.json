@@ -1,54 +1,94 @@
 {
   "kind": "build_request",
-  "title": "Set admin dashboard host email to athiakash1977@gmail.com",
+  "title": "Activate admin management for athiakash1977@gmail.com with full content editing and registered teams visibility",
   "projectName": "National Project Expo 2026",
-  "priority": "normal",
+  "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Update the hardcoded admin host/owner email in the backend to 'athiakash1977@gmail.com'. This email should be used as the primary admin credential for verifying login access to the admin dashboard.",
-      "target": "backend",
+      "text": "Ensure the admin email 'athiakash1977@gmail.com' is the single authorized admin credential in both the backend authorization logic (MixinAuthorization / admin verification) and the frontend AdminLogin page. The login form should pre-populate this email and only grant access to this exact address.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-latest"
+          "msg-1"
         ],
         "quotes": [
-          "set the admin dashboard hoat as athiakash1977@gmail.com"
+          "active the admin management with the athiakash1977@gmail.con"
         ]
       },
       "acceptanceCriteria": [
-        "The admin email used for authentication/verification in the backend is set to 'athiakash1977@gmail.com'",
-        "Logging in with 'athiakash1977@gmail.com' and the correct password grants access to the admin dashboard",
-        "No other email address is accepted as the admin host email unless explicitly configured"
+        "Logging in with athiakash1977@gmail.com and the correct password succeeds and redirects to the admin dashboard.",
+        "Logging in with any other email is rejected with an appropriate error message.",
+        "The backend admin-only endpoints reject calls from non-admin principals."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Update the AdminLogin page to pre-populate or reference the admin email 'athiakash1977@gmail.com' as the expected host email for login validation on the frontend side, ensuring the login flow matches the updated backend credential.",
-      "target": "frontend",
+      "text": "On the Admin Dashboard, ensure the Content Management tab (AdminContentManagement component) is fully functional and accessible: all CMS sections (Hero, About, Event Details, Coordinators, Contact) must load current backend data and successfully save edits via the backend mutation hooks.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-latest"
+          "msg-1"
         ],
         "quotes": [
-          "set the admin dashboard hoat as athiakash1977@gmail.com"
+          "i can edit all content"
         ]
       },
       "acceptanceCriteria": [
-        "The frontend admin login form correctly authenticates against the email 'athiakash1977@gmail.com'",
-        "Successful login with 'athiakash1977@gmail.com' redirects to the admin dashboard",
-        "Login attempts with a different email are rejected"
+        "All CMS accordion sections (Hero, About, Event Details, Coordinators, Contact) display current content fetched from the backend.",
+        "Saving edits in any section updates the backend and reflects the change immediately on the public-facing site.",
+        "Only the authenticated admin can access and use the content management tab."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "On the Admin Dashboard, ensure the Registrations tab displays a full list of all registered teams/participants with their details (name, team name, email, category, etc.). Include search/filter functionality and a CSV export option. Each registration row should show all relevant fields stored in the backend.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "see the registred teams details"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The Registrations tab lists all submitted registrations fetched from the backend admin-only endpoint.",
+        "Each row displays all stored fields (e.g., participant name, team name, email, category, registration ID, timestamp).",
+        "Search/filter input narrows the displayed list in real time.",
+        "The CSV export button downloads all registration data as a properly formatted CSV file.",
+        "The tab is only accessible to the authenticated admin."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Add a dedicated analytics summary card at the top of the Admin Dashboard showing total registered teams count, fetched live from the backend. Ensure the ProtectedRoute guard correctly redirects unauthenticated visitors away from all /admin routes to the AdminLogin page.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "see the registred teams details"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Total registration count is displayed prominently on the dashboard.",
+        "Navigating to /admin or /admin/* while unauthenticated redirects to the admin login page.",
+        "After successful login the admin is redirected back to the dashboard."
       ]
     }
   ],
   "constraints": [
-    "Do not change the admin dashboard layout or any unrelated frontend components",
-    "Do not alter the existing password/token verification logic beyond updating the email value"
+    "Only athiakash1977@gmail.com must be the authorized admin email — do not add multi-admin support.",
+    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui.",
+    "All backend logic must remain in the single actor in backend/main.mo."
   ],
   "nonGoals": [
-    "Adding multiple admin accounts or roles",
-    "Implementing email-based password reset",
-    "Fixing the 404 routing issue visible in the uploaded screenshot (separate concern)"
+    "Adding new admin accounts or a multi-admin management system.",
+    "Changing the public-facing registration form or public pages.",
+    "Implementing Internet Identity (II) based authentication for admin — use existing email/password admin login.",
+    "Real-time updates or WebSocket notifications for new registrations."
   ],
   "imageRequirements": {
     "required": [],

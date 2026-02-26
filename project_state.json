@@ -1,18 +1,42 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Project with an admin dashboard. Admin host email set to athiakash1977@gmail.com.",
+  "summary": "Project with admin dashboard functionality. Admin management is being activated for athiakash1977@gmail.com with content editing capabilities and registered teams visibility.",
   "architectural_notes": [
-    "Admin dashboard host email: athiakash1977@gmail.com"
+    "Admin user: athiakash1977@gmail.com has full admin access including content editing and team management"
   ],
   "known_issues": [],
   "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-update-the-adminlogin-page-to-pre-populate-or-reference-the-admin-email-athiakash1977-gmail-com-as-the-expected-host-email-for-login-validation-on-the-frontend-side-ensuring-the-login-flow-matches-the-updated-backend-credential",
-      "title": "Update the AdminLogin page to pre-populate or reference the admin email 'athiakash1977@gmail.com' as the expected host email for login validation on the frontend side, ensuring the login flow matches the updated backend credential.",
+      "id": "feature-ensure-the-admin-email-athiakash1977-gmail-com-is-the-single-authorized-admin-credential-in-both-the-backend-authorization-logic-mixinauthorization-admin-verification-and-the-frontend-adminlogin-page-the-login-form-should-pre-populate-this-email-and-only-grant-access-to-this-exact-address",
+      "title": "Ensure the admin email 'athiakash1977@gmail.com' is the single authorized admin credential in both the backend authorization logic (MixinAuthorization / admin verification) and the frontend AdminLogin page. The login form should pre-populate this email and only grant access to this exact address.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-on-the-admin-dashboard-ensure-the-content-management-tab-admincontentmanagement-component-is-fully-functional-and-accessible-all-cms-sections-hero-about-event-details-coordinators-contact-must-load-current-backend-data-and-successfully-save-edits-via-the-backend-mutation-hooks",
+      "title": "On the Admin Dashboard, ensure the Content Management tab (AdminContentManagement component) is fully functional and accessible: all CMS sections (Hero, About, Event Details, Coordinators, Contact) must load current backend data and successfully save edits via the backend mutation hooks.",
       "reqIds": [
         "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-on-the-admin-dashboard-ensure-the-registrations-tab-displays-a-full-list-of-all-registered-teams-participants-with-their-details-name-team-name-email-category-etc-include-search-filter-functionality-and-a-csv-export-option-each-registration-row-should-show-all-relevant-fields-stored-in-the-backend",
+      "title": "On the Admin Dashboard, ensure the Registrations tab displays a full list of all registered teams/participants with their details (name, team name, email, category, etc.). Include search/filter functionality and a CSV export option. Each registration row should show all relevant fields stored in the backend.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-dedicated-analytics-summary-card-at-the-top-of-the-admin-dashboard-showing-total-registered-teams-count-fetched-live-from-the-backend-ensure-the-protectedroute-guard-correctly-redirects-unauthenticated-visitors-away-from-all-admin-routes-to-the-adminlogin-page",
+      "title": "Add a dedicated analytics summary card at the top of the Admin Dashboard showing total registered teams count, fetched live from the backend. Ensure the ProtectedRoute guard correctly redirects unauthenticated visitors away from all /admin routes to the AdminLogin page.",
+      "reqIds": [
+        "REQ-4"
       ],
       "version": 1
     }
@@ -20,19 +44,12 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Set admin dashboard host email to athiakash1977@gmail.com",
+      "summary": "Activate admin management for athiakash1977@gmail.com with ability to edit all content and view registered teams details",
       "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-2",
-      "summary": "Update the hardcoded admin host/owner email in the backend to 'athiakash1977@gmail.com'. This email should be used as the primary admin credential for verifying login access to the admin dashboard.",
-      "reqIds": [
-        "REQ-1"
-      ],
       "status": "pending"
     }
   ],
+  "gameProjectType": "none",
   "projectName": "National Project Expo 2026",
   "clarification_mode": "instant",
   "clarification_rounds": 0

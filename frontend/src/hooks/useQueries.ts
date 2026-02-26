@@ -1,16 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import type {
-  Registration,
-  RegistrationRecord,
-  HeroContent,
-  AboutContent,
-  EventDetailsContent,
-  CoordinatorsContent,
-  ContactContent,
-  GalleryImage,
+import {
+  HeroContent, AboutContent, EventDetailsContent,
+  CoordinatorsContent, ContactContent, RegistrationRecord,
+  GalleryImage, UserProfile, ExternalBlob,
 } from '../backend';
-import { ExternalBlob } from '../backend';
+
+// ─── Registration Queries ────────────────────────────────────────────────────
 
 export function useGetRegistrationCount() {
   const { actor, isFetching } = useActor();
@@ -21,19 +17,7 @@ export function useGetRegistrationCount() {
       return actor.getRegistrationCount();
     },
     enabled: !!actor && !isFetching,
-    refetchInterval: 30000,
-  });
-}
-
-export function useGetRegistrations() {
-  const { actor, isFetching } = useActor();
-  return useQuery<Registration[]>({
-    queryKey: ['registrations'],
-    queryFn: async () => {
-      if (!actor) return [];
-      return actor.getRegistrations();
-    },
-    enabled: !!actor && !isFetching,
+    refetchInterval: 30_000,
   });
 }
 
@@ -54,30 +38,19 @@ export function useSubmitRegistration() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data: {
-      fullName: string;
-      email: string;
-      phoneNumber: string;
-      collegeName: string;
-      department: string;
-      projectTitle: string;
-      category: string;
-      abstract: string;
+      fullName: string; email: string; phoneNumber: string;
+      collegeName: string; department: string; projectTitle: string;
+      category: string; abstract: string;
     }) => {
       if (!actor) throw new Error('Actor not available');
       return actor.submitRegistration(
-        data.fullName,
-        data.email,
-        data.phoneNumber,
-        data.collegeName,
-        data.department,
-        data.projectTitle,
-        data.category,
-        data.abstract,
+        data.fullName, data.email, data.phoneNumber,
+        data.collegeName, data.department, data.projectTitle,
+        data.category, data.abstract
       );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['registrationCount'] });
-      queryClient.invalidateQueries({ queryKey: ['registrations'] });
       queryClient.invalidateQueries({ queryKey: ['allRegistrationRecords'] });
     },
   });
@@ -92,7 +65,6 @@ export function useDeleteRegistration() {
       return actor.deleteRegistration(id);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['registrations'] });
       queryClient.invalidateQueries({ queryKey: ['allRegistrationRecords'] });
       queryClient.invalidateQueries({ queryKey: ['registrationCount'] });
     },
@@ -109,15 +81,7 @@ export function useGetRegistrationByEmail() {
   });
 }
 
-export function useVerifyAdminCredentials() {
-  const { actor } = useActor();
-  return useMutation({
-    mutationFn: async (_credentials: { email: string; password: string }) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.isCallerAdmin();
-    },
-  });
-}
+// ─── Content Queries ─────────────────────────────────────────────────────────
 
 export function useGetHeroContent() {
   const { actor, isFetching } = useActor();
@@ -249,6 +213,8 @@ export function useUpdateContactContent() {
   });
 }
 
+// ─── Gallery Queries ──────────────────────────────────────────────────────────
+
 export function useGetGalleryImages() {
   const { actor, isFetching } = useActor();
   return useQuery<GalleryImage[]>({
@@ -265,10 +231,14 @@ export function useAddGalleryImage() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (data: { title: string; imageData: Uint8Array }) => {
+    mutationFn: async ({ title, imageBlob }: { title: string; imageBlob: Uint8Array }) => {
       if (!actor) throw new Error('Actor not available');
-      const blob = ExternalBlob.fromBytes(data.imageData as Uint8Array<ArrayBuffer>);
-      return actor.addGalleryImage(data.title, blob);
+      // Cast to Uint8Array<ArrayBuffer> as required by ExternalBlob.fromBytes
+      const blob = ExternalBlob.fromBytes(imageBlob.buffer instanceof ArrayBuffer
+        ? (imageBlob as unknown as Uint8Array<ArrayBuffer>)
+        : new Uint8Array(imageBlob) as unknown as Uint8Array<ArrayBuffer>
+      );
+      return actor.addGalleryImage(title, blob);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['galleryImages'] });
@@ -287,5 +257,20 @@ export function useDeleteGalleryImage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['galleryImages'] });
     },
+  });
+}
+
+// ─── User Profile Queries ─────────────────────────────────────────────────────
+
+export function useGetCallerUserProfile() {
+  const { actor, isFetching } = useActor();
+  return useQuery<UserProfile | null>({
+    queryKey: ['currentUserProfile'],
+    queryFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.getCallerUserProfile();
+    },
+    enabled: !!actor && !isFetching,
+    retry: false,
   });
 }

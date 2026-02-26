@@ -1,435 +1,367 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { useAdminAuth } from '../context/AdminAuthContext';
+import { useAdminAuth } from '../contexts/AdminAuthContext';
+import AdminContentManagement from '../components/AdminContentManagement';
 import {
-  useGetAllRegistrations,
-  useDeleteRegistration,
-  useGetGalleryImages,
-  useAddGalleryImage,
-  useDeleteGalleryImage,
-  useGetRegistrationCount,
-} from '../hooks/useQueries';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+  Users, Settings, LogOut, Search, Download, Image,
+  RefreshCw, Trophy, Mail, Phone, Building, BookOpen,
+  Tag, FileText, Calendar, Hash, ChevronDown, ChevronUp,
+  BarChart3, Trash2
+} from 'lucide-react';
+import { useGetAllRegistrations, useGetRegistrationCount, useDeleteRegistration } from '../hooks/useQueries';
+import { RegistrationRecord } from '../backend';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  LogOut,
-  Search,
-  Download,
-  Trash2,
-  Users,
-  ImageIcon,
-  Settings,
-  Loader2,
-  Upload,
-  X,
-  ClipboardList,
-  Phone,
-  Mail,
-  BookOpen,
-  Building2,
-} from 'lucide-react';
-import AdminContentManagement from '../components/AdminContentManagement';
-import type { RegistrationRecord } from '../backend';
+import GalleryManager from '../components/GalleryManager';
+
+function formatTimestamp(ts: bigint): string {
+  const ms = Number(ts) / 1_000_000;
+  return new Date(ms).toLocaleString('en-IN', {
+    day: '2-digit', month: 'short', year: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  });
+}
+
+function exportToCSV(records: RegistrationRecord[]) {
+  const headers = [
+    'ID', 'Full Name', 'Email', 'Phone', 'College', 'Department',
+    'Project Title', 'Category', 'Abstract', 'Registered At'
+  ];
+  const rows = records.map(r => [
+    r.id.toString(),
+    r.fullName,
+    r.email,
+    r.phoneNumber,
+    r.collegeName,
+    r.department,
+    r.projectTitle,
+    r.category,
+    r.abstract.replace(/,/g, ';'),
+    formatTimestamp(r.timestamp),
+  ]);
+  const csv = [headers, ...rows].map(row => row.map(v => `"${v}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `registrations_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function RegistrationCard({ record, onDelete }: { record: RegistrationRecord; onDelete: (id: bigint) => void }) {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <div className="rounded-xl p-4 transition-all"
+      style={{ background: 'oklch(0.14 0.04 145)', border: '1px solid oklch(0.28 0.08 145)' }}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-semibold text-foreground truncate">{record.fullName}</span>
+            <Badge variant="outline" className="text-xs shrink-0"
+              style={{ borderColor: 'oklch(0.45 0.15 145)', color: 'oklch(0.7 0.15 145)' }}>
+              {record.category}
+            </Badge>
+          </div>
+          <div className="flex items-center gap-1 mt-1">
+            <Mail className="w-3 h-3" style={{ color: 'oklch(0.55 0.1 145)' }} />
+            <span className="text-xs text-muted-foreground truncate">{record.email}</span>
+          </div>
+          <div className="flex items-center gap-1 mt-0.5">
+            <Building className="w-3 h-3" style={{ color: 'oklch(0.55 0.1 145)' }} />
+            <span className="text-xs text-muted-foreground truncate">{record.collegeName}</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-xs" style={{ color: 'oklch(0.5 0.08 145)' }}>#{record.id.toString()}</span>
+          <button onClick={() => setExpanded(!expanded)}
+            className="p-1 rounded transition-colors hover:bg-white/5"
+            style={{ color: 'oklch(0.6 0.12 145)' }}>
+            {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
+          <button onClick={() => onDelete(record.id)}
+            className="p-1 rounded transition-colors hover:bg-red-500/10"
+            style={{ color: 'oklch(0.55 0.15 25)' }}>
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {expanded && (
+        <div className="mt-3 pt-3 space-y-2" style={{ borderTop: '1px solid oklch(0.25 0.06 145)' }}>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div>
+              <span className="text-muted-foreground">Phone:</span>
+              <span className="ml-1 text-foreground">{record.phoneNumber}</span>
+            </div>
+            <div>
+              <span className="text-muted-foreground">Department:</span>
+              <span className="ml-1 text-foreground">{record.department}</span>
+            </div>
+            <div className="col-span-2">
+              <span className="text-muted-foreground">Project:</span>
+              <span className="ml-1 text-foreground">{record.projectTitle}</span>
+            </div>
+            <div className="col-span-2">
+              <span className="text-muted-foreground">Abstract:</span>
+              <p className="mt-1 text-foreground leading-relaxed">{record.abstract}</p>
+            </div>
+            <div className="col-span-2">
+              <span className="text-muted-foreground">Registered:</span>
+              <span className="ml-1 text-foreground">{formatTimestamp(record.timestamp)}</span>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function AdminDashboard() {
+  const { logout } = useAdminAuth();
   const navigate = useNavigate();
-  const { isAdminAuthenticated, adminLogout } = useAdminAuth();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [deletingId, setDeletingId] = useState<bigint | null>(null);
-  const [uploadTitle, setUploadTitle] = useState('');
-  const [uploadFile, setUploadFile] = useState<File | null>(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [deletingImageId, setDeletingImageId] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [search, setSearch] = useState('');
+  const [activeTab, setActiveTab] = useState('registrations');
 
-  const { data: allRegistrations, isLoading: registrationsLoading } = useGetAllRegistrations();
-  const { data: registrationCount } = useGetRegistrationCount();
-  const { data: galleryImages, isLoading: galleryLoading } = useGetGalleryImages();
-  const { mutate: deleteRegistration, isPending: isDeleting } = useDeleteRegistration();
-  const { mutate: addGalleryImage, isPending: isUploading } = useAddGalleryImage();
-  const { mutate: deleteGalleryImage, isPending: isDeletingImage } = useDeleteGalleryImage();
+  const { data: registrations = [], isLoading: regLoading, refetch: refetchReg } = useGetAllRegistrations();
+  const { data: regCount = BigInt(0), isLoading: countLoading } = useGetRegistrationCount();
+  const { mutate: deleteReg } = useDeleteRegistration();
 
-  // Bounce-in animation state for analytics cards
-  const [cardsVisible, setCardsVisible] = useState(false);
-  useEffect(() => {
-    const timer = setTimeout(() => setCardsVisible(true), 100);
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    if (!isAdminAuthenticated) {
-      navigate({ to: '/admin' });
-    }
-  }, [isAdminAuthenticated, navigate]);
-
-  if (!isAdminAuthenticated) return null;
-
-  const filteredRegistrations = (allRegistrations || []).filter((reg: RegistrationRecord) => {
-    const q = searchQuery.toLowerCase();
-    return (
-      reg.fullName.toLowerCase().includes(q) ||
-      reg.email.toLowerCase().includes(q) ||
-      reg.collegeName.toLowerCase().includes(q) ||
-      reg.projectTitle.toLowerCase().includes(q) ||
-      reg.category.toLowerCase().includes(q)
+  const filtered = useMemo(() => {
+    if (!search.trim()) return registrations;
+    const q = search.toLowerCase();
+    return registrations.filter(r =>
+      r.fullName.toLowerCase().includes(q) ||
+      r.email.toLowerCase().includes(q) ||
+      r.collegeName.toLowerCase().includes(q) ||
+      r.category.toLowerCase().includes(q) ||
+      r.projectTitle.toLowerCase().includes(q) ||
+      r.department.toLowerCase().includes(q)
     );
-  });
-
-  const handleDelete = (id: bigint) => {
-    setDeletingId(id);
-    deleteRegistration(id, {
-      onSettled: () => setDeletingId(null),
-    });
-  };
-
-  const handleDeleteImage = (id: string) => {
-    setDeletingImageId(id);
-    deleteGalleryImage(id, {
-      onSettled: () => setDeletingImageId(null),
-    });
-  };
-
-  const handleUpload = async () => {
-    if (!uploadFile || !uploadTitle.trim()) return;
-    const arrayBuffer = await uploadFile.arrayBuffer();
-    const uint8Array = new Uint8Array(arrayBuffer);
-    addGalleryImage(
-      { title: uploadTitle.trim(), imageData: uint8Array },
-      {
-        onSuccess: () => {
-          setUploadTitle('');
-          setUploadFile(null);
-          setUploadProgress(0);
-          if (fileInputRef.current) fileInputRef.current.value = '';
-        },
-      }
-    );
-  };
-
-  const exportCSV = () => {
-    const data = allRegistrations;
-    if (!data || data.length === 0) return;
-    const headers = ['ID', 'Full Name', 'Email', 'Phone', 'College', 'Department', 'Project Title', 'Category', 'Abstract', 'Registered On'];
-    const rows = data.map((r: RegistrationRecord) => [
-      r.id.toString(),
-      `"${r.fullName.replace(/"/g, '""')}"`,
-      r.email,
-      r.phoneNumber,
-      `"${r.collegeName.replace(/"/g, '""')}"`,
-      `"${r.department.replace(/"/g, '""')}"`,
-      `"${r.projectTitle.replace(/"/g, '""')}"`,
-      r.category,
-      `"${r.abstract.replace(/"/g, '""')}"`,
-      new Date(Number(r.timestamp) / 1_000_000).toLocaleString(),
-    ]);
-    const csv = [headers, ...rows].map((row) => row.join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    const dateStr = new Date().toISOString().split('T')[0];
-    a.download = `registered-teams-${dateStr}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+  }, [registrations, search]);
 
   const handleLogout = () => {
-    adminLogout();
+    logout();
     navigate({ to: '/admin' });
   };
 
-  const analyticsCards = [
-    {
-      label: 'Total Registered Teams',
-      value: registrationCount !== undefined ? Number(registrationCount) : '—',
-      icon: Users,
-      delay: 0,
-    },
-    {
-      label: 'Gallery Images',
-      value: galleryImages ? galleryImages.length : '—',
-      icon: ImageIcon,
-      delay: 100,
-    },
-    {
-      label: 'Departments',
-      value: allRegistrations ? new Set(allRegistrations.map((r: RegistrationRecord) => r.department)).size : '—',
-      icon: BookOpen,
-      delay: 200,
-    },
-    {
-      label: 'Colleges',
-      value: allRegistrations ? new Set(allRegistrations.map((r: RegistrationRecord) => r.collegeName)).size : '—',
-      icon: Building2,
-      delay: 300,
-    },
-  ];
+  const handleDelete = (id: bigint) => {
+    if (confirm('Are you sure you want to delete this registration?')) {
+      deleteReg(id);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-card border-b border-border px-6 py-4 flex items-center justify-between shadow-sm">
-        <div>
-          <h1 className="text-xl font-bold text-primary">Admin Dashboard</h1>
-          <p className="text-xs text-muted-foreground">Innovative Link Expo — Content & Team Management</p>
+      <header className="sticky top-0 z-50 px-4 py-3 flex items-center justify-between"
+        style={{ background: 'oklch(0.12 0.04 145)', borderBottom: '1px solid oklch(0.25 0.07 145)' }}>
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+            style={{ background: 'oklch(0.3 0.12 145)' }}>
+            <Trophy className="w-4 h-4" style={{ color: 'oklch(0.8 0.2 145)' }} />
+          </div>
+          <div>
+            <h1 className="font-bold text-foreground text-sm leading-none">Admin Dashboard</h1>
+            <p className="text-xs mt-0.5" style={{ color: 'oklch(0.55 0.1 145)' }}>InnovativeLink Expo 2K26</p>
+          </div>
         </div>
-        <Button variant="outline" size="sm" onClick={handleLogout} className="border-border text-foreground hover:bg-muted">
-          <LogOut className="w-4 h-4 mr-2" />
-          Logout
-        </Button>
+        <button onClick={handleLogout}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors"
+          style={{ background: 'oklch(0.2 0.06 25)', color: 'oklch(0.75 0.15 25)', border: '1px solid oklch(0.35 0.1 25)' }}>
+          <LogOut className="w-4 h-4" />
+          <span className="hidden sm:inline">Logout</span>
+        </button>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <main className="max-w-7xl mx-auto px-4 py-6">
         {/* Analytics Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          {analyticsCards.map((card) => {
-            const Icon = card.icon;
-            return (
-              <Card
-                key={card.label}
-                className={`bg-card border-border transition-all duration-500 ${
-                  cardsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-                }`}
-                style={{ transitionDelay: `${card.delay}ms` }}
-              >
-                <CardContent className="p-4 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
-                    <Icon className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-foreground">{card.value}</p>
-                    <p className="text-xs text-muted-foreground">{card.label}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <div className="rounded-xl p-5 flex items-center gap-4"
+            style={{ background: 'oklch(0.16 0.06 145)', border: '1px solid oklch(0.32 0.12 145)' }}>
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
+              style={{ background: 'oklch(0.25 0.1 145)' }}>
+              <Users className="w-6 h-6" style={{ color: 'oklch(0.75 0.2 145)' }} />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-1">Total Registrations</p>
+              {countLoading ? (
+                <Skeleton className="h-8 w-16" />
+              ) : (
+                <p className="text-3xl font-bold" style={{ color: 'oklch(0.8 0.2 145)' }}>
+                  {regCount.toString()}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="rounded-xl p-5 flex items-center gap-4"
+            style={{ background: 'oklch(0.16 0.06 145)', border: '1px solid oklch(0.32 0.12 145)' }}>
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
+              style={{ background: 'oklch(0.25 0.1 145)' }}>
+              <BarChart3 className="w-6 h-6" style={{ color: 'oklch(0.75 0.2 145)' }} />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-1">Filtered Results</p>
+              <p className="text-3xl font-bold" style={{ color: 'oklch(0.8 0.2 145)' }}>
+                {filtered.length}
+              </p>
+            </div>
+          </div>
+
+          <div className="rounded-xl p-5 flex items-center gap-4"
+            style={{ background: 'oklch(0.16 0.06 145)', border: '1px solid oklch(0.32 0.12 145)' }}>
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
+              style={{ background: 'oklch(0.25 0.1 145)' }}>
+              <Tag className="w-6 h-6" style={{ color: 'oklch(0.75 0.2 145)' }} />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-1">Admin Email</p>
+              <p className="text-xs font-medium truncate" style={{ color: 'oklch(0.75 0.15 145)' }}>
+                athiakash1977@gmail.com
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="teams">
-          <TabsList className="bg-muted border border-border mb-6 flex-wrap h-auto gap-1 p-1">
-            <TabsTrigger value="teams" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <ClipboardList className="w-4 h-4 mr-2" />
-              Registered Teams
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="mb-6 w-full sm:w-auto"
+            style={{ background: 'oklch(0.14 0.04 145)', border: '1px solid oklch(0.28 0.08 145)' }}>
+            <TabsTrigger value="registrations" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              <span>Registered Teams</span>
+              {!regLoading && (
+                <Badge variant="secondary" className="ml-1 text-xs">
+                  {registrations.length}
+                </Badge>
+              )}
             </TabsTrigger>
-            <TabsTrigger value="content" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <Settings className="w-4 h-4 mr-2" />
-              Content Management
+            <TabsTrigger value="content" className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              <span>Content Management</span>
             </TabsTrigger>
-            <TabsTrigger value="gallery" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <ImageIcon className="w-4 h-4 mr-2" />
-              Gallery
+            <TabsTrigger value="gallery" className="flex items-center gap-2">
+              <Image className="w-4 h-4" />
+              <span>Gallery</span>
             </TabsTrigger>
           </TabsList>
 
-          {/* Registered Teams Tab */}
-          <TabsContent value="teams">
-            <Card className="bg-card border-border">
-              <CardHeader className="flex flex-row items-center justify-between gap-4 flex-wrap pb-4">
-                <div className="flex items-center gap-3">
-                  <CardTitle className="text-foreground">Registered Teams</CardTitle>
-                  {!registrationsLoading && (
-                    <Badge className="bg-primary/20 text-primary border-primary/30 border">
-                      {filteredRegistrations.length}
-                      {searchQuery && ` of ${allRegistrations?.length ?? 0}`} teams
-                    </Badge>
-                  )}
+          {/* Registrations Tab */}
+          <TabsContent value="registrations">
+            <div className="rounded-2xl p-5"
+              style={{ background: 'oklch(0.13 0.04 145)', border: '1px solid oklch(0.26 0.07 145)' }}>
+              {/* Toolbar */}
+              <div className="flex flex-col sm:flex-row gap-3 mb-5">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
+                    style={{ color: 'oklch(0.55 0.1 145)' }} />
+                  <input
+                    type="text"
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    placeholder="Search by name, email, college, category..."
+                    className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm outline-none transition-all"
+                    style={{
+                      background: 'oklch(0.18 0.05 145)',
+                      border: '1px solid oklch(0.32 0.09 145)',
+                      color: 'oklch(0.9 0.05 145)',
+                    }}
+                  />
                 </div>
-                <div className="flex items-center gap-3 flex-wrap">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Search by name, email, project..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-9 bg-background border-border text-foreground w-64"
-                    />
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={exportCSV}
-                    disabled={!allRegistrations || allRegistrations.length === 0}
-                    className="border-border text-foreground hover:bg-muted"
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    Export CSV
-                  </Button>
+                <div className="flex gap-2">
+                  <button onClick={() => refetchReg()}
+                    className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm transition-colors"
+                    style={{ background: 'oklch(0.2 0.06 145)', color: 'oklch(0.7 0.15 145)', border: '1px solid oklch(0.32 0.09 145)' }}>
+                    <RefreshCw className="w-4 h-4" />
+                    <span className="hidden sm:inline">Refresh</span>
+                  </button>
+                  <button onClick={() => exportToCSV(filtered)}
+                    disabled={filtered.length === 0}
+                    className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm transition-colors disabled:opacity-50"
+                    style={{ background: 'oklch(0.3 0.12 145)', color: 'oklch(0.9 0.05 145)', border: '1px solid oklch(0.45 0.15 145)' }}>
+                    <Download className="w-4 h-4" />
+                    <span className="hidden sm:inline">Export CSV</span>
+                  </button>
                 </div>
-              </CardHeader>
-              <CardContent>
-                {registrationsLoading ? (
-                  <div className="space-y-3">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Skeleton key={i} className="h-20 w-full rounded-lg" />
-                    ))}
+              </div>
+
+              {/* Table - Desktop */}
+              <div className="hidden lg:block overflow-x-auto rounded-xl"
+                style={{ border: '1px solid oklch(0.25 0.07 145)' }}>
+                {regLoading ? (
+                  <div className="p-6 space-y-3">
+                    {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
                   </div>
-                ) : filteredRegistrations.length === 0 ? (
-                  <div className="text-center py-16">
-                    <ClipboardList className="w-12 h-12 text-muted-foreground/40 mx-auto mb-3" />
-                    <p className="text-muted-foreground font-medium">
-                      {searchQuery ? 'No teams match your search.' : 'No registrations yet.'}
+                ) : filtered.length === 0 ? (
+                  <div className="p-12 text-center">
+                    <Users className="w-12 h-12 mx-auto mb-3 opacity-30" style={{ color: 'oklch(0.6 0.12 145)' }} />
+                    <p className="text-muted-foreground">
+                      {search ? 'No registrations match your search.' : 'No registrations yet.'}
                     </p>
-                    {searchQuery && (
-                      <Button variant="ghost" size="sm" onClick={() => setSearchQuery('')} className="mt-2 text-primary">
-                        Clear search
-                      </Button>
-                    )}
                   </div>
                 ) : (
-                  <>
-                    {/* Desktop Table */}
-                    <div className="hidden md:block overflow-x-auto">
-                      <table className="w-full text-sm">
-                        <thead>
-                          <tr className="border-b border-border text-muted-foreground">
-                            <th className="text-left py-3 px-3 font-medium">ID</th>
-                            <th className="text-left py-3 px-3 font-medium">Team Leader</th>
-                            <th className="text-left py-3 px-3 font-medium">Contact</th>
-                            <th className="text-left py-3 px-3 font-medium">College / Dept</th>
-                            <th className="text-left py-3 px-3 font-medium">Project Title</th>
-                            <th className="text-left py-3 px-3 font-medium">Category</th>
-                            <th className="text-left py-3 px-3 font-medium">Registered On</th>
-                            <th className="text-left py-3 px-3 font-medium">Action</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {filteredRegistrations.map((reg: RegistrationRecord) => (
-                            <tr
-                              key={reg.id.toString()}
-                              className="border-b border-border/50 hover:bg-muted/30 transition-colors"
-                            >
-                              <td className="py-3 px-3 text-muted-foreground font-mono text-xs">
-                                #{reg.id.toString()}
-                              </td>
-                              <td className="py-3 px-3 font-medium text-foreground">
-                                {reg.fullName}
-                              </td>
-                              <td className="py-3 px-3">
-                                <div className="flex flex-col gap-0.5">
-                                  <span className="flex items-center gap-1 text-muted-foreground text-xs">
-                                    <Mail className="w-3 h-3" />
-                                    {reg.email}
-                                  </span>
-                                  <span className="flex items-center gap-1 text-muted-foreground text-xs">
-                                    <Phone className="w-3 h-3" />
-                                    {reg.phoneNumber}
-                                  </span>
-                                </div>
-                              </td>
-                              <td className="py-3 px-3">
-                                <div className="flex flex-col gap-0.5">
-                                  <span className="text-foreground text-xs font-medium">{reg.collegeName}</span>
-                                  <span className="text-muted-foreground text-xs">{reg.department}</span>
-                                </div>
-                              </td>
-                              <td className="py-3 px-3 text-muted-foreground max-w-[180px]">
-                                <span className="block truncate" title={reg.projectTitle}>
-                                  {reg.projectTitle}
-                                </span>
-                              </td>
-                              <td className="py-3 px-3">
-                                <Badge variant="outline" className="border-primary/50 text-primary text-xs whitespace-nowrap">
-                                  {reg.category}
-                                </Badge>
-                              </td>
-                              <td className="py-3 px-3 text-muted-foreground text-xs whitespace-nowrap">
-                                {new Date(Number(reg.timestamp) / 1_000_000).toLocaleDateString('en-IN', {
-                                  day: '2-digit',
-                                  month: 'short',
-                                  year: 'numeric',
-                                })}
-                              </td>
-                              <td className="py-3 px-3">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => handleDelete(reg.id)}
-                                  disabled={isDeleting && deletingId === reg.id}
-                                  className="text-destructive hover:bg-destructive/10 h-8 w-8"
-                                >
-                                  {isDeleting && deletingId === reg.id ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                  ) : (
-                                    <Trash2 className="w-4 h-4" />
-                                  )}
-                                </Button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-
-                    {/* Mobile Cards */}
-                    <div className="md:hidden space-y-3">
-                      {filteredRegistrations.map((reg: RegistrationRecord) => (
-                        <div
-                          key={reg.id.toString()}
-                          className="border border-border rounded-lg p-4 bg-muted/20 space-y-3"
-                        >
-                          <div className="flex items-start justify-between gap-2">
-                            <div>
-                              <p className="font-semibold text-foreground">{reg.fullName}</p>
-                              <p className="text-xs text-muted-foreground font-mono">#{reg.id.toString()}</p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Badge variant="outline" className="border-primary/50 text-primary text-xs">
-                                {reg.category}
-                              </Badge>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleDelete(reg.id)}
-                                disabled={isDeleting && deletingId === reg.id}
-                                className="text-destructive hover:bg-destructive/10 h-7 w-7"
-                              >
-                                {isDeleting && deletingId === reg.id ? (
-                                  <Loader2 className="w-3 h-3 animate-spin" />
-                                ) : (
-                                  <Trash2 className="w-3 h-3" />
-                                )}
-                              </Button>
-                            </div>
-                          </div>
-                          <div className="grid grid-cols-1 gap-1.5 text-xs">
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <Mail className="w-3 h-3 flex-shrink-0" />
-                              <span className="truncate">{reg.email}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <Phone className="w-3 h-3 flex-shrink-0" />
-                              <span>{reg.phoneNumber}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <Building2 className="w-3 h-3 flex-shrink-0" />
-                              <span className="truncate">{reg.collegeName} — {reg.department}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <BookOpen className="w-3 h-3 flex-shrink-0" />
-                              <span className="truncate font-medium text-foreground">{reg.projectTitle}</span>
-                            </div>
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            Registered:{' '}
-                            {new Date(Number(reg.timestamp) / 1_000_000).toLocaleDateString('en-IN', {
-                              day: '2-digit',
-                              month: 'short',
-                              year: 'numeric',
-                            })}
-                          </p>
-                        </div>
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr style={{ background: 'oklch(0.17 0.05 145)', borderBottom: '1px solid oklch(0.25 0.07 145)' }}>
+                        {['#', 'Name', 'Email', 'Phone', 'College', 'Dept', 'Project', 'Category', 'Registered', 'Action'].map(h => (
+                          <th key={h} className="px-4 py-3 text-left font-medium text-xs uppercase tracking-wider"
+                            style={{ color: 'oklch(0.6 0.12 145)' }}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filtered.map((r, i) => (
+                        <tr key={r.id.toString()}
+                          className="transition-colors hover:bg-white/5"
+                          style={{ borderBottom: i < filtered.length - 1 ? '1px solid oklch(0.2 0.05 145)' : 'none' }}>
+                          <td className="px-4 py-3 text-muted-foreground font-mono text-xs">{r.id.toString()}</td>
+                          <td className="px-4 py-3 font-medium text-foreground">{r.fullName}</td>
+                          <td className="px-4 py-3 text-muted-foreground">{r.email}</td>
+                          <td className="px-4 py-3 text-muted-foreground">{r.phoneNumber}</td>
+                          <td className="px-4 py-3 text-muted-foreground max-w-[150px] truncate">{r.collegeName}</td>
+                          <td className="px-4 py-3 text-muted-foreground">{r.department}</td>
+                          <td className="px-4 py-3 text-muted-foreground max-w-[150px] truncate">{r.projectTitle}</td>
+                          <td className="px-4 py-3">
+                            <Badge variant="outline" className="text-xs"
+                              style={{ borderColor: 'oklch(0.45 0.15 145)', color: 'oklch(0.7 0.15 145)' }}>
+                              {r.category}
+                            </Badge>
+                          </td>
+                          <td className="px-4 py-3 text-muted-foreground text-xs whitespace-nowrap">{formatTimestamp(r.timestamp)}</td>
+                          <td className="px-4 py-3">
+                            <button onClick={() => handleDelete(r.id)}
+                              className="p-1.5 rounded-lg transition-colors hover:bg-red-500/10"
+                              style={{ color: 'oklch(0.55 0.15 25)' }}>
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </td>
+                        </tr>
                       ))}
-                    </div>
-                  </>
+                    </tbody>
+                  </table>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+
+              {/* Cards - Mobile */}
+              <div className="lg:hidden space-y-3">
+                {regLoading ? (
+                  [...Array(3)].map((_, i) => <Skeleton key={i} className="h-24 w-full rounded-xl" />)
+                ) : filtered.length === 0 ? (
+                  <div className="p-12 text-center">
+                    <Users className="w-12 h-12 mx-auto mb-3 opacity-30" style={{ color: 'oklch(0.6 0.12 145)' }} />
+                    <p className="text-muted-foreground">
+                      {search ? 'No registrations match your search.' : 'No registrations yet.'}
+                    </p>
+                  </div>
+                ) : (
+                  filtered.map(r => (
+                    <RegistrationCard key={r.id.toString()} record={r} onDelete={handleDelete} />
+                  ))
+                )}
+              </div>
+            </div>
           </TabsContent>
 
           {/* Content Management Tab */}
@@ -439,134 +371,10 @@ export default function AdminDashboard() {
 
           {/* Gallery Tab */}
           <TabsContent value="gallery">
-            <Card className="bg-card border-border mb-6">
-              <CardHeader>
-                <CardTitle className="text-foreground">Upload Image</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <Input
-                    placeholder="Image title"
-                    value={uploadTitle}
-                    onChange={(e) => setUploadTitle(e.target.value)}
-                    className="bg-background border-border text-foreground"
-                  />
-                  <div className="flex items-center gap-2">
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
-                    />
-                    <Button
-                      variant="outline"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="border-border text-foreground hover:bg-muted"
-                    >
-                      {uploadFile
-                        ? uploadFile.name.slice(0, 20) + (uploadFile.name.length > 20 ? '…' : '')
-                        : 'Choose File'}
-                    </Button>
-                    {uploadFile && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          setUploadFile(null);
-                          if (fileInputRef.current) fileInputRef.current.value = '';
-                        }}
-                        className="text-muted-foreground hover:text-foreground h-8 w-8"
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    )}
-                  </div>
-                  <Button
-                    onClick={handleUpload}
-                    disabled={isUploading || !uploadFile || !uploadTitle.trim()}
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                  >
-                    {isUploading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Uploading...
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="w-4 h-4 mr-2" />
-                        Upload
-                      </>
-                    )}
-                  </Button>
-                </div>
-                {uploadProgress > 0 && uploadProgress < 100 && (
-                  <div className="mt-3">
-                    <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-primary transition-all duration-300"
-                        style={{ width: `${uploadProgress}%` }}
-                      />
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">{uploadProgress}% uploaded</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card className="bg-card border-border">
-              <CardHeader>
-                <CardTitle className="text-foreground">Gallery Images</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {galleryLoading ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                    {Array.from({ length: 8 }).map((_, i) => (
-                      <Skeleton key={i} className="aspect-square rounded-lg" />
-                    ))}
-                  </div>
-                ) : !galleryImages || galleryImages.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-12">No images uploaded yet.</p>
-                ) : (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                    {galleryImages.map((image) => (
-                      <div
-                        key={image.id}
-                        className="group relative rounded-lg overflow-hidden border border-border bg-muted aspect-square"
-                      >
-                        <img
-                          src={image.imageBlob.getDirectURL()}
-                          alt={image.title}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 p-2">
-                          <p className="text-white text-xs text-center font-medium truncate w-full px-2">
-                            {image.title}
-                          </p>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => handleDeleteImage(image.id)}
-                            disabled={isDeletingImage && deletingImageId === image.id}
-                            className="h-7 text-xs"
-                          >
-                            {isDeletingImage && deletingImageId === image.id ? (
-                              <Loader2 className="w-3 h-3 animate-spin" />
-                            ) : (
-                              <Trash2 className="w-3 h-3 mr-1" />
-                            )}
-                            Delete
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <GalleryManager />
           </TabsContent>
         </Tabs>
-      </div>
+      </main>
     </div>
   );
 }

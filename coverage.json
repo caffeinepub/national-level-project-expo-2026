@@ -1,31 +1,67 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-26T19:53:22.519Z",
+  "generatedAt": "2026-02-26T20:08:32.625Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 2,
-    "implemented": 1,
+    "total": 4,
+    "implemented": 4,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Update the hardcoded admin host/owner email in the backend to 'athiakash1977@gmail.com'. This email should be used as the primary admin credential for verifying login access to the admin dashboard.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-2",
-        "summary": "Update the AdminLogin page to pre-populate or reference the admin email 'athiakash1977@gmail.com' as the expected host email for login validation on the frontend side, ensuring the login flow matches the updated backend credential.",
+        "summary": "Ensure the admin email 'athiakash1977@gmail.com' is the single authorized admin credential in both the backend authorization logic (MixinAuthorization / admin verification) and the frontend AdminLogin page. The login form should pre-populate this email and only grant access to this exact address.",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/pages/AdminLogin.tsx"
         ],
         "matchedFiles": [
           "frontend/src/pages/AdminLogin.tsx"
+        ]
+      },
+      {
+        "id": "REQ-2",
+        "summary": "On the Admin Dashboard, ensure the Content Management tab (AdminContentManagement component) is fully functional and accessible: all CMS sections (Hero, About, Event Details, Coordinators, Contact) must load current backend data and successfully save edits via the backend mutation hooks.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/AdminContentManagement.tsx",
+          "frontend/src/pages/AdminDashboard.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/AdminContentManagement.tsx",
+          "frontend/src/pages/AdminDashboard.tsx"
+        ]
+      },
+      {
+        "id": "REQ-3",
+        "summary": "On the Admin Dashboard, ensure the Registrations tab displays a full list of all registered teams/participants with their details (name, team name, email, category, etc.). Include search/filter functionality and a CSV export option. Each registration row should show all relevant fields stored in the backend.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/AdminDashboard.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/AdminDashboard.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ]
+      },
+      {
+        "id": "REQ-4",
+        "summary": "Add a dedicated analytics summary card at the top of the Admin Dashboard showing total registered teams count, fetched live from the backend. Ensure the ProtectedRoute guard correctly redirects unauthenticated visitors away from all /admin routes to the AdminLogin page.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/AdminDashboard.tsx",
+          "frontend/src/components/ProtectedRoute.tsx",
+          "frontend/src/pages/AdminLogin.tsx",
+          "frontend/src/App.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/AdminDashboard.tsx",
+          "frontend/src/components/ProtectedRoute.tsx",
+          "frontend/src/pages/AdminLogin.tsx",
+          "frontend/src/App.tsx"
         ]
       }
     ]
@@ -36,10 +72,13 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
+    "frontend/src/App.tsx",
+    "frontend/src/components/AdminContentManagement.tsx",
+    "frontend/src/components/GalleryManager.tsx",
+    "frontend/src/components/ProtectedRoute.tsx",
+    "frontend/src/contexts/AdminAuthContext.tsx",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/AdminDashboard.tsx",
     "frontend/src/pages/AdminLogin.tsx",
     "project_state.json",
     "scratch/component-selection.json",

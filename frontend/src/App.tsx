@@ -1,43 +1,43 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React from 'react';
 import {
-  RouterProvider,
   createRouter,
   createRoute,
   createRootRoute,
-  createHashHistory,
+  RouterProvider,
   Outlet,
-  notFound,
+  createHashHistory,
 } from '@tanstack/react-router';
-import { AdminAuthProvider } from './context/AdminAuthContext';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from '@/components/ui/sonner';
+import { AdminAuthProvider } from './contexts/AdminAuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
+
 import HomePage from './pages/HomePage';
-import AdminLogin from './pages/AdminLogin';
-import AdminDashboard from './pages/AdminDashboard';
-import GalleryPage from './pages/GalleryPage';
-import RegistrationLookupPage from './pages/RegistrationLookupPage';
 import AboutPage from './pages/AboutPage';
 import EventDetailsPage from './pages/EventDetailsPage';
 import RegistrationPage from './pages/RegistrationPage';
+import GalleryPage from './pages/GalleryPage';
+import RegistrationLookupPage from './pages/RegistrationLookupPage';
+import AdminLogin from './pages/AdminLogin';
+import AdminDashboard from './pages/AdminDashboard';
 import NotFoundPage from './pages/NotFoundPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
-    queries: {
-      retry: 1,
-      staleTime: 30000,
-    },
+    queries: { staleTime: 1000 * 60 * 5, retry: 1 },
   },
 });
 
-function RootLayout() {
-  return (
-    <div className="page-transition">
-      <Outlet />
-    </div>
-  );
-}
+const hashHistory = createHashHistory();
 
+// Root layout
 const rootRoute = createRootRoute({
-  component: RootLayout,
+  component: () => (
+    <AdminAuthProvider>
+      <Outlet />
+      <Toaster richColors position="top-right" />
+    </AdminAuthProvider>
+  ),
   notFoundComponent: NotFoundPage,
 });
 
@@ -71,7 +71,7 @@ const galleryRoute = createRoute({
   component: GalleryPage,
 });
 
-const registrationLookupRoute = createRoute({
+const checkRegistrationRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/check-registration',
   component: RegistrationLookupPage,
@@ -86,7 +86,11 @@ const adminLoginRoute = createRoute({
 const adminDashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/admin/dashboard',
-  component: AdminDashboard,
+  component: () => (
+    <ProtectedRoute>
+      <AdminDashboard />
+    </ProtectedRoute>
+  ),
 });
 
 const routeTree = rootRoute.addChildren([
@@ -95,20 +99,12 @@ const routeTree = rootRoute.addChildren([
   eventDetailsRoute,
   registrationRoute,
   galleryRoute,
-  registrationLookupRoute,
+  checkRegistrationRoute,
   adminLoginRoute,
   adminDashboardRoute,
 ]);
 
-// Use hash-based routing so the IC asset canister always serves index.html
-// and client-side routing handles the hash fragment (e.g. /#/about)
-const hashHistory = createHashHistory();
-
-const router = createRouter({
-  routeTree,
-  history: hashHistory,
-  defaultNotFoundComponent: NotFoundPage,
-});
+const router = createRouter({ routeTree, history: hashHistory });
 
 declare module '@tanstack/react-router' {
   interface Register {
@@ -119,9 +115,7 @@ declare module '@tanstack/react-router' {
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AdminAuthProvider>
-        <RouterProvider router={router} />
-      </AdminAuthProvider>
+      <RouterProvider router={router} />
     </QueryClientProvider>
   );
 }

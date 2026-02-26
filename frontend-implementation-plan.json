@@ -1,21 +1,95 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Set admin dashboard host email to athiakash1977@gmail.com",
+  "title": "Activate admin management for athiakash1977@gmail.com with full content editing and registered teams visibility",
   "requirements": [
     {
-      "id": "REQ-2",
-      "summary": "Update the AdminLogin page to validate against the admin email 'athiakash1977@gmail.com' on the frontend side, ensuring the login flow matches the backend credential.",
+      "id": "REQ-1",
+      "summary": "Ensure the admin email 'athiakash1977@gmail.com' is the single authorized admin credential in the frontend AdminLogin page, with pre-populated email and access restricted to this exact address",
       "acceptanceCriteria": [
-        "The frontend admin login form correctly authenticates against the email 'athiakash1977@gmail.com'",
-        "Successful login with 'athiakash1977@gmail.com' redirects to the admin dashboard",
-        "Login attempts with a different email are rejected"
+        "Logging in with athiakash1977@gmail.com and the correct password succeeds and redirects to the admin dashboard.",
+        "Logging in with any other email is rejected with an appropriate error message."
       ],
       "file_operations": [
         {
           "path": "frontend/src/pages/AdminLogin.tsx",
           "operation": "modify",
-          "description": "Update the admin login form to validate that the entered email matches 'athiakash1977@gmail.com' before calling the backend verification. Add frontend validation to reject login attempts with any other email address. Ensure the email input field displays or pre-populates 'athiakash1977@gmail.com' as the expected admin host email. The existing backend call to verify credentials should remain unchanged, but add a client-side check that blocks submission if the email doesn't match the expected admin email."
+          "description": "Pre-populate the email field with 'athiakash1977@gmail.com' and add frontend validation to ensure only this exact email can proceed with authentication. Display a clear error message if any other email is entered. Update the login form state to disable the email field or make the restriction clear to users."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Ensure the Content Management tab (AdminContentManagement component) is fully functional and accessible on the Admin Dashboard, with all CMS sections loading current backend data and successfully saving edits",
+      "acceptanceCriteria": [
+        "All CMS accordion sections (Hero, About, Event Details, Coordinators, Contact) display current content fetched from the backend.",
+        "Saving edits in any section updates the backend and reflects the change immediately on the public-facing site.",
+        "Only the authenticated admin can access and use the content management tab."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/AdminContentManagement.tsx",
+          "operation": "modify",
+          "description": "Review and verify that all five CMS sections (Hero, About, Event Details, Coordinators, Contact) correctly fetch data using the existing query hooks and properly wire up their save handlers to the mutation hooks. Ensure all form fields map to the backend interface types. Add loading states and success/error feedback for each section's save operation. Verify that the mutation invalidates the appropriate query cache keys to reflect changes on the public site."
+        },
+        {
+          "path": "frontend/src/pages/AdminDashboard.tsx",
+          "operation": "modify",
+          "description": "Ensure the Content Management tab is visible and accessible to authenticated admins. Verify that the AdminContentManagement component is properly imported and rendered within the dashboard's tab navigation. Confirm that the ProtectedRoute wrapper is in place to restrict access to authenticated admins only."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Ensure the Registrations tab on the Admin Dashboard displays a full list of all registered teams/participants with their details, includes search/filter functionality, and provides a CSV export option",
+      "acceptanceCriteria": [
+        "The Registrations tab lists all submitted registrations fetched from the backend admin-only endpoint.",
+        "Each row displays all stored fields (e.g., participant name, team name, email, category, registration ID, timestamp).",
+        "Search/filter input narrows the displayed list in real time.",
+        "The CSV export button downloads all registration data as a properly formatted CSV file.",
+        "The tab is only accessible to the authenticated admin."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/AdminDashboard.tsx",
+          "operation": "modify",
+          "description": "Review and enhance the Registrations tab to ensure it calls the getAllRegistrationRecords backend method via a query hook. Verify that all registration fields (id, fullName, email, phoneNumber, collegeName, department, projectTitle, category, abstract, timestamp) are displayed in the table. Ensure the search/filter input works in real-time by filtering the displayed rows based on user input across relevant fields (name, email, team name, category). Verify the CSV export button calls the existing csvExport utility with the filtered or full registration list. Ensure proper loading and error states are shown."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add or verify the existence of a useGetAllRegistrationRecords query hook that fetches data from the backend's getAllRegistrationRecords endpoint. Ensure it uses the correct query key and is enabled only when the actor is available. If the hook already exists, verify it returns the full RegistrationRecord array with all fields."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Add a dedicated analytics summary card at the top of the Admin Dashboard showing total registered teams count, and ensure the ProtectedRoute guard correctly redirects unauthenticated visitors",
+      "acceptanceCriteria": [
+        "Total registration count is displayed prominently on the dashboard.",
+        "Navigating to /admin or /admin/* while unauthenticated redirects to the admin login page.",
+        "After successful login the admin is redirected back to the dashboard."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/AdminDashboard.tsx",
+          "operation": "modify",
+          "description": "Add a prominent analytics summary card at the top of the dashboard that displays the total number of registered teams. Use the existing useGetRegistrationCount query hook to fetch the count from the backend. Style the card to stand out visually above the tab navigation (e.g., using a colored background, larger text, or an icon). Ensure the card shows a loading state while fetching and handles errors gracefully."
+        },
+        {
+          "path": "frontend/src/components/ProtectedRoute.tsx",
+          "operation": "modify",
+          "description": "Review and verify that the ProtectedRoute component correctly checks the AdminAuthContext for authentication status. Ensure unauthenticated users are redirected to the admin login page (/admin/login). Store the original destination route so that after successful login the user is redirected back to the intended admin page. Confirm that the component handles edge cases such as loading states and expired sessions."
+        },
+        {
+          "path": "frontend/src/pages/AdminLogin.tsx",
+          "operation": "modify",
+          "description": "After successful login, check if a redirect path was stored (e.g., in sessionStorage or via URL params) and navigate the user back to that path. If no redirect path is stored, default to navigating to /admin or /admin/dashboard. Ensure the redirect logic is implemented using TanStack Router's navigation API."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Verify that all /admin routes (e.g., /admin, /admin/dashboard) are wrapped with the ProtectedRoute component to enforce authentication. Ensure the admin login route (/admin/login) is publicly accessible and not wrapped by ProtectedRoute. Confirm the route definitions are correctly configured in the TanStack Router setup."
         }
       ]
     }

@@ -1,15 +1,15 @@
-import { ReactNode } from 'react';
+import React from 'react';
 import { Navigate } from '@tanstack/react-router';
-import { useAdminAuth } from '../context/AdminAuthContext';
+import { useAdminAuth } from '../contexts/AdminAuthContext';
 
 interface ProtectedRouteProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { isAdminAuthenticated } = useAdminAuth();
+  const { isAuthenticated } = useAdminAuth();
 
-  if (!isAdminAuthenticated) {
+  if (!isAuthenticated) {
     return <Navigate to="/admin" />;
   }
 
