@@ -1,0 +1,43 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-add-an-edit-registration-feature-to-the-admin-dashboard-admin-dashboard-each-row-in-the-registrations-table-must-have-an-edit-button-that-opens-an-inline-modal-or-drawer-pre-filled-with-that-registration-s-current-field-values-the-admin-can-modify-any-field-full-name-email-phone-number-college-name-department-project-title-category-abstract-and-submit-the-changes-which-calls-the-updateregistration-backend-function-show-a-success-toast-on-completion-and-refresh-the-registrations-table-show-an-error-message-if-the-update-fails",
+      "featureTitle": "Add an 'Edit Registration' feature to the Admin Dashboard (`/admin/dashboard`). Each row in the registrations table must have an 'Edit' button that opens an inline modal or drawer pre-filled with that registration's current field values. The admin can modify any field (Full Name, Email, Phone Number, College Name, Department, Project Title, Category, Abstract) and submit the changes, which calls the `updateRegistration` backend function. Show a success toast on completion and refresh the registrations table. Show an error message if the update fails.",
+      "files": [
+        "frontend/src/pages/AdminDashboard.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-24"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-a-useupdateregistration-mutation-hook-in-frontend-src-hooks-usequeries-ts-that-calls-the-updateregistration-backend-function-it-should-accept-a-registration-id-and-updated-field-values-and-invalidate-the-registrations-list-query-on-success-following-the-same-pattern-as-the-existing-usedeleteregistration-mutation-hook",
+      "featureTitle": "Add a `useUpdateRegistration` mutation hook in `frontend/src/hooks/useQueries.ts` that calls the `updateRegistration` backend function. It should accept a registration ID and updated field values, and invalidate the registrations list query on success, following the same pattern as the existing `useDeleteRegistration` mutation hook.",
+      "files": [
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-25"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

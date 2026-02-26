@@ -1,0 +1,10 @@
+{
+  "frontend/src/pages/HomePage.tsx": "New dedicated Home page (/) that renders Navbar, Hero, Coordinators, Registration, Contact, and Footer — excludes About and EventDetails sections.",
+  "frontend/src/pages/AboutPage.tsx": "New dedicated About page (/about) that wraps the existing About component with Navbar and Footer, adding top padding to account for the fixed navbar.",
+  "frontend/src/pages/EventDetailsPage.tsx": "New dedicated Event Details page (/event-details) that wraps the existing EventDetails component with Navbar and Footer, adding top padding for the fixed navbar.",
+  "frontend/src/components/Navbar.tsx": "Updated Navbar with \"Check Registration\" added to both desktop and mobile navigation link arrays, pointing to `/check-registration`, with consistent active-state and hover styling.",
+  "frontend/src/App.tsx": "TanStack Router configuration with routes for `/`, `/about`, `/event-details`, `/check-registration`, `/admin/login`, and `/admin/dashboard`, wrapped in AdminAuthProvider.",
+  "frontend/src/hooks/useQueries.ts": "All React Query hooks for backend interactions including registration CRUD, admin auth, and email lookup; now includes the new `useUpdateRegistration` mutation hook that calls `actor.updateRegistration` and invalidates the registrations query on success.",
+  "frontend/src/pages/RegistrationLookupPage.tsx": "Public registration lookup page at `/check-registration` that lets users search by email, displays all registration details in a glassmorphism result card with green glow styling, and shows appropriate empty/loading/error states with scroll-triggered fade-in animations.",
+  "frontend/src/pages/AdminDashboard.tsx": "Admin-only dashboard showing registration analytics, a searchable/sortable table with per-row Edit and Delete actions; the new Edit button opens a pre-filled modal dialog (`EditModal`) that calls `useUpdateRegistration` and shows a success toast or inline error on completion."
+}

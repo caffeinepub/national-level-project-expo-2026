@@ -1,0 +1,296 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 9,
+  "summary": "Premium animated event website for 'National Level Project Expo 2026' organized by E.G.S. Pillay Engineering College (ECE Dept). Green gradient theme (#0f9d58 → #22c55e), glassmorphism UI, smooth scroll animations, Poppins/Inter fonts, fully responsive. Features 9 sections separated into distinct pages: Home, About, Event Details (timeline), Coordinators (profile cards), Registration (form + validation + success popup), Admin Login (Firebase Auth), Admin Dashboard (table, search, delete, CSV export, analytics), Contact, and Footer.",
+  "architectural_notes": [
+    "Green gradient theme: #0f9d58 → #22c55e with glassmorphism cards (blur + hover glow)",
+    "Fonts: Poppins or Inter; fully responsive (mobile, tablet, desktop)",
+    "Sticky transparent navbar with scroll progress indicator",
+    "Firebase Authentication used for Admin Login",
+    "Registration data stored/retrieved via Firebase for Admin Dashboard",
+    "Multi-page routing: Home, About, and Event Details are separate pages/routes rather than scroll sections",
+    "Admin-only access: only the authenticated host/admin can view all registrations and edit registration details"
+  ],
+  "known_issues": [],
+  "isFixRequest": false,
+  "existing_features": [
+    {
+      "id": "feature-implement-a-sticky-transparent-navbar-that-becomes-semi-opaque-on-scroll-with-smooth-anchor-navigation-to-all-sections-a-hamburger-menu-on-mobile-and-a-scroll-progress-indicator-bar-at-the-top-of-the-viewport-use-poppins-or-inter-font-throughout-the-entire-site",
+      "title": "Implement a sticky transparent navbar that becomes semi-opaque on scroll, with smooth anchor navigation to all sections, a hamburger menu on mobile, and a scroll progress indicator bar at the top of the viewport. Use Poppins or Inter font throughout the entire site.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-a-hero-section-with-an-animated-particle-or-mesh-background-with-a-dark-green-overlay-the-event-title-national-level-project-expo-2026-a-tagline-e-g-s-pillay-engineering-college-ece-department-branding-a-live-countdown-timer-targeting-the-event-date-a-real-time-registration-counter-fetched-from-backend-and-a-glowing-register-now-cta-button-that-smooth-scrolls-to-the-registration-section-all-elements-should-have-entrance-animations-fade-in-slide-up",
+      "title": "Build a Hero section with: an animated particle or mesh background with a dark green overlay, the event title 'National Level Project Expo 2026', a tagline, E.G.S. Pillay Engineering College (ECE Department) branding, a live countdown timer targeting the event date, a real-time registration counter (fetched from backend), and a glowing 'Register Now' CTA button that smooth-scrolls to the Registration section. All elements should have entrance animations (fade-in, slide-up).",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-an-about-section-describing-the-project-expo-college-identity-and-featuring-3-glassmorphism-feature-cards-1-innovation-2-inter-college-participation-3-certificates-prizes-each-card-should-have-a-distinct-icon-brief-description-hover-glow-effect-and-scroll-triggered-fade-in-animation",
+      "title": "Build an About section describing the Project Expo, college identity, and featuring 3 glassmorphism feature cards: (1) Innovation, (2) Inter-College Participation, (3) Certificates & Prizes. Each card should have a distinct icon, brief description, hover glow effect, and scroll-triggered fade-in animation.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-an-event-details-section-displaying-event-date-venue-registration-fee-eligibility-criteria-project-categories-and-an-animated-vertical-timeline-showing-key-event-milestones-e-g-registration-open-submission-deadline-expo-day-timeline-items-should-animate-in-sequentially-on-scroll",
+      "title": "Build an Event Details section displaying: event date, venue, registration fee, eligibility criteria, project categories, and an animated vertical timeline showing key event milestones (e.g., Registration Open, Submission Deadline, Expo Day). Timeline items should animate in sequentially on scroll.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-a-coordinators-section-with-glassmorphism-profile-cards-for-faculty-coordinators-and-student-coordinators-each-card-should-show-a-circular-photo-placeholder-avatar-initials-fallback-name-role-designation-phone-number-and-email-cards-should-have-a-hover-lift-and-glow-animation-and-be-grouped-by-faculty-vs-student",
+      "title": "Build a Coordinators section with glassmorphism profile cards for Faculty Coordinators and Student Coordinators. Each card should show a circular photo placeholder (avatar initials fallback), name, role/designation, phone number, and email. Cards should have a hover lift-and-glow animation and be grouped by Faculty vs Student.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-a-registration-section-with-a-validated-form-containing-fields-full-name-email-phone-number-college-name-department-project-title-category-dropdown-and-abstract-textarea-on-successful-submission-save-the-registration-to-the-backend-canister-and-display-an-animated-success-popup-modal-show-inline-validation-errors-for-required-fields-and-email-phone-format",
+      "title": "Build a Registration section with a validated form containing fields: Full Name, Email, Phone Number, College Name, Department, Project Title, Category (dropdown), and Abstract (textarea). On successful submission, save the registration to the backend canister and display an animated success popup/modal. Show inline validation errors for required fields and email/phone format.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-an-admin-login-page-route-admin-login-with-an-email-and-password-form-authentication-must-use-a-hardcoded-admin-credential-check-stored-securely-in-the-backend-canister-since-firebase-authentication-is-not-supported-on-successful-login-store-an-authenticated-session-in-frontend-state-and-redirect-to-the-admin-dashboard-show-an-error-message-on-failed-login",
+      "title": "Implement an Admin Login page (route: /admin/login) with an email and password form. Authentication must use a hardcoded admin credential check stored securely in the backend canister (since Firebase Authentication is not supported). On successful login, store an authenticated session in frontend state and redirect to the Admin Dashboard. Show an error message on failed login.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-an-admin-dashboard-route-admin-dashboard-accessible-only-to-authenticated-admins-it-must-display-analytics-cards-total-registrations-registrations-by-category-a-searchable-and-paginated-table-of-all-registrations-with-columns-for-all-form-fields-ability-to-delete-individual-registrations-with-confirmation-and-a-button-to-export-all-registrations-as-a-csv-file",
+      "title": "Build an Admin Dashboard (route: /admin/dashboard) accessible only to authenticated admins. It must display: analytics cards (total registrations, registrations by category), a searchable and paginated table of all registrations with columns for all form fields, ability to delete individual registrations (with confirmation), and a button to export all registrations as a CSV file.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-a-contact-section-with-e-g-s-pillay-engineering-college-address-and-contact-details-a-google-maps-embed-placeholder-static-image-or-iframe-placeholder-and-social-media-icon-links-facebook-instagram-linkedin-youtube-include-a-decorative-section-header-with-scroll-animation",
+      "title": "Build a Contact section with E.G.S. Pillay Engineering College address and contact details, a Google Maps embed placeholder (static image or iframe placeholder), and social media icon links (Facebook, Instagram, LinkedIn, YouTube). Include a decorative section header with scroll animation.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-a-footer-with-organized-by-ece-department-e-g-s-pillay-engineering-college-nagapattinam-branding-copyright-notice-2026-quick-navigation-links-to-all-sections-a-scroll-to-top-button-that-appears-after-scrolling-down-and-the-college-logo-name-footer-should-use-a-dark-background-with-green-accent",
+      "title": "Build a Footer with: 'Organized by ECE Department, E.G.S. Pillay Engineering College, Nagapattinam' branding, copyright notice (© 2026), quick navigation links to all sections, a scroll-to-top button that appears after scrolling down, and the college logo/name. Footer should use a dark background with green accent.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-global-scroll-animations-all-major-section-headings-and-content-blocks-should-use-intersection-observer-based-fade-in-and-slide-up-entrance-animations-apply-smooth-css-transitions-for-page-level-interactions-ensure-all-glassmorphism-cards-use-backdrop-blur-semi-transparent-backgrounds-and-green-glow-on-hover-apply-the-green-gradient-0f9d58-22c55e-as-the-primary-brand-gradient-across-buttons-section-accents-and-decorative-elements",
+      "title": "Implement global scroll animations: all major section headings and content blocks should use Intersection Observer-based fade-in and slide-up entrance animations. Apply smooth CSS transitions for page-level interactions. Ensure all glassmorphism cards use backdrop-blur, semi-transparent backgrounds, and green glow on hover. Apply the green gradient (#0f9d58 → #22c55e) as the primary brand gradient across buttons, section accents, and decorative elements.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-generate-a-custom-hero-background-image-a-dark-deep-green-abstract-tech-circuit-pattern-with-glowing-green-nodes-and-lines-suitable-as-a-full-width-hero-background-with-a-dark-overlay-applied-on-top-in-the-ui",
+      "title": "Generate a custom hero background image: a dark deep-green abstract tech/circuit pattern with glowing green nodes and lines, suitable as a full-width hero background with a dark overlay applied on top in the UI.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-dedicated-home-page-route-that-renders-only-the-hero-coordinators-registration-contact-and-footer-sections-remove-about-and-event-details-sections-from-this-route",
+      "title": "Create a dedicated Home page (route: /) that renders only the Hero, Coordinators, Registration, Contact, and Footer sections. Remove About and Event Details sections from this route.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-dedicated-about-page-route-about-that-renders-the-navbar-about-section-and-footer-the-about-section-content-and-animations-must-remain-identical-to-the-existing-about-component",
+      "title": "Create a dedicated About page (route: /about) that renders the Navbar, About section, and Footer. The About section content and animations must remain identical to the existing About component.",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-dedicated-event-details-page-route-event-details-that-renders-the-navbar-eventdetails-section-date-venue-fee-eligibility-categories-animated-timeline-and-footer-the-eventdetails-section-content-and-animations-must-remain-identical-to-the-existing-eventdetails-component",
+      "title": "Create a dedicated Event Details page (route: /event-details) that renders the Navbar, EventDetails section (date, venue, fee, eligibility, categories, animated timeline), and Footer. The EventDetails section content and animations must remain identical to the existing EventDetails component.",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-navbar-component-to-include-navigation-links-for-home-about-about-and-event-details-event-details-as-page-level-route-links-using-tanstack-router-link-in-addition-to-the-existing-smooth-scroll-anchor-links-for-sections-present-on-the-home-page-on-the-home-page-anchor-links-for-registration-and-contact-should-still-work-on-about-and-event-details-pages-only-the-page-navigation-links-should-be-shown",
+      "title": "Update the Navbar component to include navigation links for 'Home' (/), 'About' (/about), and 'Event Details' (/event-details) as page-level route links (using TanStack Router Link) in addition to the existing smooth-scroll anchor links for sections present on the Home page. On the Home page, anchor links for #registration and #contact should still work. On /about and /event-details pages, only the page navigation links should be shown.",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-app-tsx-to-register-the-new-about-and-event-details-routes-using-tanstack-router-pointing-to-their-respective-new-page-components-ensure-existing-admin-login-and-admin-dashboard-routes-are-preserved",
+      "title": "Update App.tsx to register the new /about and /event-details routes using TanStack Router, pointing to their respective new page components. Ensure existing /admin/login and /admin/dashboard routes are preserved.",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-new-frontend-page-component-at-frontend-src-pages-registrationlookuppage-tsx-for-the-route-check-registration-the-page-must-render-the-navbar-and-footer-and-contain-a-lookup-form-where-a-user-enters-their-registered-email-address-on-submission-call-the-getregistrationbyemail-backend-function-and-display-the-matching-team-registration-details-full-name-email-phone-number-college-name-department-project-title-category-abstract-and-registration-id-in-a-glassmorphism-card-with-green-accent-styling-consistent-with-the-site-theme-show-a-no-registration-found-message-if-no-match-is-returned-show-inline-validation-for-required-email-format-include-scroll-triggered-fade-in-entrance-animations-matching-the-existing-site-style",
+      "title": "Create a new frontend page component at `frontend/src/pages/RegistrationLookupPage.tsx` for the route `/check-registration`. The page must render the Navbar and Footer, and contain a lookup form where a user enters their registered email address. On submission, call the `getRegistrationByEmail` backend function and display the matching team/registration details (Full Name, Email, Phone Number, College Name, Department, Project Title, Category, Abstract, and Registration ID) in a glassmorphism card with green accent styling consistent with the site theme. Show a 'No registration found' message if no match is returned. Show inline validation for required email format. Include scroll-triggered fade-in entrance animations matching the existing site style.",
+      "reqIds": [
+        "REQ-20"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-register-the-check-registration-route-in-frontend-src-app-tsx-using-tanstack-router-pointing-to-the-new-registrationlookuppage-component-preserve-all-existing-routes-about-event-details-admin-login-admin-dashboard",
+      "title": "Register the `/check-registration` route in `frontend/src/App.tsx` using TanStack Router, pointing to the new `RegistrationLookupPage` component. Preserve all existing routes (/, /about, /event-details, /admin/login, /admin/dashboard).",
+      "reqIds": [
+        "REQ-21"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-check-registration-navigation-link-in-the-navbar-component-pointing-to-check-registration-as-a-tanstack-router-page-level-link-consistent-with-existing-page-navigation-links-home-about-event-details",
+      "title": "Add a 'Check Registration' navigation link in the Navbar component pointing to `/check-registration` as a TanStack Router page-level link, consistent with existing page navigation links (Home, About, Event Details).",
+      "reqIds": [
+        "REQ-22"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-an-edit-registration-feature-to-the-admin-dashboard-admin-dashboard-each-row-in-the-registrations-table-must-have-an-edit-button-that-opens-an-inline-modal-or-drawer-pre-filled-with-that-registration-s-current-field-values-the-admin-can-modify-any-field-full-name-email-phone-number-college-name-department-project-title-category-abstract-and-submit-the-changes-which-calls-the-updateregistration-backend-function-show-a-success-toast-on-completion-and-refresh-the-registrations-table-show-an-error-message-if-the-update-fails",
+      "title": "Add an 'Edit Registration' feature to the Admin Dashboard (`/admin/dashboard`). Each row in the registrations table must have an 'Edit' button that opens an inline modal or drawer pre-filled with that registration's current field values. The admin can modify any field (Full Name, Email, Phone Number, College Name, Department, Project Title, Category, Abstract) and submit the changes, which calls the `updateRegistration` backend function. Show a success toast on completion and refresh the registrations table. Show an error message if the update fails.",
+      "reqIds": [
+        "REQ-24"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-useupdateregistration-mutation-hook-in-frontend-src-hooks-usequeries-ts-that-calls-the-updateregistration-backend-function-it-should-accept-a-registration-id-and-updated-field-values-and-invalidate-the-registrations-list-query-on-success-following-the-same-pattern-as-the-existing-usedeleteregistration-mutation-hook",
+      "title": "Add a `useUpdateRegistration` mutation hook in `frontend/src/hooks/useQueries.ts` that calls the `updateRegistration` backend function. It should accept a registration ID and updated field values, and invalidate the registrations list query on success, following the same pattern as the existing `useDeleteRegistration` mutation hook.",
+      "reqIds": [
+        "REQ-25"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Hero section with animated background, countdown timer, college branding, registration counter, and glowing Register Now button",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "About section with expo description, college identity, and 3 feature cards (Innovation, Inter-College, Certificates & Prizes)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Event Details section with date, venue, fee, eligibility, categories, and timeline animation",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Coordinators section with faculty & student profile cards, hover animations, contact info, and photo placeholders",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Registration form with fields (Name, Email, Phone, College, Department, Project Title, Category, Abstract), validation, and success popup",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Admin Login with secure Firebase Authentication (email/password)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Admin Dashboard with registrations table, search, count, delete, CSV export, and analytics cards",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Contact section with college info, Google Maps placeholder, and social icons",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Footer with ECE Dept branding, copyright, navigation links, scroll-to-top button, and college branding",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-21",
+      "summary": "Backend canister must expose these functions: submitRegistration (store a new registration record), getRegistrations (return all registrations, admin only), deleteRegistration (remove by ID, admin only), getRegistrationCount (return total count, public), verifyAdminCredentials (verify email+password, return session token).",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-22",
+      "summary": "Separate the website into distinct pages: Home, About, and Event Details (instead of a single-page scroll layout)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-23",
+      "summary": "Add a public or semi-public page where users can check/view their registration/team details (e.g., by entering registration ID or email)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-24",
+      "summary": "Add a backend function `getRegistrationByEmail(email: Text): async ?Registration` that retrieves a single registration record matching the provided email address (case-insensitive). This function must be publicly accessible (no admin auth required).",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-25",
+      "summary": "Only the admin/host person should be able to view all registrations and edit/modify registration details. Add an 'Edit Registration' feature in the Admin Dashboard allowing the admin to update any field of a registration record.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-26",
+      "summary": "Add an `updateRegistration` function to the backend canister that accepts a registration ID and updated field values (Full Name, Email, Phone Number, College Name, Department, Project Title, Category, Abstract) and overwrites the existing record. This function must be admin-protected — it must only succeed when called with a valid admin session or after credential verification.",
+      "reqIds": [
+        "REQ-23"
+      ],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "National Level Project Expo 2026",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

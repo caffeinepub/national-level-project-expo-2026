@@ -1,0 +1,45 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Admin-only registration management with edit capability",
+  "requirements": [
+    {
+      "id": "REQ-24",
+      "summary": "Add an 'Edit Registration' feature to the Admin Dashboard with an inline modal for editing registration fields",
+      "acceptanceCriteria": [
+        "Each row in the Admin Dashboard table has an 'Edit' button",
+        "Clicking 'Edit' opens a modal/drawer pre-filled with the registration's current values",
+        "All fields (Full Name, Email, Phone, College Name, Department, Project Title, Category, Abstract) are editable in the form",
+        "Submitting the form calls `updateRegistration` via the existing actor hook pattern in useQueries.ts",
+        "A success toast/notification is shown after a successful update",
+        "The registrations table is refreshed/invalidated after a successful update",
+        "An error message is displayed if the update call fails",
+        "The Edit modal/drawer uses the existing green gradient and glassmorphism styling consistent with the rest of the admin UI"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/AdminDashboard.tsx",
+          "operation": "modify",
+          "description": "Add an 'Edit' button to each registration row in the table. Implement state management for the edit modal (open/close, selected registration). Add an edit modal/dialog that displays a form pre-filled with the selected registration's current field values. Wire the modal to call the useUpdateRegistration mutation hook on form submission. Display success toast notifications using the existing toast system after successful updates. Show error messages if the update fails. Ensure the modal uses the existing green gradient and glassmorphism styling patterns found throughout the admin UI."
+        }
+      ]
+    },
+    {
+      "id": "REQ-25",
+      "summary": "Add a useUpdateRegistration mutation hook that calls the updateRegistration backend function and invalidates the registrations list on success",
+      "acceptanceCriteria": [
+        "A `useUpdateRegistration` mutation hook is exported from useQueries.ts",
+        "The hook calls `actor.updateRegistration(id, fields)` on mutation",
+        "On success, it invalidates the registrations list query key",
+        "The hook follows the same structure as the existing `useDeleteRegistration` hook"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add a new useUpdateRegistration mutation hook that accepts a registration ID (bigint) and all registration field values (fullName, email, phoneNumber, collegeName, department, projectTitle, category, abstract) as parameters. The hook should call actor.updateRegistration with these parameters and return a boolean indicating success. On successful mutation, invalidate the 'registrations' query key to trigger a refetch of the registrations list. Follow the exact same pattern and structure as the existing useDeleteRegistration mutation hook for consistency."
+        }
+      ]
+    }
+  ]
+}

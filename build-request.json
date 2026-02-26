@@ -1,0 +1,86 @@
+{
+  "kind": "build_request",
+  "title": "Admin-only registration management with edit capability",
+  "projectName": "Project Expo 2026",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-23",
+      "text": "Add an `updateRegistration` function to the backend canister that accepts a registration ID and updated field values (Full Name, Email, Phone Number, College Name, Department, Project Title, Category, Abstract) and overwrites the existing record. This function must be admin-protected — it must only succeed when called with a valid admin session or after credential verification.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "only he can see who all are registred in it and he can change the details in it"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A public `updateRegistration(id: Text, fields: UpdateFields): async Result` function exists in main.mo",
+        "The function requires admin credential verification before updating",
+        "It returns an error variant if the registration ID does not exist",
+        "It returns an error variant if admin credentials are invalid",
+        "On success, the stored record reflects all updated field values"
+      ]
+    },
+    {
+      "id": "REQ-24",
+      "text": "Add an 'Edit Registration' feature to the Admin Dashboard (`/admin/dashboard`). Each row in the registrations table must have an 'Edit' button that opens an inline modal or drawer pre-filled with that registration's current field values. The admin can modify any field (Full Name, Email, Phone Number, College Name, Department, Project Title, Category, Abstract) and submit the changes, which calls the `updateRegistration` backend function. Show a success toast on completion and refresh the registrations table. Show an error message if the update fails.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "he can change the details in it"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Each row in the Admin Dashboard table has an 'Edit' button",
+        "Clicking 'Edit' opens a modal/drawer pre-filled with the registration's current values",
+        "All fields (Full Name, Email, Phone, College Name, Department, Project Title, Category, Abstract) are editable in the form",
+        "Submitting the form calls `updateRegistration` via the existing actor hook pattern in useQueries.ts",
+        "A success toast/notification is shown after a successful update",
+        "The registrations table is refreshed/invalidated after a successful update",
+        "An error message is displayed if the update call fails",
+        "The Edit modal/drawer uses the existing green gradient and glassmorphism styling consistent with the rest of the admin UI"
+      ]
+    },
+    {
+      "id": "REQ-25",
+      "text": "Add a `useUpdateRegistration` mutation hook in `frontend/src/hooks/useQueries.ts` that calls the `updateRegistration` backend function. It should accept a registration ID and updated field values, and invalidate the registrations list query on success, following the same pattern as the existing `useDeleteRegistration` mutation hook.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "he can change the details in it"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A `useUpdateRegistration` mutation hook is exported from useQueries.ts",
+        "The hook calls `actor.updateRegistration(id, fields)` on mutation",
+        "On success, it invalidates the registrations list query key",
+        "The hook follows the same structure as the existing `useDeleteRegistration` hook"
+      ]
+    }
+  ],
+  "constraints": [
+    "All admin-protected backend functions must verify credentials before performing state mutations",
+    "Do not modify files in frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui",
+    "The public-facing Registration Lookup page (/check-registration) must NOT expose the edit capability — editing is admin-only",
+    "Preserve all existing routes and backend functions"
+  ],
+  "nonGoals": [
+    "Adding new admin accounts or multi-admin role management",
+    "Allowing regular users/registrants to edit their own registrations from the public site",
+    "Changing the existing admin authentication mechanism",
+    "Adding email notifications on registration update"
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}
