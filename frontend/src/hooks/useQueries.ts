@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
 import type {
   Registration,
+  RegistrationRecord,
   HeroContent,
   AboutContent,
   EventDetailsContent,
@@ -36,6 +37,18 @@ export function useGetRegistrations() {
   });
 }
 
+export function useGetAllRegistrations() {
+  const { actor, isFetching } = useActor();
+  return useQuery<RegistrationRecord[]>({
+    queryKey: ['allRegistrationRecords'],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getAllRegistrationRecords();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
 export function useSubmitRegistration() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
@@ -65,6 +78,7 @@ export function useSubmitRegistration() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['registrationCount'] });
       queryClient.invalidateQueries({ queryKey: ['registrations'] });
+      queryClient.invalidateQueries({ queryKey: ['allRegistrationRecords'] });
     },
   });
 }
@@ -79,6 +93,7 @@ export function useDeleteRegistration() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['registrations'] });
+      queryClient.invalidateQueries({ queryKey: ['allRegistrationRecords'] });
       queryClient.invalidateQueries({ queryKey: ['registrationCount'] });
     },
   });

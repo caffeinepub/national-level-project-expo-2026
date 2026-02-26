@@ -34,6 +34,18 @@ export const AboutContent = IDL.Record({
   'sectionDescription' : IDL.Text,
   'featureCards' : IDL.Vec(FeatureCard),
 });
+export const RegistrationRecord = IDL.Record({
+  'id' : IDL.Nat,
+  'collegeName' : IDL.Text,
+  'fullName' : IDL.Text,
+  'email' : IDL.Text,
+  'projectTitle' : IDL.Text,
+  'timestamp' : IDL.Int,
+  'abstract' : IDL.Text,
+  'category' : IDL.Text,
+  'department' : IDL.Text,
+  'phoneNumber' : IDL.Text,
+});
 export const UserProfile = IDL.Record({
   'name' : IDL.Text,
   'email' : IDL.Text,
@@ -125,6 +137,11 @@ export const idlService = IDL.Service({
   'deleteGalleryImage' : IDL.Func([IDL.Text], [IDL.Bool], []),
   'deleteRegistration' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'getAboutContent' : IDL.Func([], [IDL.Opt(AboutContent)], ['query']),
+  'getAllRegistrationRecords' : IDL.Func(
+      [],
+      [IDL.Vec(RegistrationRecord)],
+      ['query'],
+    ),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getContactContent' : IDL.Func([], [IDL.Opt(ContactContent)], ['query']),
@@ -219,6 +236,18 @@ export const idlFactory = ({ IDL }) => {
     'sectionDescription' : IDL.Text,
     'featureCards' : IDL.Vec(FeatureCard),
   });
+  const RegistrationRecord = IDL.Record({
+    'id' : IDL.Nat,
+    'collegeName' : IDL.Text,
+    'fullName' : IDL.Text,
+    'email' : IDL.Text,
+    'projectTitle' : IDL.Text,
+    'timestamp' : IDL.Int,
+    'abstract' : IDL.Text,
+    'category' : IDL.Text,
+    'department' : IDL.Text,
+    'phoneNumber' : IDL.Text,
+  });
   const UserProfile = IDL.Record({ 'name' : IDL.Text, 'email' : IDL.Text });
   const ContactContent = IDL.Record({
     'email' : IDL.Text,
@@ -307,6 +336,11 @@ export const idlFactory = ({ IDL }) => {
     'deleteGalleryImage' : IDL.Func([IDL.Text], [IDL.Bool], []),
     'deleteRegistration' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'getAboutContent' : IDL.Func([], [IDL.Opt(AboutContent)], ['query']),
+    'getAllRegistrationRecords' : IDL.Func(
+        [],
+        [IDL.Vec(RegistrationRecord)],
+        ['query'],
+      ),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getContactContent' : IDL.Func([], [IDL.Opt(ContactContent)], ['query']),

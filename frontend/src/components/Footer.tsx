@@ -1,127 +1,142 @@
-import { useState, useEffect } from 'react';
-import { ArrowUp, Zap, Heart } from 'lucide-react';
+import { Link } from '@tanstack/react-router';
+import { Zap, Heart, ArrowUp } from 'lucide-react';
+import { SiWhatsapp, SiInstagram } from 'react-icons/si';
+
+const WHATSAPP_URL = 'https://chat.whatsapp.com/H6H4HMb31XzKw0ziktZSkg';
+const INSTAGRAM_URL = 'https://www.instagram.com/innovativelink_expo_2k26?igsh=MTBvbTMzMXJzbWdtMg==';
 
 const navLinks = [
-  { label: 'Home', href: '#hero' },
-  { label: 'About', href: '#about' },
-  { label: 'Event Details', href: '#event-details' },
-  { label: 'Coordinators', href: '#coordinators' },
-  { label: 'Register', href: '#registration' },
-  { label: 'Contact', href: '#contact' },
+  { label: 'Home', path: '/' },
+  { label: 'About', path: '/about' },
+  { label: 'Event Details', path: '/event-details' },
+  { label: 'Registration', path: '/registration' },
+  { label: 'Gallery', path: '/gallery' },
 ];
 
+const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+
 export default function Footer() {
-  const [showScrollTop, setShowScrollTop] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => setShowScrollTop(window.scrollY > 500);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-
-  const handleNavClick = (href: string) => {
-    const id = href.replace('#', '');
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const appId = encodeURIComponent(window.location.hostname || 'project-expo-2026');
+  const year = new Date().getFullYear();
+  const appId = encodeURIComponent(typeof window !== 'undefined' ? window.location.hostname : 'iot-expo-2026');
 
   return (
-    <>
-      <footer className="bg-expo-darkest border-t border-white/5 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,rgba(15,157,88,0.05),transparent_60%)]" />
+    <footer
+      className="relative overflow-hidden"
+      style={{ background: 'linear-gradient(180deg, #050f0a 0%, #020a06 100%)' }}
+    >
+      {/* Top border gradient */}
+      <div className="h-px w-full" style={{ background: 'linear-gradient(to right, transparent, #0f9d58, #22c55e, transparent)' }} />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-10">
-            {/* Branding */}
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-expo-green-start to-expo-green-end flex items-center justify-center shadow-lg shadow-expo-green-start/30">
-                  <Zap className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <p className="text-white font-bold text-sm leading-tight">Project Expo 2026</p>
-                  <p className="text-expo-green-end text-xs">National Level</p>
-                </div>
+      {/* Background orb */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-96 h-48 rounded-full opacity-10"
+          style={{ background: 'radial-gradient(circle, #0f9d58, transparent 70%)', filter: 'blur(60px)' }} />
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-10">
+          {/* Brand */}
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center"
+                style={{ background: 'linear-gradient(135deg, #0f9d58, #22c55e)' }}>
+                <Zap className="w-5 h-5 text-white" />
               </div>
-              <p className="text-white/40 text-sm leading-relaxed">
-                Organized by the Department of Electronics & Communication Engineering,{' '}
-                <span className="text-white/60">E.G.S. Pillay Engineering College</span>, Nagapattinam.
-              </p>
-            </div>
-
-            {/* Quick Links */}
-            <div>
-              <h4 className="text-white font-semibold text-sm uppercase tracking-widest mb-4">
-                Quick Links
-              </h4>
-              <ul className="space-y-2">
-                {navLinks.map((link) => (
-                  <li key={link.href}>
-                    <button
-                      onClick={() => handleNavClick(link.href)}
-                      className="text-white/40 hover:text-expo-green-end transition-colors text-sm"
-                    >
-                      {link.label}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Event Info */}
-            <div>
-              <h4 className="text-white font-semibold text-sm uppercase tracking-widest mb-4">
-                Event Info
-              </h4>
-              <div className="space-y-2 text-sm text-white/40">
-                <p>📅 April 15, 2026</p>
-                <p>📍 Nagapattinam, Tamil Nadu</p>
-                <p>🎓 Open to All Engineering Students</p>
-                <p>💰 Free Registration</p>
-                <p>🏆 ₹50,000+ Prize Pool</p>
+              <div>
+                <p className="text-white font-bold text-base">IoT Expo 2026</p>
+                <p className="text-xs" style={{ color: '#22c55e' }}>National Level Project Expo</p>
               </div>
+            </div>
+            <p className="text-white/50 text-sm leading-relaxed max-w-xs">
+              Showcasing the future of IoT innovation. Connect, create, and conquer at the premier project expo.
+            </p>
+            <div className="flex gap-3 mt-5">
+              <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"
+                className="w-9 h-9 rounded-lg flex items-center justify-center transition-all hover:scale-110"
+                style={{ background: 'rgba(37,211,102,0.15)', border: '1px solid rgba(37,211,102,0.3)' }}>
+                <SiWhatsapp className="w-4 h-4" style={{ color: '#25D366' }} />
+              </a>
+              <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer"
+                className="w-9 h-9 rounded-lg flex items-center justify-center transition-all hover:scale-110"
+                style={{ background: 'rgba(253,29,29,0.15)', border: '1px solid rgba(253,29,29,0.3)' }}>
+                <SiInstagram className="w-4 h-4" style={{ color: '#FD1D1D' }} />
+              </a>
             </div>
           </div>
 
-          {/* Divider */}
-          <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mb-6" />
+          {/* Quick Links */}
+          <div>
+            <h4 className="text-white font-semibold text-sm uppercase tracking-widest mb-5"
+              style={{ color: '#22c55e' }}>
+              Quick Links
+            </h4>
+            <ul className="space-y-2.5">
+              {navLinks.map((link) => (
+                <li key={link.path}>
+                  <Link
+                    to={link.path}
+                    className="text-white/50 hover:text-white text-sm transition-colors flex items-center gap-2 group"
+                  >
+                    <span className="w-1 h-1 rounded-full transition-all group-hover:w-3"
+                      style={{ background: '#22c55e' }} />
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-          {/* Bottom Bar */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/30">
-            <p>
-              © {new Date().getFullYear()} E.G.S. Pillay Engineering College, ECE Department. All Rights Reserved.
-            </p>
-            <p className="flex items-center gap-1">
-              Built with{' '}
-              <Heart className="w-3 h-3 text-expo-green-end fill-expo-green-end mx-0.5" />{' '}
-              using{' '}
-              <a
-                href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${appId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-expo-green-end hover:text-expo-green-start transition-colors"
-              >
-                caffeine.ai
-              </a>
-            </p>
+          {/* Contact */}
+          <div>
+            <h4 className="text-white font-semibold text-sm uppercase tracking-widest mb-5"
+              style={{ color: '#22c55e' }}>
+              Contact
+            </h4>
+            <ul className="space-y-2.5 text-sm text-white/50">
+              <li>Department of IoT Engineering</li>
+              <li>College Campus, City - 600001</li>
+              <li>
+                <a href="mailto:iotexpo2026@college.edu"
+                  className="hover:text-white transition-colors" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                  iotexpo2026@college.edu
+                </a>
+              </li>
+            </ul>
           </div>
         </div>
-      </footer>
 
-      {/* Scroll to Top Button */}
-      <button
-        onClick={scrollToTop}
-        className={`fixed bottom-6 right-6 z-50 w-11 h-11 rounded-full bg-gradient-to-br from-expo-green-start to-expo-green-end text-white shadow-lg shadow-expo-green-start/40 flex items-center justify-center hover:scale-110 transition-all duration-300 ${
-          showScrollTop ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
-        }`}
-        aria-label="Scroll to top"
-      >
-        <ArrowUp className="w-5 h-5" />
-      </button>
-    </>
+        {/* Bottom Bar */}
+        <div className="pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4"
+          style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+          <p className="text-white/40 text-xs text-center sm:text-left">
+            © {year} IoT Expo 2026. All rights reserved.
+          </p>
+          <p className="text-white/40 text-xs flex items-center gap-1">
+            Built with <Heart className="w-3 h-3 fill-current" style={{ color: '#22c55e' }} /> using{' '}
+            <a
+              href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${appId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white transition-colors"
+              style={{ color: '#22c55e' }}
+            >
+              caffeine.ai
+            </a>
+          </p>
+          <button
+            onClick={scrollToTop}
+            className="w-9 h-9 rounded-lg flex items-center justify-center transition-all hover:scale-110"
+            style={{
+              background: 'rgba(15,157,88,0.15)',
+              border: '1px solid rgba(15,157,88,0.3)',
+              color: '#22c55e',
+            }}
+            aria-label="Scroll to top"
+          >
+            <ArrowUp className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    </footer>
   );
 }

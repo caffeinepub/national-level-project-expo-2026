@@ -2,23 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-revert-the-application-to-the-last-known-stable-state-before-the-recent-changes-that-caused-issues-restore-both-frontend-and-backend-code-to-the-previously-working-version-ensuring-the-app-builds-and-deploys-successfully",
-      "featureTitle": "Revert the application to the last known stable state before the recent changes that caused issues. Restore both frontend and backend code to the previously working version, ensuring the app builds and deploys successfully.",
+      "featureId": "feature-fix-the-not-found-error-displayed-when-navigating-to-the-deployed-application-ensure-the-tanstack-router-configuration-correctly-handles-the-root-route-and-all-defined-routes-home-about-event-details-registration-gallery-check-registration-admin-admin-dashboard-so-that-users-land-on-the-home-page-by-default-without-seeing-a-404-not-found-screen",
+      "featureTitle": "Fix the 'Not Found' error displayed when navigating to the deployed application. Ensure the TanStack Router configuration correctly handles the root route and all defined routes (home, about, event-details, registration, gallery, check-registration, admin, admin/dashboard) so that users land on the home page by default without seeing a 404/not-found screen.",
       "files": [
         "frontend/src/App.tsx",
-        "frontend/src/components/About.tsx",
-        "frontend/src/components/AdminContentManagement.tsx",
-        "frontend/src/components/Coordinators.tsx",
-        "frontend/src/components/EventDetails.tsx",
-        "frontend/src/components/Hero.tsx",
-        "frontend/src/components/Registration.tsx",
-        "frontend/src/context/AdminAuthContext.tsx",
-        "frontend/src/hooks/useQueries.ts",
-        "frontend/src/pages/AdminDashboard.tsx",
-        "frontend/src/pages/AdminLogin.tsx",
-        "frontend/src/pages/GalleryPage.tsx",
-        "frontend/src/pages/HomePage.tsx",
-        "frontend/src/pages/RegistrationLookupPage.tsx"
+        "frontend/src/pages/NotFoundPage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -31,6 +19,26 @@
       ],
       "testIds": [
         "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-ensure-the-frontend-build-configuration-index-html-and-asset-paths-supports-client-side-routing-correctly-in-the-internet-computer-deployment-environment-so-that-deep-link-navigation-and-page-refreshes-do-not-result-in-not-found-errors",
+      "featureTitle": "Ensure the frontend build configuration (index.html and asset paths) supports client-side routing correctly in the Internet Computer deployment environment, so that deep-link navigation and page refreshes do not result in 'Not Found' errors.",
+      "files": [
+        "frontend/src/App.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
       ],
       "confidence": "high"
     }

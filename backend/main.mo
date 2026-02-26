@@ -32,6 +32,19 @@ actor {
     timestamp : Int;
   };
 
+  public type RegistrationRecord = {
+    id : Nat;
+    fullName : Text;
+    email : Text;
+    phoneNumber : Text;
+    collegeName : Text;
+    department : Text;
+    projectTitle : Text;
+    category : Text;
+    abstract : Text;
+    timestamp : Int;
+  };
+
   public type UserProfile = {
     name : Text;
     email : Text;
@@ -111,6 +124,14 @@ actor {
   var coordinatorsContent : ?CoordinatorsContent = null;
   var contactContent : ?ContactContent = null;
   var galleryImages = Map.empty<Text, GalleryImage>();
+
+  public query ({ caller }) func getAllRegistrationRecords() : async [RegistrationRecord] {
+    if (not (AccessControl.isAdmin(accessControlState, caller))) {
+      Runtime.trap("Unauthorized: Only admins can access all registration records");
+    };
+
+    registrations.values().toArray().sort(Registration.compareByTimestamp);
+  };
 
   public shared ({ caller }) func submitRegistration(
     fullName : Text,

@@ -69,6 +69,18 @@ export interface Registration {
   'department' : string,
   'phoneNumber' : string,
 }
+export interface RegistrationRecord {
+  'id' : bigint,
+  'collegeName' : string,
+  'fullName' : string,
+  'email' : string,
+  'projectTitle' : string,
+  'timestamp' : bigint,
+  'abstract' : string,
+  'category' : string,
+  'department' : string,
+  'phoneNumber' : string,
+}
 export interface TimelineMilestone {
   'milestoneLabel' : string,
   'date' : string,
@@ -110,6 +122,7 @@ export interface _SERVICE {
   'deleteGalleryImage' : ActorMethod<[string], boolean>,
   'deleteRegistration' : ActorMethod<[bigint], boolean>,
   'getAboutContent' : ActorMethod<[], [] | [AboutContent]>,
+  'getAllRegistrationRecords' : ActorMethod<[], Array<RegistrationRecord>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getContactContent' : ActorMethod<[], [] | [ContactContent]>,

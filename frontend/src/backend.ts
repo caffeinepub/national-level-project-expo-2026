@@ -158,6 +158,18 @@ export interface Coordinator {
     email: string;
     phone: string;
 }
+export interface RegistrationRecord {
+    id: bigint;
+    collegeName: string;
+    fullName: string;
+    email: string;
+    projectTitle: string;
+    timestamp: bigint;
+    abstract: string;
+    category: string;
+    department: string;
+    phoneNumber: string;
+}
 export interface UserProfile {
     name: string;
     email: string;
@@ -184,6 +196,7 @@ export interface backendInterface {
     deleteGalleryImage(id: string): Promise<boolean>;
     deleteRegistration(id: bigint): Promise<boolean>;
     getAboutContent(): Promise<AboutContent | null>;
+    getAllRegistrationRecords(): Promise<Array<RegistrationRecord>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getContactContent(): Promise<ContactContent | null>;
@@ -374,6 +387,20 @@ export class Backend implements backendInterface {
         } else {
             const result = await this.actor.getAboutContent();
             return from_candid_opt_n11(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getAllRegistrationRecords(): Promise<Array<RegistrationRecord>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getAllRegistrationRecords();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getAllRegistrationRecords();
+            return result;
         }
     }
     async getCallerUserProfile(): Promise<UserProfile | null> {

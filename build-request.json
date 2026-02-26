@@ -1,36 +1,53 @@
 {
   "kind": "build_request",
-  "title": "Revert to a stable working version",
+  "title": "Fix 'Not Found' routing error on deployed app",
   "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Revert the application to the last known stable state before the recent changes that caused issues. Restore both frontend and backend code to the previously working version, ensuring the app builds and deploys successfully.",
-      "target": "both",
+      "text": "Fix the 'Not Found' error displayed when navigating to the deployed application. Ensure the TanStack Router configuration correctly handles the root route and all defined routes (home, about, event-details, registration, gallery, check-registration, admin, admin/dashboard) so that users land on the home page by default without seeing a 404/not-found screen.",
+      "target": "frontend",
       "source": {
         "messageIds": [
           "msg-latest"
         ],
         "quotes": [
-          "it is not reverted"
+          "it is showing not fount"
         ]
       },
       "acceptanceCriteria": [
-        "The application builds without errors",
-        "The application deploys successfully to the network",
-        "All previously working features (registration, gallery, admin dashboard, CMS content) function correctly",
-        "The admin login and dashboard data loading work as expected"
+        "Navigating to the root URL '/' renders the HomePage without any 'Not Found' error",
+        "All defined routes (about, event-details, registration, gallery, check-registration, admin, admin/dashboard) resolve correctly",
+        "A proper catch-all or fallback route is defined so unknown paths show a user-friendly 404 page rather than a blank or broken screen",
+        "The deployed production build does not show 'Not Found' on initial page load"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Ensure the frontend build configuration (index.html and asset paths) supports client-side routing correctly in the Internet Computer deployment environment, so that deep-link navigation and page refreshes do not result in 'Not Found' errors.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ],
+        "quotes": [
+          "it is showing not fount"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Page refresh on any valid route does not produce a 'Not Found' error",
+        "Direct URL navigation to any defined route loads the correct page"
       ]
     }
   ],
   "constraints": [
-    "Do not introduce new features or UI changes — only restore stable functionality",
-    "Preserve the existing data model and backend state"
+    "Do not modify files listed in frontend.immutablePaths",
+    "Do not alter the existing backend actor or data models"
   ],
   "nonGoals": [
-    "Adding new features",
-    "Redesigning any UI components",
-    "Changing the authentication mechanism"
+    "Adding new routes or pages",
+    "Changing visual design or layout",
+    "Modifying backend logic"
   ],
   "imageRequirements": {
     "required": [],

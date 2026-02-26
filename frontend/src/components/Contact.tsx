@@ -1,199 +1,272 @@
-import { MapPin, Phone, Mail, Globe, MessageCircle, Instagram } from 'lucide-react';
-import { SiFacebook, SiInstagram, SiLinkedin, SiYoutube } from 'react-icons/si';
-import { useScrollAnimation } from '../hooks/useScrollAnimation';
+import { useRef, useEffect, useState } from 'react';
 import { useGetContactContent } from '../hooks/useQueries';
-
-const socialLinks = [
-  { icon: SiFacebook, href: 'https://facebook.com', label: 'Facebook', color: 'hover:text-blue-400' },
-  { icon: SiInstagram, href: 'https://www.instagram.com/innovativelink_expo_2k26?igsh=MTBvbTMzMXJzbWdtMg==', label: 'Instagram', color: 'hover:text-pink-400' },
-  { icon: SiLinkedin, href: 'https://linkedin.com', label: 'LinkedIn', color: 'hover:text-blue-500' },
-  { icon: SiYoutube, href: 'https://youtube.com', label: 'YouTube', color: 'hover:text-red-400' },
-];
-
-const DEFAULT_CONTACT = {
-  addressLine1: 'E.G.S. Pillay Engineering College',
-  addressLine2: 'Redhills, Nagapattinam – 611 002\nTamil Nadu, India',
-  phone: '+91 4365 220000',
-  email: 'expo2026@egspillay.ac.in',
-  website: 'www.egspillay.ac.in',
-};
+import { MapPin, Phone, Mail, Globe, Zap } from 'lucide-react';
+import { SiWhatsapp, SiInstagram } from 'react-icons/si';
 
 const WHATSAPP_URL = 'https://chat.whatsapp.com/H6H4HMb31XzKw0ziktZSkg';
 const INSTAGRAM_URL = 'https://www.instagram.com/innovativelink_expo_2k26?igsh=MTBvbTMzMXJzbWdtMg==';
 
-export default function Contact() {
-  const { ref: headingRef, isVisible: headingVisible } = useScrollAnimation({ threshold: 0.3 });
-  const { ref: contentRef, isVisible: contentVisible } = useScrollAnimation({ threshold: 0.2 });
-  const { ref: connectRef, isVisible: connectVisible } = useScrollAnimation({ threshold: 0.2 });
-  const { data: contactContent } = useGetContactContent();
+const defaultContent = {
+  addressLine1: 'Department of IoT Engineering',
+  addressLine2: 'College Campus, City - 600001',
+  phone: '+91 98765 43210',
+  email: 'iotexpo2026@college.edu',
+  website: 'www.iotexpo2026.college.edu',
+};
 
-  const addressLine1 = contactContent?.addressLine1 || DEFAULT_CONTACT.addressLine1;
-  const addressLine2 = contactContent?.addressLine2 || DEFAULT_CONTACT.addressLine2;
-  const phone = contactContent?.phone || DEFAULT_CONTACT.phone;
-  const email = contactContent?.email || DEFAULT_CONTACT.email;
-  const website = contactContent?.website || DEFAULT_CONTACT.website;
+function AnimatedCard({
+  children,
+  index,
+  className = '',
+  style,
+}: {
+  children: React.ReactNode;
+  index: number;
+  className?: string;
+  style?: React.CSSProperties;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
 
-  const websiteHref = website.startsWith('http') ? website : `https://${website}`;
-  const phoneHref = `tel:${phone.replace(/\s/g, '')}`;
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <section id="contact" className="py-24 bg-expo-dark relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-expo-green-start/30 to-transparent" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(15,157,88,0.05),transparent_60%)]" />
+    <div
+      ref={ref}
+      className={className}
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: visible ? 'translateY(0)' : 'translateY(30px)',
+        transition: `opacity 0.6s ease, transform 0.6s ease`,
+        transitionDelay: `${index * 120}ms`,
+        ...style,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
+export default function Contact() {
+  const { data: contactContent } = useGetContactContent();
+  const headerRef = useRef<HTMLDivElement>(null);
+  const [headerVisible, setHeaderVisible] = useState(false);
+
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setHeaderVisible(true);
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const content = contactContent || defaultContent;
+
+  const contactItems = [
+    { icon: <MapPin className="w-5 h-5" />, label: 'Address', value: `${content.addressLine1}, ${content.addressLine2}` },
+    { icon: <Phone className="w-5 h-5" />, label: 'Phone', value: content.phone, href: `tel:${content.phone}` },
+    { icon: <Mail className="w-5 h-5" />, label: 'Email', value: content.email, href: `mailto:${content.email}` },
+    { icon: <Globe className="w-5 h-5" />, label: 'Website', value: content.website, href: `https://${content.website}` },
+  ];
+
+  return (
+    <section
+      id="contact"
+      className="relative py-20 md:py-28 overflow-hidden"
+      style={{ background: 'linear-gradient(180deg, #050f0a 0%, #071a10 50%, #050f0a 100%)' }}
+    >
+      {/* Background Orbs */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div
-          ref={headingRef as React.RefObject<HTMLDivElement>}
-          className={`text-center mb-16 transition-all duration-700 ${
-            headingVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}
+          className="drift-orb-2 absolute top-[20%] right-[5%] w-72 h-72 rounded-full opacity-10"
+          style={{ background: 'radial-gradient(circle, #0f9d58, transparent 70%)', filter: 'blur(50px)' }}
+        />
+        <div
+          className="drift-orb-1 absolute bottom-[15%] left-[8%] w-56 h-56 rounded-full opacity-10"
+          style={{ background: 'radial-gradient(circle, #22c55e, transparent 70%)', filter: 'blur(40px)' }}
+        />
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Section Header */}
+        <div
+          ref={headerRef}
+          className="text-center mb-16"
+          style={{
+            opacity: headerVisible ? 1 : 0,
+            transform: headerVisible ? 'translateY(0)' : 'translateY(30px)',
+            transition: 'opacity 0.7s ease, transform 0.7s ease',
+          }}
         >
-          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold text-expo-green-end border border-expo-green-start/40 bg-expo-green-start/10 mb-4 uppercase tracking-widest">
+          <div
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-widest mb-4"
+            style={{
+              background: 'rgba(15,157,88,0.1)',
+              border: '1px solid rgba(15,157,88,0.3)',
+              color: '#22c55e',
+            }}
+          >
+            <Zap className="w-3 h-3" />
             Get in Touch
-          </span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-4">
-            Contact{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-expo-green-start to-expo-green-end">
-              Us
-            </span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-5">
+            <span className="gradient-text">Contact Us</span>
           </h2>
-          <p className="text-white/50 max-w-xl mx-auto text-sm sm:text-base">
-            Have questions? Reach out to us and we'll get back to you as soon as possible.
+          <p className="text-white/60 max-w-xl mx-auto text-base md:text-lg">
+            Have questions? We're here to help. Reach out to us through any of the channels below.
           </p>
         </div>
 
-        <div
-          ref={contentRef as React.RefObject<HTMLDivElement>}
-          className={`grid grid-cols-1 lg:grid-cols-2 gap-8 transition-all duration-700 ${
-            contentVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}
-        >
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Contact Info */}
-          <div className="space-y-6">
-            <div className="glass-card rounded-2xl p-6 border border-white/10">
-              <h3 className="text-white font-bold text-lg mb-5">College Information</h3>
-              <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-expo-green-start/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <MapPin className="w-4 h-4 text-expo-green-end" />
-                  </div>
-                  <div>
-                    <p className="text-white font-semibold text-sm">{addressLine1}</p>
-                    <p className="text-white/50 text-sm leading-relaxed whitespace-pre-line">
-                      {addressLine2}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-expo-green-start/20 flex items-center justify-center flex-shrink-0">
-                    <Phone className="w-4 h-4 text-expo-green-end" />
-                  </div>
-                  <div>
-                    <p className="text-white/50 text-xs uppercase tracking-wider mb-0.5">Phone</p>
-                    <a href={phoneHref} className="text-white text-sm hover:text-expo-green-end transition-colors">
-                      {phone}
-                    </a>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-expo-green-start/20 flex items-center justify-center flex-shrink-0">
-                    <Mail className="w-4 h-4 text-expo-green-end" />
-                  </div>
-                  <div>
-                    <p className="text-white/50 text-xs uppercase tracking-wider mb-0.5">Email</p>
-                    <a href={`mailto:${email}`} className="text-white text-sm hover:text-expo-green-end transition-colors">
-                      {email}
-                    </a>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-expo-green-start/20 flex items-center justify-center flex-shrink-0">
-                    <Globe className="w-4 h-4 text-expo-green-end" />
-                  </div>
-                  <div>
-                    <p className="text-white/50 text-xs uppercase tracking-wider mb-0.5">Website</p>
-                    <a href={websiteHref} target="_blank" rel="noopener noreferrer" className="text-white text-sm hover:text-expo-green-end transition-colors">
-                      {website}
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Social Links */}
-            <div className="glass-card rounded-2xl p-6 border border-white/10">
-              <h3 className="text-white font-bold text-lg mb-4">Follow Us</h3>
-              <div className="flex gap-4">
-                {socialLinks.map(({ icon: Icon, href, label, color }) => (
-                  <a
-                    key={label}
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={label}
-                    className={`w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 ${color} hover:border-white/20 hover:bg-white/10 transition-all duration-300`}
+          <div className="space-y-4">
+            {contactItems.map((item, i) => (
+              <AnimatedCard key={i} index={i} className="glass-card glass-card-hover rounded-2xl p-5">
+                <div className="flex items-center gap-4">
+                  <div
+                    className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(15,157,88,0.2), rgba(34,197,94,0.1))',
+                      border: '1px solid rgba(15,157,88,0.3)',
+                      color: '#22c55e',
+                    }}
                   >
-                    <Icon className="w-4 h-4" />
-                  </a>
-                ))}
+                    {item.icon}
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider mb-0.5" style={{ color: '#22c55e' }}>
+                      {item.label}
+                    </p>
+                    {item.href ? (
+                      <a href={item.href} className="text-white/80 hover:text-white text-sm transition-colors">
+                        {item.value}
+                      </a>
+                    ) : (
+                      <p className="text-white/80 text-sm">{item.value}</p>
+                    )}
+                  </div>
+                </div>
+              </AnimatedCard>
+            ))}
+
+            {/* Social CTA */}
+            <AnimatedCard
+              index={4}
+              className="glass-card rounded-2xl p-6"
+              style={{ border: '1px solid rgba(15,157,88,0.2)' }}
+            >
+              <h3 className="text-white font-bold text-base mb-4">Connect With Us</h3>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <a
+                  href={WHATSAPP_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 px-5 py-3 rounded-full font-semibold text-sm text-white transition-all hover:scale-105"
+                  style={{
+                    background: 'linear-gradient(135deg, #128C7E, #25D366)',
+                    boxShadow: '0 0 20px rgba(37,211,102,0.3)',
+                  }}
+                >
+                  <SiWhatsapp className="w-4 h-4" />
+                  WhatsApp Community
+                </a>
+                <a
+                  href={INSTAGRAM_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 px-5 py-3 rounded-full font-semibold text-sm text-white transition-all hover:scale-105"
+                  style={{
+                    background: 'linear-gradient(135deg, #833AB4, #FD1D1D, #F77737)',
+                    boxShadow: '0 0 20px rgba(253,29,29,0.3)',
+                  }}
+                >
+                  <SiInstagram className="w-4 h-4" />
+                  Follow on Instagram
+                </a>
               </div>
-            </div>
+            </AnimatedCard>
           </div>
 
-          {/* Map Embed */}
-          <div className="glass-card rounded-2xl overflow-hidden border border-white/10 min-h-[300px]">
-            <iframe
-              title="College Location"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3916.5!2d79.8!3d10.77!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTDCsDQ2JzEyLjAiTiA3OcKwNDgnMDAuMCJF!5e0!3m2!1sen!2sin!4v1234567890"
-              width="100%"
-              height="100%"
-              style={{ border: 0, minHeight: '300px' }}
-              allowFullScreen
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              className="grayscale opacity-70 hover:opacity-100 hover:grayscale-0 transition-all duration-500"
-            />
-          </div>
-        </div>
+          {/* Map + Social Icons */}
+          <div className="space-y-5">
+            <AnimatedCard
+              index={0}
+              className="glass-card rounded-2xl overflow-hidden"
+              style={{ border: '1px solid rgba(15,157,88,0.2)' }}
+            >
+              <div className="h-64 md:h-80 lg:h-96">
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3890.0!2d80.2!3d13.0!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTPCsDAwJzAwLjAiTiA4MMKwMTInMDAuMCJF!5e0!3m2!1sen!2sin!4v1234567890"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Event Location"
+                  className="grayscale opacity-80"
+                />
+              </div>
+            </AnimatedCard>
 
-        {/* Connect With Us */}
-        <div
-          ref={connectRef as React.RefObject<HTMLDivElement>}
-          className={`mt-8 transition-all duration-700 delay-200 ${
-            connectVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}
-        >
-          <div className="glass-card rounded-2xl p-6 sm:p-8 border border-expo-green-start/20 bg-gradient-to-br from-expo-green-start/5 to-expo-green-end/5">
-            <div className="text-center mb-6">
-              <h3 className="text-white font-bold text-xl mb-2">Connect With Us</h3>
-              <p className="text-white/50 text-sm">
-                Reach out directly via WhatsApp or follow us on Instagram for the latest updates.
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              {/* WhatsApp Button */}
-              <a
-                href={WHATSAPP_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex items-center gap-3 px-6 py-3.5 rounded-xl bg-gradient-to-r from-[#0f9d58] to-[#22c55e] text-white font-semibold text-sm shadow-lg shadow-green-500/20 hover:shadow-xl hover:shadow-green-500/40 hover:scale-[1.03] transition-all duration-300 w-full sm:w-auto justify-center"
-              >
-                <MessageCircle className="w-5 h-5 flex-shrink-0" />
-                Chat on WhatsApp
-              </a>
-
-              {/* Instagram Button */}
-              <a
-                href={INSTAGRAM_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex items-center gap-3 px-6 py-3.5 rounded-xl bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 text-white font-semibold text-sm shadow-lg shadow-pink-500/20 hover:shadow-xl hover:shadow-pink-500/40 hover:scale-[1.03] transition-all duration-300 w-full sm:w-auto justify-center"
-              >
-                <Instagram className="w-5 h-5 flex-shrink-0" />
-                Follow on Instagram
-              </a>
-            </div>
+            {/* Follow Us */}
+            <AnimatedCard
+              index={1}
+              className="glass-card rounded-2xl p-6"
+              style={{ border: '1px solid rgba(15,157,88,0.2)' }}
+            >
+              <h3 className="text-white font-bold text-base mb-4">Follow Us</h3>
+              <div className="flex gap-3">
+                <a
+                  href={WHATSAPP_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-11 h-11 rounded-xl flex items-center justify-center text-white transition-all hover:scale-110"
+                  style={{
+                    background: 'rgba(37,211,102,0.15)',
+                    border: '1px solid rgba(37,211,102,0.3)',
+                    boxShadow: '0 0 15px rgba(37,211,102,0.2)',
+                  }}
+                >
+                  <SiWhatsapp className="w-5 h-5" style={{ color: '#25D366' }} />
+                </a>
+                <a
+                  href={INSTAGRAM_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-11 h-11 rounded-xl flex items-center justify-center text-white transition-all hover:scale-110"
+                  style={{
+                    background: 'rgba(253,29,29,0.15)',
+                    border: '1px solid rgba(253,29,29,0.3)',
+                    boxShadow: '0 0 15px rgba(253,29,29,0.2)',
+                  }}
+                >
+                  <SiInstagram className="w-5 h-5" style={{ color: '#FD1D1D' }} />
+                </a>
+              </div>
+            </AnimatedCard>
           </div>
         </div>
       </div>

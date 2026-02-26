@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,51 +6,79 @@
 
 @layer base {
   :root {
-    --background: oklch(0.08 0.02 150);
-    --foreground: oklch(0.95 0.02 150);
-    --card: oklch(0.12 0.025 150);
-    --card-foreground: oklch(0.95 0.02 150);
-    --popover: oklch(0.10 0.02 150);
-    --popover-foreground: oklch(0.95 0.02 150);
-    --primary: oklch(0.65 0.18 150);
-    --primary-foreground: oklch(0.08 0.02 150);
-    --secondary: oklch(0.18 0.03 150);
-    --secondary-foreground: oklch(0.90 0.02 150);
-    --muted: oklch(0.15 0.02 150);
-    --muted-foreground: oklch(0.60 0.04 150);
-    --accent: oklch(0.55 0.20 145);
-    --accent-foreground: oklch(0.08 0.02 150);
+    --background: oklch(0.08 0.02 160);
+    --foreground: oklch(0.95 0.01 160);
+    --card: oklch(0.12 0.03 160);
+    --card-foreground: oklch(0.95 0.01 160);
+    --popover: oklch(0.10 0.02 160);
+    --popover-foreground: oklch(0.95 0.01 160);
+    --primary: oklch(0.55 0.18 155);
+    --primary-foreground: oklch(0.98 0.005 160);
+    --secondary: oklch(0.65 0.20 145);
+    --secondary-foreground: oklch(0.08 0.02 160);
+    --muted: oklch(0.18 0.03 160);
+    --muted-foreground: oklch(0.65 0.05 160);
+    --accent: oklch(0.60 0.22 148);
+    --accent-foreground: oklch(0.08 0.02 160);
     --destructive: oklch(0.55 0.22 25);
-    --destructive-foreground: oklch(0.95 0.02 150);
-    --border: oklch(0.22 0.04 150);
-    --input: oklch(0.18 0.03 150);
-    --ring: oklch(0.65 0.18 150);
-    --success: oklch(0.60 0.18 145);
-    --warning: oklch(0.75 0.18 80);
-    --radius: 0.5rem;
+    --destructive-foreground: oklch(0.98 0.005 0);
+    --border: oklch(0.22 0.04 160);
+    --input: oklch(0.18 0.03 160);
+    --ring: oklch(0.55 0.18 155);
+    --radius: 0.75rem;
+    --success: oklch(0.60 0.20 148);
+    --warning: oklch(0.75 0.18 75);
+
+    /* Green gradient tokens */
+    --green-primary: #0f9d58;
+    --green-secondary: #22c55e;
+    --green-glow: rgba(15, 157, 88, 0.6);
+    --green-glow-strong: rgba(15, 157, 88, 0.9);
   }
 
   * {
     @apply border-border;
   }
 
-  body {
-    @apply bg-background text-foreground;
-    font-family: 'Space Grotesk', 'Inter', sans-serif;
+  html {
+    scroll-behavior: smooth;
   }
 
-  h1, h2, h3 {
-    font-family: 'Orbitron', sans-serif;
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Poppins', 'Inter', system-ui, sans-serif;
+    overflow-x: hidden;
   }
 }
 
-/* =============================================
-   PAGE TRANSITION ANIMATIONS
-   ============================================= */
-@keyframes page-enter {
+/* ===================== SCROLL ANIMATIONS ===================== */
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.6s ease-out forwards;
+}
+
+.animate-fade-in-hidden {
+  opacity: 0;
+}
+
+.animate-slide-up-hidden {
+  opacity: 0;
+  transform: translateY(2rem);
+}
+
+/* ===================== KEYFRAMES ===================== */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(2rem);
   }
   to {
     opacity: 1;
@@ -58,104 +86,115 @@
   }
 }
 
-.page-transition {
-  animation: page-enter 0.35s ease-out both;
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* =============================================
-   GLOW ORB / DRIFT ANIMATIONS
-   ============================================= */
 @keyframes drift-orb-1 {
-  0% {
-    transform: translate(0, 0) scale(1);
-    opacity: 0.4;
-  }
-  25% {
-    transform: translate(40px, -60px) scale(1.1);
-    opacity: 0.55;
-  }
-  50% {
-    transform: translate(-30px, -100px) scale(0.95);
-    opacity: 0.35;
-  }
-  75% {
-    transform: translate(60px, -40px) scale(1.05);
-    opacity: 0.5;
-  }
-  100% {
-    transform: translate(0, 0) scale(1);
-    opacity: 0.4;
-  }
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(40px, -60px) scale(1.1); }
+  66% { transform: translate(-30px, 40px) scale(0.95); }
 }
 
 @keyframes drift-orb-2 {
-  0% {
-    transform: translate(0, 0) scale(1);
-    opacity: 0.3;
-  }
-  33% {
-    transform: translate(-50px, 40px) scale(1.08);
-    opacity: 0.45;
-  }
-  66% {
-    transform: translate(30px, 70px) scale(0.92);
-    opacity: 0.3;
-  }
-  100% {
-    transform: translate(0, 0) scale(1);
-    opacity: 0.3;
-  }
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-50px, 30px) scale(1.05); }
+  66% { transform: translate(35px, -45px) scale(1.1); }
 }
 
 @keyframes drift-orb-3 {
-  0% {
-    transform: translate(0, 0) scale(1);
-    opacity: 0.25;
-  }
-  40% {
-    transform: translate(70px, 30px) scale(1.12);
-    opacity: 0.4;
-  }
-  80% {
-    transform: translate(-40px, 60px) scale(0.9);
-    opacity: 0.2;
-  }
-  100% {
-    transform: translate(0, 0) scale(1);
-    opacity: 0.25;
-  }
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(25px, 50px) scale(0.9); }
 }
 
-.glow-orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  pointer-events: none;
-  z-index: 0;
-}
-
-.glow-orb-1 {
-  animation: drift-orb-1 25s ease-in-out infinite;
-}
-
-.glow-orb-2 {
-  animation: drift-orb-2 30s ease-in-out infinite;
-}
-
-.glow-orb-3 {
-  animation: drift-orb-3 20s ease-in-out infinite;
-}
-
-/* =============================================
-   SHIMMER SWEEP (Coordinator Cards)
-   ============================================= */
 @keyframes shimmer-sweep {
-  0% {
-    transform: translateX(-100%) skewX(-15deg);
-  }
-  100% {
-    transform: translateX(250%) skewX(-15deg);
-  }
+  0% { transform: translateX(-100%) skewX(-15deg); }
+  100% { transform: translateX(200%) skewX(-15deg); }
+}
+
+@keyframes blink-cursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes bounce-in {
+  0% { opacity: 0; transform: scale(0.85) translateY(20px); }
+  60% { opacity: 1; transform: scale(1.03) translateY(-4px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(15, 157, 88, 0.7), 0 0 30px rgba(15, 157, 88, 0.5); }
+  50% { box-shadow: 0 0 0 12px rgba(15, 157, 88, 0), 0 0 60px rgba(34, 197, 94, 0.8); }
+  100% { box-shadow: 0 0 0 0 rgba(15, 157, 88, 0), 0 0 30px rgba(15, 157, 88, 0.5); }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes float-hero {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(15, 157, 88, 0.5), 0 0 40px rgba(15, 157, 88, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(34, 197, 94, 0.8), 0 0 80px rgba(34, 197, 94, 0.5); }
+}
+
+@keyframes scroll-progress {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+@keyframes count-up {
+  from { opacity: 0; transform: scale(0.5); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ===================== ANIMATION CLASSES ===================== */
+.page-transition {
+  animation: page-enter 0.4s ease-out both;
+}
+
+.drift-orb-1 {
+  animation: drift-orb-1 12s ease-in-out infinite;
+}
+
+.drift-orb-2 {
+  animation: drift-orb-2 16s ease-in-out infinite;
+}
+
+.drift-orb-3 {
+  animation: drift-orb-3 10s ease-in-out infinite;
+}
+
+.shimmer-sweep::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.15) 50%,
+    transparent 60%
+  );
+  transform: translateX(-100%) skewX(-15deg);
+  transition: none;
 }
 
 .coordinator-card-shimmer {
@@ -163,158 +202,91 @@
   overflow: hidden;
 }
 
-.coordinator-card-shimmer::before {
+.coordinator-card-shimmer::after {
   content: '';
   position: absolute;
   inset: 0;
   background: linear-gradient(
     105deg,
     transparent 40%,
-    oklch(0.85 0.12 150 / 0.25) 50%,
-    oklch(0.95 0.05 150 / 0.15) 55%,
-    transparent 65%
+    rgba(255, 255, 255, 0.12) 50%,
+    transparent 60%
   );
   transform: translateX(-100%) skewX(-15deg);
   transition: none;
-  z-index: 1;
   pointer-events: none;
 }
 
-.coordinator-card-shimmer:hover::before {
-  animation: shimmer-sweep 0.75s ease-in-out;
+.coordinator-card-shimmer:hover::after {
+  animation: shimmer-sweep 0.6s ease-out forwards;
 }
 
-/* =============================================
-   TYPEWRITER CURSOR
-   ============================================= */
-@keyframes blink-cursor {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+.animate-bounce-in {
+  animation: bounce-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
-.typewriter-cursor {
-  display: inline-block;
-  width: 2px;
-  height: 1em;
-  background-color: oklch(0.65 0.18 150);
-  margin-left: 2px;
-  vertical-align: text-bottom;
-  animation: blink-cursor 0.8s step-end infinite;
+.animate-pulse-ring {
+  animation: pulse-ring 2s ease-in-out infinite;
 }
 
-/* =============================================
-   BOUNCE-IN (Admin Dashboard Cards)
-   ============================================= */
-@keyframes bounce-in {
-  0% {
-    opacity: 0;
-    transform: scale(0.8) translateY(10px);
-  }
-  60% {
-    opacity: 1;
-    transform: scale(1.04) translateY(-3px);
-  }
-  80% {
-    transform: scale(0.98) translateY(1px);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-.bounce-in {
-  animation: bounce-in 0.45s ease-out both;
-}
-
-/* =============================================
-   PULSE RING (CTA Buttons)
-   ============================================= */
-@keyframes pulse-ring {
-  0% {
-    transform: scale(1);
-    opacity: 0.7;
-  }
-  100% {
-    transform: scale(1.8);
-    opacity: 0;
-  }
-}
-
-.pulse-ring-btn {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.pulse-ring-btn::before,
-.pulse-ring-btn::after {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border-radius: inherit;
-  border: 2px solid oklch(0.65 0.18 150 / 0.6);
-  animation: pulse-ring 2s ease-out infinite;
-  pointer-events: none;
-}
-
-.pulse-ring-btn::after {
-  animation-delay: 1s;
-}
-
-/* =============================================
-   SCROLL REVEAL (general utility)
-   ============================================= */
-@keyframes fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.fade-up {
+.animate-fade-up {
   animation: fade-up 0.6s ease-out both;
 }
 
-/* =============================================
-   FLOATING PARTICLE PULSE
-   ============================================= */
-@keyframes float-pulse {
-  0%, 100% {
-    transform: translateY(0px);
-    opacity: 0.6;
-  }
-  50% {
-    transform: translateY(-12px);
-    opacity: 1;
-  }
+.animate-gradient-shift {
+  background-size: 200% 200%;
+  animation: gradient-shift 4s ease infinite;
 }
 
-/* =============================================
-   GRADIENT TEXT SHIMMER
-   ============================================= */
-@keyframes gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+.animate-float {
+  animation: float-hero 6s ease-in-out infinite;
 }
 
-.gradient-text-animated {
-  background: linear-gradient(
-    270deg,
-    oklch(0.75 0.20 150),
-    oklch(0.55 0.22 145),
-    oklch(0.65 0.18 160),
-    oklch(0.70 0.20 140)
-  );
-  background-size: 300% 300%;
+.animate-glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+/* ===================== GLASSMORPHISM ===================== */
+.glass-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-card-hover {
+  transition: all 0.3s ease;
+}
+
+.glass-card-hover:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(15, 157, 88, 0.4);
+  box-shadow: 0 0 30px rgba(15, 157, 88, 0.3), 0 8px 32px rgba(0, 0, 0, 0.3);
+  transform: translateY(-4px);
+}
+
+/* ===================== GREEN GRADIENT TEXT ===================== */
+.gradient-text {
+  background: linear-gradient(135deg, #0f9d58, #22c55e);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: gradient-shift 4s ease infinite;
+}
+
+/* ===================== SCROLLBAR ===================== */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: oklch(0.10 0.02 160);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #0f9d58, #22c55e);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #22c55e;
 }

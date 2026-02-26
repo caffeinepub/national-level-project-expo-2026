@@ -76,6 +76,18 @@ export interface Coordinator {
     email: string;
     phone: string;
 }
+export interface RegistrationRecord {
+    id: bigint;
+    collegeName: string;
+    fullName: string;
+    email: string;
+    projectTitle: string;
+    timestamp: bigint;
+    abstract: string;
+    category: string;
+    department: string;
+    phoneNumber: string;
+}
 export interface UserProfile {
     name: string;
     email: string;
@@ -91,6 +103,7 @@ export interface backendInterface {
     deleteGalleryImage(id: string): Promise<boolean>;
     deleteRegistration(id: bigint): Promise<boolean>;
     getAboutContent(): Promise<AboutContent | null>;
+    getAllRegistrationRecords(): Promise<Array<RegistrationRecord>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getContactContent(): Promise<ContactContent | null>;

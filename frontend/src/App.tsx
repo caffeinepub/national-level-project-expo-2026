@@ -1,11 +1,23 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { RouterProvider, createRouter, createRoute, createRootRoute, Outlet } from '@tanstack/react-router';
+import {
+  RouterProvider,
+  createRouter,
+  createRoute,
+  createRootRoute,
+  createHashHistory,
+  Outlet,
+  notFound,
+} from '@tanstack/react-router';
 import { AdminAuthProvider } from './context/AdminAuthContext';
 import HomePage from './pages/HomePage';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import GalleryPage from './pages/GalleryPage';
 import RegistrationLookupPage from './pages/RegistrationLookupPage';
+import AboutPage from './pages/AboutPage';
+import EventDetailsPage from './pages/EventDetailsPage';
+import RegistrationPage from './pages/RegistrationPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -26,12 +38,31 @@ function RootLayout() {
 
 const rootRoute = createRootRoute({
   component: RootLayout,
+  notFoundComponent: NotFoundPage,
 });
 
 const homeRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
   component: HomePage,
+});
+
+const aboutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/about',
+  component: AboutPage,
+});
+
+const eventDetailsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/event-details',
+  component: EventDetailsPage,
+});
+
+const registrationRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/registration',
+  component: RegistrationPage,
 });
 
 const galleryRoute = createRoute({
@@ -60,13 +91,24 @@ const adminDashboardRoute = createRoute({
 
 const routeTree = rootRoute.addChildren([
   homeRoute,
+  aboutRoute,
+  eventDetailsRoute,
+  registrationRoute,
   galleryRoute,
   registrationLookupRoute,
   adminLoginRoute,
   adminDashboardRoute,
 ]);
 
-const router = createRouter({ routeTree });
+// Use hash-based routing so the IC asset canister always serves index.html
+// and client-side routing handles the hash fragment (e.g. /#/about)
+const hashHistory = createHashHistory();
+
+const router = createRouter({
+  routeTree,
+  history: hashHistory,
+  defaultNotFoundComponent: NotFoundPage,
+});
 
 declare module '@tanstack/react-router' {
   interface Register {

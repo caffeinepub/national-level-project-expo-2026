@@ -1,112 +1,47 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Revert to Stable Working Version",
+  "title": "Fix 'Not Found' routing error on deployed app",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Revert the application to the last known stable state before recent changes, restoring both frontend and backend code to ensure the app builds, deploys, and functions correctly with working registration, gallery, admin dashboard, and CMS content features",
+      "summary": "Fix the 'Not Found' error by correcting TanStack Router configuration to properly handle the root route and all defined routes",
       "acceptanceCriteria": [
-        "The application builds without errors",
-        "The application deploys successfully to the network",
-        "All previously working features (registration, gallery, admin dashboard, CMS content) function correctly",
-        "The admin login and dashboard data loading work as expected"
+        "Navigating to the root URL '/' renders the HomePage without any 'Not Found' error",
+        "All defined routes (about, event-details, registration, gallery, check-registration, admin, admin/dashboard) resolve correctly",
+        "A proper catch-all or fallback route is defined so unknown paths show a user-friendly 404 page rather than a blank or broken screen",
+        "The deployed production build does not show 'Not Found' on initial page load"
       ],
       "file_operations": [
         {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Restore the stable router configuration and route definitions, ensuring all routes (home, about, event details, gallery, registration lookup, admin login/dashboard) are properly registered with correct component imports and path mappings"
+          "description": "Review and fix the TanStack Router configuration to ensure the root route '/' is properly defined and mapped to HomePage. Verify that all route definitions (home, about, event-details, registration, gallery, check-registration, admin, admin/dashboard) have correct path configurations. Add a catch-all NotFound route that handles undefined paths gracefully. Ensure the router's basepath and routing strategy are compatible with Internet Computer deployment."
         },
         {
-          "path": "frontend/src/components/AdminContentManagement.tsx",
+          "path": "frontend/src/pages/NotFoundPage.tsx",
+          "operation": "create",
+          "description": "Create a user-friendly 404 Not Found page component that displays a clear message when users navigate to an undefined route. Include a link back to the home page and match the site's design system with Navbar and Footer components."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Ensure frontend build configuration supports client-side routing in IC deployment environment to prevent 'Not Found' errors on page refresh and deep links",
+      "acceptanceCriteria": [
+        "Page refresh on any valid route does not produce a 'Not Found' error",
+        "Direct URL navigation to any defined route loads the correct page"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/index.html",
           "operation": "modify",
-          "description": "Revert any problematic changes to the CMS component, restoring stable state management, form handling, and backend mutation calls for Hero, About, Event Details, Coordinators, and Contact content sections"
+          "description": "Verify that the base tag and script module paths are correctly configured for Internet Computer deployment. Ensure asset paths are relative and compatible with the IC asset canister serving strategy. Add any necessary meta tags or configuration to support client-side routing in production."
         },
         {
-          "path": "frontend/src/components/Registration.tsx",
+          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Restore the working registration form component with proper validation, submission handling, and success dialog display, ensuring the mutation hook integration works correctly"
-        },
-        {
-          "path": "frontend/src/pages/AdminDashboard.tsx",
-          "operation": "modify",
-          "description": "Revert the admin dashboard to its stable state with functioning tabs for registrations, gallery, and content management, including working search, CSV export, delete operations, and data loading from React Query hooks"
-        },
-        {
-          "path": "frontend/src/pages/AdminLogin.tsx",
-          "operation": "modify",
-          "description": "Restore the stable admin login page with correct form handling and backend authentication integration, ensuring successful redirect to dashboard after login"
-        },
-        {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Revert any breaking changes to the query and mutation hooks, restoring stable React Query integration with proper error handling, cache management, and backend actor calls for all CRUD operations"
-        },
-        {
-          "path": "frontend/src/hooks/useActor.ts",
-          "operation": "modify",
-          "description": "Restore the stable actor initialization logic with correct identity handling, query invalidation on identity changes, and proper actor caching to ensure reliable backend communication"
-        },
-        {
-          "path": "frontend/src/context/AdminAuthContext.tsx",
-          "operation": "modify",
-          "description": "Revert any changes to the admin authentication context, ensuring stable session storage persistence and correct login/logout state management"
-        },
-        {
-          "path": "frontend/src/components/Hero.tsx",
-          "operation": "modify",
-          "description": "Restore the stable hero section with working countdown timer, registration count display, typewriter effect, and CMS content integration with proper fallback defaults"
-        },
-        {
-          "path": "frontend/src/components/About.tsx",
-          "operation": "modify",
-          "description": "Revert to the stable About component with functioning scroll animations, feature card rendering, and CMS content fetching with correct fallback handling"
-        },
-        {
-          "path": "frontend/src/components/EventDetails.tsx",
-          "operation": "modify",
-          "description": "Restore the stable event details component with proper content display, timeline rendering, and scroll-triggered animations working correctly"
-        },
-        {
-          "path": "frontend/src/components/Coordinators.tsx",
-          "operation": "modify",
-          "description": "Revert the coordinators component to its working state with proper data fetching and card rendering for faculty and student coordinators"
-        },
-        {
-          "path": "frontend/src/components/Contact.tsx",
-          "operation": "modify",
-          "description": "Restore the stable contact section with working map embed, social links, and CMS content integration"
-        },
-        {
-          "path": "frontend/src/pages/GalleryPage.tsx",
-          "operation": "modify",
-          "description": "Revert the gallery page to its stable state with functioning image loading, grid display, and scroll animations"
-        },
-        {
-          "path": "frontend/src/pages/HomePage.tsx",
-          "operation": "modify",
-          "description": "Restore the stable home page layout with all section components properly composed and rendered"
-        },
-        {
-          "path": "frontend/src/pages/RegistrationLookupPage.tsx",
-          "operation": "modify",
-          "description": "Revert the registration lookup page to its working state with correct email search functionality and result display"
-        },
-        {
-          "path": "frontend/src/main.tsx",
-          "operation": "modify",
-          "description": "Restore the stable React app entry point with correct provider wrapping order and initialization"
-        },
-        {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Revert any CSS changes that may have broken styling, restoring stable global styles, theme variables, and animation keyframes"
-        },
-        {
-          "path": "frontend/tailwind.config.js",
-          "operation": "modify",
-          "description": "Restore the stable Tailwind configuration with correct color tokens, plugins, and theme settings"
+          "description": "Ensure the TanStack Router is configured with the correct basepath for IC deployment (if needed). Verify that the router uses hash-based routing or that the deployment environment is configured to serve index.html for all routes. Add fallback handling to redirect unknown routes to the NotFound page component."
         }
       ]
     }

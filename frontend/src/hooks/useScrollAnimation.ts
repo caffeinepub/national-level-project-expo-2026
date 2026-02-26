@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 
-interface UseScrollAnimationOptions {
+interface ScrollAnimationOptions {
+  variant?: 'fade-in' | 'slide-up';
+  delay?: number;
   threshold?: number;
-  rootMargin?: string;
-  triggerOnce?: boolean;
 }
 
-export function useScrollAnimation(options: UseScrollAnimationOptions = {}) {
-  const { threshold = 0.15, rootMargin = '0px', triggerOnce = true } = options;
-  const ref = useRef<HTMLElement>(null);
+export function useScrollAnimation(options: ScrollAnimationOptions = {}) {
+  const { variant = 'fade-in', delay = 0, threshold = 0.15 } = options;
+  const ref = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -19,19 +19,21 @@ export function useScrollAnimation(options: UseScrollAnimationOptions = {}) {
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsVisible(true);
-          if (triggerOnce) {
-            observer.unobserve(element);
-          }
-        } else if (!triggerOnce) {
-          setIsVisible(false);
+          observer.unobserve(element);
         }
       },
-      { threshold, rootMargin }
+      { threshold }
     );
 
     observer.observe(element);
     return () => observer.disconnect();
-  }, [threshold, rootMargin, triggerOnce]);
+  }, [threshold]);
 
-  return { ref, isVisible };
+  const hiddenClass = variant === 'slide-up' ? 'animate-slide-up-hidden' : 'animate-fade-in-hidden';
+  const visibleClass = variant === 'slide-up' ? 'animate-slide-up' : 'animate-fade-in';
+  const animationClass = isVisible ? visibleClass : hiddenClass;
+
+  const style = delay > 0 ? { animationDelay: `${delay}ms` } : {};
+
+  return { ref, isVisible, animationClass, style };
 }

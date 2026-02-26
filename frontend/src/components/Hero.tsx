@@ -1,188 +1,284 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useGetHeroContent, useGetRegistrationCount } from '../hooks/useQueries';
-import { useNavigate } from '@tanstack/react-router';
+import { ChevronDown, Zap, Users, Calendar, MapPin } from 'lucide-react';
+
+interface TimeLeft {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+}
 
 function TypewriterText({ texts }: { texts: string[] }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [displayText, setDisplayText] = useState('');
-  const [textIndex, setTextIndex] = useState(0);
-  const [charIndex, setCharIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    if (!texts.length) return;
-    const current = texts[textIndex];
+    const currentText = texts[currentIndex];
     const timeout = setTimeout(() => {
       if (!isDeleting) {
-        if (charIndex < current.length) {
-          setDisplayText(current.slice(0, charIndex + 1));
-          setCharIndex((c) => c + 1);
+        if (displayText.length < currentText.length) {
+          setDisplayText(currentText.slice(0, displayText.length + 1));
         } else {
           setTimeout(() => setIsDeleting(true), 1500);
         }
       } else {
-        if (charIndex > 0) {
-          setDisplayText(current.slice(0, charIndex - 1));
-          setCharIndex((c) => c - 1);
+        if (displayText.length > 0) {
+          setDisplayText(displayText.slice(0, -1));
         } else {
           setIsDeleting(false);
-          setTextIndex((i) => (i + 1) % texts.length);
+          setCurrentIndex((prev) => (prev + 1) % texts.length);
         }
       }
     }, isDeleting ? 50 : 80);
     return () => clearTimeout(timeout);
-  }, [charIndex, isDeleting, textIndex, texts]);
+  }, [displayText, isDeleting, currentIndex, texts]);
 
   return (
-    <span className="text-primary">
+    <span>
       {displayText}
-      <span className="blink-cursor">|</span>
+      <span className="animate-[blink-cursor_1s_step-end_infinite] border-r-2 ml-0.5"
+        style={{ borderColor: '#22c55e' }}>&nbsp;</span>
     </span>
   );
 }
 
-function CountUp({ target }: { target: number }) {
-  const [count, setCount] = useState(0);
+function CountdownTimer({ targetDate }: { targetDate: string }) {
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+
   useEffect(() => {
-    if (target === 0) return;
-    const duration = 1500;
-    const steps = 60;
-    const increment = target / steps;
-    let current = 0;
-    const timer = setInterval(() => {
-      current += increment;
-      if (current >= target) {
-        setCount(target);
-        clearInterval(timer);
-      } else {
-        setCount(Math.floor(current));
+    const calculateTimeLeft = () => {
+      const target = new Date(targetDate).getTime();
+      const now = new Date().getTime();
+      const diff = target - now;
+
+      if (diff <= 0) {
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+        return;
       }
-    }, duration / steps);
-    return () => clearInterval(timer);
-  }, [target]);
-  return <>{count}</>;
+
+      setTimeLeft({
+        days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
+        seconds: Math.floor((diff % (1000 * 60)) / 1000),
+      });
+    };
+
+    calculateTimeLeft();
+    const interval = setInterval(calculateTimeLeft, 1000);
+    return () => clearInterval(interval);
+  }, [targetDate]);
+
+  const units = [
+    { label: 'Days', value: timeLeft.days },
+    { label: 'Hours', value: timeLeft.hours },
+    { label: 'Minutes', value: timeLeft.minutes },
+    { label: 'Seconds', value: timeLeft.seconds },
+  ];
+
+  return (
+    <div className="flex items-center gap-3 sm:gap-4 justify-center">
+      {units.map((unit, i) => (
+        <div key={unit.label} className="flex items-center gap-3 sm:gap-4">
+          <div className="flex flex-col items-center">
+            <div
+              className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl flex items-center justify-center text-2xl sm:text-3xl font-bold text-white"
+              style={{
+                background: 'rgba(255,255,255,0.08)',
+                backdropFilter: 'blur(12px)',
+                border: '1px solid rgba(15, 157, 88, 0.4)',
+                boxShadow: '0 0 20px rgba(15, 157, 88, 0.2)',
+              }}
+            >
+              {String(unit.value).padStart(2, '0')}
+            </div>
+            <span className="text-xs mt-1.5 font-medium uppercase tracking-widest"
+              style={{ color: '#22c55e' }}>
+              {unit.label}
+            </span>
+          </div>
+          {i < units.length - 1 && (
+            <span className="text-2xl font-bold mb-5" style={{ color: '#22c55e' }}>:</span>
+          )}
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export default function Hero() {
   const { data: heroContent } = useGetHeroContent();
   const { data: registrationCount } = useGetRegistrationCount();
-  const navigate = useNavigate();
+  const [scrollY, setScrollY] = useState(0);
   const heroRef = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setVisible(true), 100);
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (heroRef.current) {
-        const scrollY = window.scrollY;
-        heroRef.current.style.transform = `translateY(${scrollY * 0.4}px)`;
-      }
-    };
+    const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const eventTitle = heroContent?.eventTitle || 'Innovative Link Expo';
-  const taglines = heroContent?.tagline
-    ? [heroContent.tagline]
-    : ['Where Innovation Meets Excellence', 'Showcase Your Ideas', 'Connect & Collaborate'];
-  const eventDate = heroContent?.eventDate || 'March 2026';
-  const collegeName = heroContent?.collegeName || 'Your College';
-  const count = registrationCount !== undefined ? Number(registrationCount) : 0;
+  const defaultContent = {
+    eventTitle: 'National Level Project Expo 2026',
+    tagline: 'Innovate. Build. Transform.',
+    eventDate: '2026-04-15',
+    collegeName: 'Department of IoT Engineering',
+  };
 
-  const handleRegisterClick = () => {
-    document.getElementById('register')?.scrollIntoView({ behavior: 'smooth' });
+  const content = heroContent || defaultContent;
+
+  const taglines = [
+    content.tagline,
+    'Where Ideas Meet Innovation',
+    'Build the Future Today',
+    'Connect. Create. Conquer.',
+  ];
+
+  const scrollToNext = () => {
+    const nextSection = document.getElementById('about');
+    if (nextSection) nextSection.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const scrollToRegister = () => {
+    const el = document.getElementById('registration');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background">
-      {/* Parallax Background */}
+    <section
+      ref={heroRef}
+      className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden"
+      style={{ background: '#050f0a' }}
+    >
+      {/* Animated Background Image with Parallax */}
       <div
-        ref={heroRef}
-        className="absolute inset-0 -top-20 -bottom-20"
+        className="absolute inset-0 z-0"
         style={{
           backgroundImage: 'url(/assets/generated/hero-bg.dim_1920x1080.png)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
+          transform: `translateY(${scrollY * 0.3}px)`,
+          willChange: 'transform',
         }}
       />
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-background/70" />
 
-      {/* Drifting Orbs */}
-      <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-primary/10 blur-3xl drift-orb-1 pointer-events-none" />
-      <div className="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full bg-primary/8 blur-3xl drift-orb-2 pointer-events-none" />
-      <div className="absolute top-1/2 right-1/3 w-48 h-48 rounded-full bg-accent/10 blur-3xl drift-orb-3 pointer-events-none" />
+      {/* Dark Overlay */}
+      <div className="absolute inset-0 z-[1]"
+        style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.75) 100%)' }} />
+
+      {/* Green gradient overlay */}
+      <div className="absolute inset-0 z-[2]"
+        style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(15,157,88,0.15) 0%, transparent 70%)' }} />
+
+      {/* Floating Orbs */}
+      <div className="absolute inset-0 z-[3] pointer-events-none overflow-hidden">
+        <div className="drift-orb-1 absolute top-[15%] left-[10%] w-64 h-64 rounded-full opacity-20"
+          style={{ background: 'radial-gradient(circle, #0f9d58, transparent 70%)', filter: 'blur(40px)' }} />
+        <div className="drift-orb-2 absolute top-[60%] right-[8%] w-80 h-80 rounded-full opacity-15"
+          style={{ background: 'radial-gradient(circle, #22c55e, transparent 70%)', filter: 'blur(50px)' }} />
+        <div className="drift-orb-3 absolute bottom-[20%] left-[30%] w-48 h-48 rounded-full opacity-20"
+          style={{ background: 'radial-gradient(circle, #0f9d58, transparent 70%)', filter: 'blur(35px)' }} />
+      </div>
 
       {/* Content */}
-      <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
-        <div
-          className={`transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
-          style={{ transitionDelay: '0ms' }}
-        >
-          <p className="text-primary text-sm font-semibold uppercase tracking-widest mb-3">{collegeName}</p>
+      <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto w-full pt-24 pb-16">
+        {/* Badge */}
+        <div className="animate-fade-up inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold mb-6"
+          style={{
+            background: 'rgba(15, 157, 88, 0.15)',
+            border: '1px solid rgba(15, 157, 88, 0.4)',
+            color: '#22c55e',
+            animationDelay: '0ms',
+          }}>
+          <Zap className="w-4 h-4" />
+          <span>{content.collegeName}</span>
         </div>
 
-        <div
-          className={`transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
-          style={{ transitionDelay: '150ms' }}
+        {/* Title */}
+        <h1
+          className="animate-fade-up text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-white mb-4 leading-tight tracking-tight"
+          style={{ animationDelay: '100ms' }}
         >
-          <h1 className="text-5xl md:text-7xl font-extrabold text-foreground mb-4 leading-tight">
-            {eventTitle}
-          </h1>
-        </div>
+          <span className="gradient-text">{content.eventTitle}</span>
+        </h1>
 
-        <div
-          className={`transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
-          style={{ transitionDelay: '300ms' }}
+        {/* Typewriter Tagline */}
+        <p
+          className="animate-fade-up text-lg sm:text-xl md:text-2xl font-medium mb-8 min-h-[2rem]"
+          style={{ color: 'rgba(255,255,255,0.8)', animationDelay: '200ms' }}
         >
-          <p className="text-xl md:text-2xl text-muted-foreground mb-2 h-8">
-            <TypewriterText texts={taglines} />
+          <TypewriterText texts={taglines} />
+        </p>
+
+        {/* Countdown Timer */}
+        <div className="animate-fade-up mb-10" style={{ animationDelay: '300ms' }}>
+          <p className="text-sm font-medium uppercase tracking-widest mb-4"
+            style={{ color: 'rgba(255,255,255,0.5)' }}>
+            Event Countdown
           </p>
+          <CountdownTimer targetDate={content.eventDate} />
         </div>
 
-        <div
-          className={`transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
-          style={{ transitionDelay: '450ms' }}
-        >
-          <p className="text-muted-foreground mb-8 text-lg">{eventDate}</p>
-        </div>
-
-        <div
-          className={`transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
-          style={{ transitionDelay: '600ms' }}
-        >
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-10">
-            <button
-              onClick={handleRegisterClick}
-              className="pulse-ring relative px-8 py-4 bg-primary text-primary-foreground font-bold text-lg rounded-full hover:bg-primary/90 transition-colors shadow-lg shadow-primary/30"
-            >
-              Register Now
-            </button>
-            <button
-              onClick={() => navigate({ to: '/gallery' })}
-              className="px-8 py-4 border-2 border-primary/50 text-primary font-semibold text-lg rounded-full hover:bg-primary/10 transition-colors"
-            >
-              View Gallery
-            </button>
-          </div>
-        </div>
-
-        <div
-          className={`transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
-          style={{ transitionDelay: '750ms' }}
-        >
-          <div className="inline-flex items-center gap-3 bg-card/60 backdrop-blur-sm border border-border rounded-full px-6 py-3">
-            <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-            <span className="text-foreground font-semibold">
-              <CountUp target={count} />+ Registrations
+        {/* Stats Row */}
+        <div className="animate-fade-up flex flex-wrap items-center justify-center gap-6 mb-10"
+          style={{ animationDelay: '350ms' }}>
+          <div className="flex items-center gap-2 text-white/70">
+            <Users className="w-4 h-4" style={{ color: '#22c55e' }} />
+            <span className="text-sm font-medium">
+              <span className="text-white font-bold text-lg">{Number(registrationCount || 0)}</span>+ Registered
             </span>
           </div>
+          <div className="w-px h-5 bg-white/20" />
+          <div className="flex items-center gap-2 text-white/70">
+            <Calendar className="w-4 h-4" style={{ color: '#22c55e' }} />
+            <span className="text-sm font-medium">{content.eventDate}</span>
+          </div>
+          <div className="w-px h-5 bg-white/20" />
+          <div className="flex items-center gap-2 text-white/70">
+            <MapPin className="w-4 h-4" style={{ color: '#22c55e' }} />
+            <span className="text-sm font-medium">On Campus</span>
+          </div>
+        </div>
+
+        {/* CTA Buttons */}
+        <div className="animate-fade-up flex flex-col sm:flex-row items-center justify-center gap-4"
+          style={{ animationDelay: '400ms' }}>
+          <button
+            onClick={scrollToRegister}
+            className="animate-pulse-ring px-8 py-4 rounded-full text-white font-bold text-lg transition-all duration-300 hover:scale-105 w-full sm:w-auto"
+            style={{
+              background: 'linear-gradient(135deg, #0f9d58, #22c55e)',
+              boxShadow: '0 0 40px rgba(15, 157, 88, 0.6)',
+            }}
+          >
+            🚀 Register Now
+          </button>
+          <button
+            onClick={scrollToNext}
+            className="px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 hover:scale-105 w-full sm:w-auto"
+            style={{
+              background: 'rgba(255,255,255,0.08)',
+              backdropFilter: 'blur(12px)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              color: 'white',
+            }}
+          >
+            Explore More
+          </button>
         </div>
       </div>
+
+      {/* Scroll Indicator */}
+      <button
+        onClick={scrollToNext}
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1 text-white/40 hover:text-white/70 transition-colors animate-float"
+        aria-label="Scroll down"
+      >
+        <span className="text-xs font-medium tracking-widest uppercase">Scroll</span>
+        <ChevronDown className="w-5 h-5" />
+      </button>
     </section>
   );
 }
