@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Search, Loader2, CheckCircle2, AlertCircle, User, Mail, Phone, Building2, BookOpen, Lightbulb, Tag, FileText, Hash } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import FloatingSocialButtons from '../components/FloatingSocialButtons';
 import { useGetRegistrationByEmail } from '../hooks/useQueries';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 import { Input } from '@/components/ui/input';
@@ -190,28 +191,14 @@ export default function RegistrationLookupPage() {
                   <DetailRow icon={Phone} label="Phone Number" value={registration.phoneNumber} />
                   <DetailRow icon={Building2} label="College Name" value={registration.collegeName} />
                   <DetailRow icon={BookOpen} label="Department" value={registration.department} />
-                  <DetailRow icon={Tag} label="Project Category" value={registration.category} />
                   <DetailRow icon={Lightbulb} label="Project Title" value={registration.projectTitle} />
-                  <DetailRow icon={FileText} label="Project Abstract" value={registration.abstract} />
+                  <DetailRow icon={Tag} label="Category" value={registration.category} />
+                  <DetailRow icon={FileText} label="Abstract" value={registration.abstract} />
                   <DetailRow
                     icon={Hash}
-                    label="Registration ID"
-                    value={`#${registration.id.toString()}`}
+                    label="Submitted On"
+                    value={new Date(Number(registration.timestamp) / 1_000_000).toLocaleString()}
                   />
-                </div>
-
-                {/* Card Footer */}
-                <div className="px-6 py-4 bg-expo-green-start/5 border-t border-expo-green-start/10">
-                  <p className="text-white/40 text-xs text-center">
-                    Registered on{' '}
-                    <span className="text-white/60">
-                      {new Date(Number(registration.timestamp) / 1_000_000).toLocaleDateString('en-IN', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric',
-                      })}
-                    </span>
-                  </p>
                 </div>
               </div>
             )}
@@ -219,6 +206,7 @@ export default function RegistrationLookupPage() {
         </div>
       </main>
       <Footer />
+      <FloatingSocialButtons />
     </>
   );
 }

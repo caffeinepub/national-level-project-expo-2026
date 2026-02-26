@@ -7,7 +7,9 @@ import type {
   EventDetailsContent,
   CoordinatorsContent,
   ContactContent,
+  GalleryImage,
 } from '../backend';
+import { ExternalBlob } from '../backend';
 
 export function useGetRegistrationCount() {
   const { actor, isFetching } = useActor();
@@ -29,10 +31,16 @@ export function useGetRegistrations() {
   return useQuery<Registration[]>({
     queryKey: ['registrations'],
     queryFn: async () => {
-      if (!actor) return [];
-      return actor.getRegistrations();
+      if (!actor) throw new Error('Actor not available');
+      const result = await actor.getRegistrations();
+      return Array.isArray(result) ? result : [];
     },
     enabled: !!actor && !isFetching,
+    retry: 1,
+    retryDelay: 1000,
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -125,9 +133,10 @@ export function useVerifyAdminCredentials() {
   const { actor } = useActor();
 
   return useMutation({
-    mutationFn: async ({ email, password }: { email: string; password: string }) => {
+    mutationFn: async (_credentials: { email: string; password: string }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.verifyAdminCredentials(email, password);
+      // Backend uses Internet Identity principal for admin verification
+      return actor.isCallerAdmin();
     },
   });
 }
@@ -286,6 +295,51 @@ export function useUpdateContactContent() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contactContent'] });
+    },
+  });
+}
+
+// ─── Gallery Hooks ───────────────────────────────────────────────────────────
+
+export function useGetGalleryImages() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<GalleryImage[]>({
+    queryKey: ['galleryImages'],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getGalleryImages();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useAddGalleryImage() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: { title: string; imageBlob: ExternalBlob }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.addGalleryImage(data.title, data.imageBlob);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['galleryImages'] });
+    },
+  });
+}
+
+export function useDeleteGalleryImage() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.deleteGalleryImage(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['galleryImages'] });
     },
   });
 }

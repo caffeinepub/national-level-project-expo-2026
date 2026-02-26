@@ -1,219 +1,160 @@
-import { Calendar, MapPin, IndianRupee, Users, Tag, Clock } from 'lucide-react';
-import { useScrollAnimation } from '../hooks/useScrollAnimation';
+import { useEffect, useRef } from 'react';
+import { Calendar, MapPin, DollarSign, Users, Tag, Clock } from 'lucide-react';
 import { useGetEventDetailsContent } from '../hooks/useQueries';
 
-const DEFAULT_EVENT_DATE = 'April 15, 2026';
-const DEFAULT_VENUE = 'E.G.S. Pillay Engineering College';
-const DEFAULT_FEE = 'Rs. 150';
-const DEFAULT_ELIGIBILITY = 'All Engineering Students';
-
-const DEFAULT_CATEGORIES = [
-  { name: 'IoT & Embedded Systems', color: 'bg-blue-500/20 text-blue-300 border-blue-500/30' },
-  { name: 'AI / Machine Learning', color: 'bg-purple-500/20 text-purple-300 border-purple-500/30' },
-  { name: 'Robotics & Automation', color: 'bg-orange-500/20 text-orange-300 border-orange-500/30' },
-  { name: 'Software Development', color: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' },
-  { name: 'Electronics & VLSI', color: 'bg-pink-500/20 text-pink-300 border-pink-500/30' },
-  { name: 'Others / Interdisciplinary', color: 'bg-expo-green-start/20 text-expo-green-end border-expo-green-start/30' },
-];
-
-const CATEGORY_COLORS = [
-  'bg-blue-500/20 text-blue-300 border-blue-500/30',
-  'bg-purple-500/20 text-purple-300 border-purple-500/30',
-  'bg-orange-500/20 text-orange-300 border-orange-500/30',
-  'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
-  'bg-pink-500/20 text-pink-300 border-pink-500/30',
-  'bg-expo-green-start/20 text-expo-green-end border-expo-green-start/30',
-];
-
-const DEFAULT_TIMELINE = [
-  { date: 'March 1, 2026', title: 'Registration Opens', desc: 'Online registration portal goes live. Submit your team details and project abstract.', side: 'left' as const },
-  { date: 'March 31, 2026', title: 'Registration Deadline', desc: 'Last date to register and submit your project abstract for review.', side: 'right' as const },
-  { date: 'April 5, 2026', title: 'Abstract Review', desc: 'Submitted abstracts will be reviewed by faculty coordinators. Selected teams will be notified.', side: 'left' as const },
-  { date: 'April 10, 2026', title: 'Confirmation & Briefing', desc: 'Selected teams receive confirmation and event guidelines. Prepare your project demo.', side: 'right' as const },
-  { date: 'April 15, 2026', title: 'Expo Day 🎉', desc: 'Present your project to judges, industry experts, and fellow innovators. Winners announced!', side: 'left' as const },
-];
-
-interface TimelineItemData {
-  date: string;
-  title: string;
-  desc: string;
-  side: 'left' | 'right';
-}
-
-function TimelineItem({ item, index }: { item: TimelineItemData; index: number }) {
-  const { ref, isVisible } = useScrollAnimation({ threshold: 0.3 });
-  const isLeft = item.side === 'left';
-
-  return (
-    <div
-      ref={ref as React.RefObject<HTMLDivElement>}
-      className={`relative flex items-center gap-4 md:gap-0 transition-all duration-700 ${
-        isVisible
-          ? 'opacity-100 translate-x-0'
-          : isLeft
-          ? 'opacity-0 -translate-x-12'
-          : 'opacity-0 translate-x-12'
-      }`}
-      style={{ transitionDelay: `${index * 100}ms` }}
-    >
-      {/* Left content (desktop) */}
-      <div className={`hidden md:block w-5/12 ${isLeft ? 'text-right pr-8' : ''}`}>
-        {isLeft && (
-          <div className="glass-card rounded-xl p-4 border border-white/10 hover:border-expo-green-start/40 transition-colors">
-            <span className="text-xs text-expo-green-end font-semibold uppercase tracking-wider">{item.date}</span>
-            <h4 className="text-white font-bold mt-1 mb-2">{item.title}</h4>
-            <p className="text-white/50 text-sm leading-relaxed">{item.desc}</p>
-          </div>
-        )}
-      </div>
-
-      {/* Center dot */}
-      <div className="hidden md:flex w-2/12 justify-center">
-        <div className="w-4 h-4 rounded-full bg-gradient-to-br from-expo-green-start to-expo-green-end shadow-lg shadow-expo-green-start/50 ring-4 ring-expo-dark z-10" />
-      </div>
-
-      {/* Right content (desktop) */}
-      <div className={`hidden md:block w-5/12 ${!isLeft ? 'pl-8' : ''}`}>
-        {!isLeft && (
-          <div className="glass-card rounded-xl p-4 border border-white/10 hover:border-expo-green-start/40 transition-colors">
-            <span className="text-xs text-expo-green-end font-semibold uppercase tracking-wider">{item.date}</span>
-            <h4 className="text-white font-bold mt-1 mb-2">{item.title}</h4>
-            <p className="text-white/50 text-sm leading-relaxed">{item.desc}</p>
-          </div>
-        )}
-      </div>
-
-      {/* Mobile layout */}
-      <div className="md:hidden flex items-start gap-4 w-full">
-        <div className="flex flex-col items-center">
-          <div className="w-3 h-3 rounded-full bg-gradient-to-br from-expo-green-start to-expo-green-end shadow-lg shadow-expo-green-start/50 mt-1.5 flex-shrink-0" />
-          <div className="w-px flex-1 bg-expo-green-start/20 mt-1" />
-        </div>
-        <div className="glass-card rounded-xl p-4 border border-white/10 flex-1 mb-4">
-          <span className="text-xs text-expo-green-end font-semibold uppercase tracking-wider">{item.date}</span>
-          <h4 className="text-white font-bold mt-1 mb-2">{item.title}</h4>
-          <p className="text-white/50 text-sm leading-relaxed">{item.desc}</p>
-        </div>
-      </div>
-    </div>
-  );
-}
+const defaultContent = {
+  eventDate: 'March 15, 2026',
+  venue: 'Sri Eshwar College of Engineering, Coimbatore',
+  registrationFee: '₹500 per team',
+  eligibilityCriteria: 'Open to all undergraduate and postgraduate engineering students',
+  projectCategories: [
+    'Artificial Intelligence & Machine Learning',
+    'Internet of Things',
+    'Web & Mobile Development',
+    'Robotics & Automation',
+    'Cybersecurity',
+    'Blockchain Technology',
+  ],
+  timelineMilestones: [
+    { milestoneLabel: 'Registration Opens', date: 'January 1, 2026' },
+    { milestoneLabel: 'Abstract Submission', date: 'February 15, 2026' },
+    { milestoneLabel: 'Selection Results', date: 'March 1, 2026' },
+    { milestoneLabel: 'Event Day', date: 'March 15, 2026' },
+  ],
+};
 
 export default function EventDetails() {
-  const { ref: headingRef, isVisible: headingVisible } = useScrollAnimation({ threshold: 0.3 });
   const { data: eventDetailsContent } = useGetEventDetailsContent();
+  const content = eventDetailsContent ?? defaultContent;
 
-  const eventDate = eventDetailsContent?.eventDate || DEFAULT_EVENT_DATE;
-  const venue = eventDetailsContent?.venue || DEFAULT_VENUE;
-  const registrationFee = eventDetailsContent?.registrationFee || DEFAULT_FEE;
-  const eligibilityCriteria = eventDetailsContent?.eligibilityCriteria || DEFAULT_ELIGIBILITY;
+  const sectionRef = useRef<HTMLElement>(null);
 
-  const eventInfo = [
-    { icon: Calendar, label: 'Event Date', value: eventDate, sub: 'Wednesday' },
-    { icon: MapPin, label: 'Venue', value: venue, sub: 'Nagapattinam, Tamil Nadu' },
-    { icon: IndianRupee, label: 'Registration Fee', value: registrationFee, sub: 'Per head' },
-    { icon: Users, label: 'Eligibility', value: eligibilityCriteria, sub: 'UG & PG (Any College)' },
-  ];
-
-  const categories =
-    eventDetailsContent?.projectCategories && eventDetailsContent.projectCategories.length > 0
-      ? eventDetailsContent.projectCategories.map((name, i) => ({
-          name,
-          color: CATEGORY_COLORS[i % CATEGORY_COLORS.length],
-        }))
-      : DEFAULT_CATEGORIES;
-
-  const timeline: TimelineItemData[] =
-    eventDetailsContent?.timelineMilestones && eventDetailsContent.timelineMilestones.length > 0
-      ? eventDetailsContent.timelineMilestones.map((m, i) => ({
-          date: m.date,
-          title: m.milestoneLabel,
-          desc: '',
-          side: i % 2 === 0 ? 'left' : 'right',
-        }))
-      : DEFAULT_TIMELINE;
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.querySelectorAll('.reveal-item').forEach((el, i) => {
+              (el as HTMLElement).style.animationDelay = `${i * 0.1}s`;
+              el.classList.add('bounce-in');
+            });
+          }
+        });
+      },
+      { threshold: 0.15 }
+    );
+    if (sectionRef.current) observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <section id="event-details" className="py-24 bg-expo-darker relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-expo-green-start/30 to-transparent" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(15,157,88,0.05),transparent_60%)]" />
+    <section id="event-details" ref={sectionRef} className="relative py-24 bg-background overflow-hidden">
+      {/* Glow orbs */}
+      <div
+        className="glow-orb glow-orb-1"
+        style={{
+          width: '400px',
+          height: '400px',
+          background: 'radial-gradient(circle, oklch(0.65 0.18 150 / 0.18) 0%, transparent 70%)',
+          top: '5%',
+          left: '-8%',
+        }}
+      />
+      <div
+        className="glow-orb glow-orb-3"
+        style={{
+          width: '350px',
+          height: '350px',
+          background: 'radial-gradient(circle, oklch(0.55 0.22 145 / 0.15) 0%, transparent 70%)',
+          bottom: '5%',
+          right: '-5%',
+        }}
+      />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div
-          ref={headingRef as React.RefObject<HTMLDivElement>}
-          className={`text-center mb-16 transition-all duration-700 ${
-            headingVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}
-        >
-          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold text-expo-green-end border border-expo-green-start/40 bg-expo-green-start/10 mb-4 uppercase tracking-widest">
-            Event Details
-          </span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-4">
-            Everything You Need to{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-expo-green-start to-expo-green-end">
-              Know
-            </span>
+      <div className="relative z-10 max-w-6xl mx-auto px-4">
+        {/* Section header */}
+        <div className="text-center mb-16">
+          <p className="text-primary text-sm font-semibold tracking-widest uppercase mb-3">Event Information</p>
+          <h2 className="text-3xl md:text-4xl font-black text-foreground mb-4">
+            <span className="gradient-text-animated">Event Details</span>
           </h2>
         </div>
 
-        {/* Info Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
-          {eventInfo.map(({ icon: Icon, label, value, sub }) => (
-            <div
-              key={label}
-              className="glass-card rounded-2xl p-5 border border-white/10 hover:border-expo-green-start/40 hover:shadow-lg hover:shadow-expo-green-start/10 transition-all duration-300 hover:-translate-y-1"
-            >
-              <div className="w-10 h-10 rounded-lg bg-expo-green-start/20 flex items-center justify-center mb-4">
-                <Icon className="w-5 h-5 text-expo-green-end" />
-              </div>
-              <p className="text-white/50 text-xs uppercase tracking-wider mb-1">{label}</p>
-              <p className="text-white font-bold text-base">{value}</p>
-              <p className="text-white/40 text-xs mt-1">{sub}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Categories */}
-        <div className="mb-16">
-          <div className="flex items-center gap-3 mb-6">
-            <Tag className="w-5 h-5 text-expo-green-end" />
-            <h3 className="text-xl font-bold text-white">Project Categories</h3>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            {categories.map((cat, i) => (
-              <span
-                key={cat.name + i}
-                className={`px-4 py-2 rounded-full text-sm font-semibold border ${cat.color} backdrop-blur-sm`}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          {/* Left column: key info */}
+          <div className="space-y-6">
+            {[
+              { icon: Calendar, label: 'Event Date', value: content.eventDate },
+              { icon: MapPin, label: 'Venue', value: content.venue },
+              { icon: DollarSign, label: 'Registration Fee', value: content.registrationFee },
+              { icon: Users, label: 'Eligibility', value: content.eligibilityCriteria },
+            ].map(({ icon: Icon, label, value }, i) => (
+              <div
+                key={label}
+                className="reveal-item opacity-0 flex items-start gap-4 bg-card/60 backdrop-blur-sm border border-primary/20 rounded-xl p-5 hover:border-primary/40 transition-all duration-300"
               >
-                {cat.name}
-              </span>
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <Icon className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">{label}</p>
+                  <p className="text-foreground font-medium">{value}</p>
+                </div>
+              </div>
             ))}
-          </div>
-        </div>
 
-        {/* Timeline */}
-        <div>
-          <div className="flex items-center gap-3 mb-10">
-            <Clock className="w-5 h-5 text-expo-green-end" />
-            <h3 className="text-xl font-bold text-white">Event Timeline</h3>
-          </div>
-
-          {/* Desktop: vertical line */}
-          <div className="hidden md:block relative">
-            <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-expo-green-start/50 via-expo-green-start/20 to-transparent -translate-x-1/2" />
-            <div className="space-y-8">
-              {timeline.map((item, i) => (
-                <TimelineItem key={item.title + i} item={item} index={i} />
-              ))}
+            {/* Project categories */}
+            <div className="reveal-item opacity-0 bg-card/60 backdrop-blur-sm border border-primary/20 rounded-xl p-5">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Tag className="w-5 h-5 text-primary" />
+                </div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">Project Categories</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {content.projectCategories.map((cat, i) => (
+                  <span
+                    key={i}
+                    className="text-xs bg-primary/10 border border-primary/20 text-primary px-3 py-1 rounded-full"
+                  >
+                    {cat}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Mobile */}
-          <div className="md:hidden space-y-0">
-            {timeline.map((item, i) => (
-              <TimelineItem key={item.title + i} item={item} index={i} />
-            ))}
+          {/* Right column: timeline */}
+          <div>
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Clock className="w-5 h-5 text-primary" />
+              </div>
+              <h3 className="text-xl font-bold text-foreground">Timeline</h3>
+            </div>
+
+            <div className="relative">
+              {/* Vertical line */}
+              <div className="absolute left-5 top-0 bottom-0 w-px bg-gradient-to-b from-primary/60 via-primary/30 to-transparent" />
+
+              <div className="space-y-8">
+                {content.timelineMilestones.map((milestone, i) => (
+                  <div
+                    key={i}
+                    className="reveal-item opacity-0 relative flex items-start gap-6 pl-14"
+                  >
+                    {/* Dot */}
+                    <div className="absolute left-3 top-1 w-5 h-5 rounded-full bg-primary border-2 border-background shadow-lg shadow-primary/40 flex items-center justify-center">
+                      <div className="w-2 h-2 rounded-full bg-background" />
+                    </div>
+                    <div className="bg-card/60 backdrop-blur-sm border border-primary/20 rounded-xl p-4 flex-1 hover:border-primary/40 transition-all duration-300">
+                      <p className="text-primary font-semibold text-sm mb-1">{milestone.milestoneLabel}</p>
+                      <p className="text-muted-foreground text-sm">{milestone.date}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>

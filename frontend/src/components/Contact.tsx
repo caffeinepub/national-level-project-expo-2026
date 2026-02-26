@@ -1,11 +1,11 @@
-import { MapPin, Phone, Mail, Globe } from 'lucide-react';
+import { MapPin, Phone, Mail, Globe, MessageCircle, Instagram } from 'lucide-react';
 import { SiFacebook, SiInstagram, SiLinkedin, SiYoutube } from 'react-icons/si';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 import { useGetContactContent } from '../hooks/useQueries';
 
 const socialLinks = [
   { icon: SiFacebook, href: 'https://facebook.com', label: 'Facebook', color: 'hover:text-blue-400' },
-  { icon: SiInstagram, href: 'https://instagram.com', label: 'Instagram', color: 'hover:text-pink-400' },
+  { icon: SiInstagram, href: 'https://www.instagram.com/innovativelink_expo_2k26?igsh=MTBvbTMzMXJzbWdtMg==', label: 'Instagram', color: 'hover:text-pink-400' },
   { icon: SiLinkedin, href: 'https://linkedin.com', label: 'LinkedIn', color: 'hover:text-blue-500' },
   { icon: SiYoutube, href: 'https://youtube.com', label: 'YouTube', color: 'hover:text-red-400' },
 ];
@@ -18,9 +18,13 @@ const DEFAULT_CONTACT = {
   website: 'www.egspillay.ac.in',
 };
 
+const WHATSAPP_URL = 'https://chat.whatsapp.com/H6H4HMb31XzKw0ziktZSkg';
+const INSTAGRAM_URL = 'https://www.instagram.com/innovativelink_expo_2k26?igsh=MTBvbTMzMXJzbWdtMg==';
+
 export default function Contact() {
   const { ref: headingRef, isVisible: headingVisible } = useScrollAnimation({ threshold: 0.3 });
   const { ref: contentRef, isVisible: contentVisible } = useScrollAnimation({ threshold: 0.2 });
+  const { ref: connectRef, isVisible: connectVisible } = useScrollAnimation({ threshold: 0.2 });
   const { data: contactContent } = useGetContactContent();
 
   const addressLine1 = contactContent?.addressLine1 || DEFAULT_CONTACT.addressLine1;
@@ -150,6 +154,46 @@ export default function Contact() {
               referrerPolicy="no-referrer-when-downgrade"
               className="grayscale opacity-70 hover:opacity-100 hover:grayscale-0 transition-all duration-500"
             />
+          </div>
+        </div>
+
+        {/* Connect With Us */}
+        <div
+          ref={connectRef as React.RefObject<HTMLDivElement>}
+          className={`mt-8 transition-all duration-700 delay-200 ${
+            connectVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}
+        >
+          <div className="glass-card rounded-2xl p-6 sm:p-8 border border-expo-green-start/20 bg-gradient-to-br from-expo-green-start/5 to-expo-green-end/5">
+            <div className="text-center mb-6">
+              <h3 className="text-white font-bold text-xl mb-2">Connect With Us</h3>
+              <p className="text-white/50 text-sm">
+                Reach out directly via WhatsApp or follow us on Instagram for the latest updates.
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              {/* WhatsApp Button */}
+              <a
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-3 px-6 py-3.5 rounded-xl bg-gradient-to-r from-[#0f9d58] to-[#22c55e] text-white font-semibold text-sm shadow-lg shadow-green-500/20 hover:shadow-xl hover:shadow-green-500/40 hover:scale-[1.03] transition-all duration-300 w-full sm:w-auto justify-center"
+              >
+                <MessageCircle className="w-5 h-5 flex-shrink-0" />
+                Chat on WhatsApp
+              </a>
+
+              {/* Instagram Button */}
+              <a
+                href={INSTAGRAM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-3 px-6 py-3.5 rounded-xl bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 text-white font-semibold text-sm shadow-lg shadow-pink-500/20 hover:shadow-xl hover:shadow-pink-500/40 hover:scale-[1.03] transition-all duration-300 w-full sm:w-auto justify-center"
+              >
+                <Instagram className="w-5 h-5 flex-shrink-0" />
+                Follow on Instagram
+              </a>
+            </div>
           </div>
         </div>
       </div>

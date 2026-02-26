@@ -1,53 +1,174 @@
 {
   "kind": "build_request",
-  "title": "Fix admin login password mismatch",
-  "priority": "high",
+  "title": "Enhance site-wide animations and visual polish",
+  "projectName": "Project Expo 2026",
+  "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-41",
-      "text": "Update the hardcoded admin credentials in `backend/main.mo` so that the `verifyAdminCredentials` function accepts exactly email `athiakash1977@gmail.com` and password `Akash@8667099605`. Ensure the stored password value and the comparison logic match this exact string with correct casing and special characters. The admin name should remain `Akash A`.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-last"
-        ],
-        "quotes": [
-          "the password is wrong it showing"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Calling `verifyAdminCredentials` with email `athiakash1977@gmail.com` and password `Akash@8667099605` returns a successful result (truthy/valid session token).",
-        "Calling `verifyAdminCredentials` with an incorrect password returns a failure result.",
-        "The admin name associated with the credentials is `Akash A`."
-      ]
-    },
-    {
-      "id": "REQ-42",
-      "text": "Update `frontend/src/pages/AdminLogin.tsx` to ensure the login form submits the password exactly as typed (no trimming, no transformation) and that the credential verification call uses the raw input values. Confirm the placeholder or pre-filled email field shows `athiakash1977@gmail.com`.",
+      "id": "REQ-72",
+      "text": "Add a smooth page transition animation (fade-in + slight upward slide) that plays whenever the user navigates between routes (/, /home, /about, /event-details, /check-registration, /gallery). Implement this as a wrapper component or CSS class applied at the route level in App.tsx or the individual page components.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-last"
+          "msg-3"
         ],
         "quotes": [
-          "the password is wrong it showing"
+          "add some animation which looks good"
         ]
       },
       "acceptanceCriteria": [
-        "Entering email `athiakash1977@gmail.com` and password `Akash@8667099605` on the Admin Login page and clicking Submit successfully authenticates and redirects to `/admin/dashboard`.",
-        "The email input field has placeholder or pre-filled value `athiakash1977@gmail.com`.",
-        "An incorrect password still shows the existing error message without crashing."
+        "Navigating to any route triggers a visible fade-in + slide-up transition on the page content.",
+        "Transition duration is smooth (200–400ms) and does not feel jarring.",
+        "All existing routes continue to render correctly."
+      ]
+    },
+    {
+      "id": "REQ-73",
+      "text": "Add a floating animated glow orb or gradient blob (two or three large blurred radial gradient circles) as decorative background elements on the Hero section, About page, and Event Details page. The orbs should slowly drift or pulse using CSS keyframe animations, reinforcing the dark green tech aesthetic without obscuring content.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-3"
+        ],
+        "quotes": [
+          "add some animation which looks good"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Glowing orb/blob elements are visible in the Hero section background.",
+        "Glowing orb/blob elements appear on the About and Event Details pages.",
+        "Orbs animate continuously (drift or pulse) with a slow, smooth CSS keyframe animation.",
+        "Orbs do not overlap or obscure any text or interactive elements."
+      ]
+    },
+    {
+      "id": "REQ-74",
+      "text": "Enhance the Coordinators section cards (`frontend/src/components/Coordinators.tsx`) with a shimmer/shine sweep animation on hover — a subtle light sweep effect that passes across the card surface from left to right when the user hovers over a card, using a CSS pseudo-element or gradient overlay.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-3"
+        ],
+        "quotes": [
+          "add some animation which looks good"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Hovering a coordinator card triggers a visible left-to-right shine/shimmer sweep animation.",
+        "The shimmer uses a semi-transparent white or light-green gradient.",
+        "Existing hover lift-and-glow animations are preserved and not broken.",
+        "Animation is smooth and does not flicker."
+      ]
+    },
+    {
+      "id": "REQ-75",
+      "text": "Add a typewriter text animation to the event tagline in the Hero section (`frontend/src/components/Hero.tsx`). The tagline text should appear character by character using a CSS or JavaScript typewriter effect on page load, after the initial fade-in entrance animation completes.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-3"
+        ],
+        "quotes": [
+          "add some animation which looks good"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The hero tagline text animates in as a typewriter effect (characters appear one by one).",
+        "The typewriter effect starts after the hero section's entrance fade-in animation.",
+        "The effect completes within 2–4 seconds.",
+        "A blinking cursor is shown at the end of the tagline while typing, then disappears or fades out."
+      ]
+    },
+    {
+      "id": "REQ-76",
+      "text": "Add a staggered bounce-in or pop-in animation to the analytics cards and tab buttons in the Admin Dashboard (`frontend/src/pages/AdminDashboard.tsx`). When the dashboard first loads, each analytics card should animate in sequentially with a slight scale-up and fade-in (stagger delay of ~100ms between cards).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-3"
+        ],
+        "quotes": [
+          "add some animation which looks good"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Admin Dashboard analytics cards animate in with a staggered scale-up + fade-in on first load.",
+        "Each card has an incremental delay (e.g., 0ms, 100ms, 200ms).",
+        "Animation is smooth and does not affect layout or data display.",
+        "Existing dashboard functionality (tabs, table, search) is unaffected."
+      ]
+    },
+    {
+      "id": "REQ-77",
+      "text": "Add a pulsing ring/ripple animation around the 'Register Now' CTA button on the Landing Page (`frontend/src/pages/LandingPage.tsx`) and Hero section (`frontend/src/components/Hero.tsx`). The ripple should be a continuously expanding semi-transparent green ring that fades out as it expands, drawing attention to the button.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-3"
+        ],
+        "quotes": [
+          "add some animation which looks good"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The CTA button on LandingPage.tsx has a continuously looping ripple/pulse ring animation.",
+        "The CTA button in Hero.tsx has the same ripple/pulse ring animation.",
+        "The ring is green/semi-transparent and expands outward before fading.",
+        "Animation loops indefinitely without pausing.",
+        "Button remains fully clickable and functional."
+      ]
+    },
+    {
+      "id": "REQ-78",
+      "text": "Add a smooth number count-up animation to the registration counter displayed in the Hero section (`frontend/src/components/Hero.tsx`). When the registration count value is fetched and rendered, the number should animate from 0 up to the actual value over ~1.5 seconds using requestAnimationFrame or a CSS counter approach.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-3"
+        ],
+        "quotes": [
+          "add some animation which looks good"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The registration counter in the Hero section animates from 0 to the fetched value on load.",
+        "The count-up animation takes approximately 1–2 seconds.",
+        "If the backend returns 0 or is loading, the animation either skips or shows 0.",
+        "The final displayed value matches the actual backend registration count."
+      ]
+    },
+    {
+      "id": "REQ-79",
+      "text": "Add a subtle parallax scrolling effect to the Hero section background (`frontend/src/components/Hero.tsx`). As the user scrolls down from the hero, the background image/particle canvas should scroll at a slower rate than the foreground content, creating a depth effect. Implement using a scroll event listener that adjusts the background's `transform: translateY()`.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-3"
+        ],
+        "quotes": [
+          "add some animation which looks good"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The hero background moves at a visibly slower pace than the page content when scrolling.",
+        "The parallax effect is smooth and does not cause layout shifts or jank.",
+        "The foreground hero content (title, timer, buttons) scrolls at normal speed.",
+        "The effect is disabled or gracefully degraded on mobile if it causes performance issues."
       ]
     }
   ],
   "constraints": [
-    "Do not change any other backend functions or data models.",
-    "Do not modify immutable frontend paths listed in the system context."
+    "Do not modify any files listed in frontend.immutablePaths.",
+    "All new animations must use the existing green gradient (#0f9d58 → #22c55e) color palette and dark theme.",
+    "Animations must not degrade performance on mobile devices — use CSS animations over JS where possible.",
+    "All existing functionality (routing, form submission, admin dashboard, data fetching) must remain fully intact."
   ],
   "nonGoals": [
-    "Changing the admin email address.",
-    "Adding a password reset or forgot-password flow.",
-    "Implementing external authentication (Firebase, Auth0, etc.)."
+    "Adding any new pages or routes.",
+    "Changing the backend data model or API.",
+    "Introducing third-party animation libraries (e.g., Framer Motion, GSAP) unless already in the dependency tree.",
+    "Modifying any content data or coordinator/registration information.",
+    "Adding real-time or WebSocket-based animations."
   ],
   "imageRequirements": {
     "required": [],

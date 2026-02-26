@@ -8,6 +8,18 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
+export const _CaffeineStorageCreateCertificateResult = IDL.Record({
+  'method' : IDL.Text,
+  'blob_hash' : IDL.Text,
+});
+export const _CaffeineStorageRefillInformation = IDL.Record({
+  'proposed_top_up_amount' : IDL.Opt(IDL.Nat),
+});
+export const _CaffeineStorageRefillResult = IDL.Record({
+  'success' : IDL.Opt(IDL.Bool),
+  'topped_up_amount' : IDL.Opt(IDL.Nat),
+});
+export const ExternalBlob = IDL.Vec(IDL.Nat8);
 export const UserRole = IDL.Variant({
   'admin' : IDL.Null,
   'user' : IDL.Null,
@@ -55,6 +67,12 @@ export const EventDetailsContent = IDL.Record({
   'registrationFee' : IDL.Text,
   'eventDate' : IDL.Text,
 });
+export const GalleryImage = IDL.Record({
+  'id' : IDL.Text,
+  'title' : IDL.Text,
+  'imageBlob' : ExternalBlob,
+  'uploadedAt' : IDL.Int,
+});
 export const HeroContent = IDL.Record({
   'tagline' : IDL.Text,
   'collegeName' : IDL.Text,
@@ -75,8 +93,36 @@ export const Registration = IDL.Record({
 });
 
 export const idlService = IDL.Service({
+  '_caffeineStorageBlobIsLive' : IDL.Func(
+      [IDL.Vec(IDL.Nat8)],
+      [IDL.Bool],
+      ['query'],
+    ),
+  '_caffeineStorageBlobsToDelete' : IDL.Func(
+      [],
+      [IDL.Vec(IDL.Vec(IDL.Nat8))],
+      ['query'],
+    ),
+  '_caffeineStorageConfirmBlobDeletion' : IDL.Func(
+      [IDL.Vec(IDL.Vec(IDL.Nat8))],
+      [],
+      [],
+    ),
+  '_caffeineStorageCreateCertificate' : IDL.Func(
+      [IDL.Text],
+      [_CaffeineStorageCreateCertificateResult],
+      [],
+    ),
+  '_caffeineStorageRefillCashier' : IDL.Func(
+      [IDL.Opt(_CaffeineStorageRefillInformation)],
+      [_CaffeineStorageRefillResult],
+      [],
+    ),
+  '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+  'addGalleryImage' : IDL.Func([IDL.Text, ExternalBlob], [IDL.Text], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+  'deleteGalleryImage' : IDL.Func([IDL.Text], [IDL.Bool], []),
   'deleteRegistration' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'getAboutContent' : IDL.Func([], [IDL.Opt(AboutContent)], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
@@ -92,6 +138,7 @@ export const idlService = IDL.Service({
       [IDL.Opt(EventDetailsContent)],
       ['query'],
     ),
+  'getGalleryImages' : IDL.Func([], [IDL.Vec(GalleryImage)], ['query']),
   'getHeroContent' : IDL.Func([], [IDL.Opt(HeroContent)], ['query']),
   'getRegistrationByEmail' : IDL.Func(
       [IDL.Text],
@@ -141,16 +188,23 @@ export const idlService = IDL.Service({
       [IDL.Bool],
       [],
     ),
-  'verifyAdminCredentials' : IDL.Func(
-      [IDL.Text, IDL.Text],
-      [IDL.Bool],
-      ['query'],
-    ),
 });
 
 export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
+  const _CaffeineStorageCreateCertificateResult = IDL.Record({
+    'method' : IDL.Text,
+    'blob_hash' : IDL.Text,
+  });
+  const _CaffeineStorageRefillInformation = IDL.Record({
+    'proposed_top_up_amount' : IDL.Opt(IDL.Nat),
+  });
+  const _CaffeineStorageRefillResult = IDL.Record({
+    'success' : IDL.Opt(IDL.Bool),
+    'topped_up_amount' : IDL.Opt(IDL.Nat),
+  });
+  const ExternalBlob = IDL.Vec(IDL.Nat8);
   const UserRole = IDL.Variant({
     'admin' : IDL.Null,
     'user' : IDL.Null,
@@ -195,6 +249,12 @@ export const idlFactory = ({ IDL }) => {
     'registrationFee' : IDL.Text,
     'eventDate' : IDL.Text,
   });
+  const GalleryImage = IDL.Record({
+    'id' : IDL.Text,
+    'title' : IDL.Text,
+    'imageBlob' : ExternalBlob,
+    'uploadedAt' : IDL.Int,
+  });
   const HeroContent = IDL.Record({
     'tagline' : IDL.Text,
     'collegeName' : IDL.Text,
@@ -215,8 +275,36 @@ export const idlFactory = ({ IDL }) => {
   });
   
   return IDL.Service({
+    '_caffeineStorageBlobIsLive' : IDL.Func(
+        [IDL.Vec(IDL.Nat8)],
+        [IDL.Bool],
+        ['query'],
+      ),
+    '_caffeineStorageBlobsToDelete' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Vec(IDL.Nat8))],
+        ['query'],
+      ),
+    '_caffeineStorageConfirmBlobDeletion' : IDL.Func(
+        [IDL.Vec(IDL.Vec(IDL.Nat8))],
+        [],
+        [],
+      ),
+    '_caffeineStorageCreateCertificate' : IDL.Func(
+        [IDL.Text],
+        [_CaffeineStorageCreateCertificateResult],
+        [],
+      ),
+    '_caffeineStorageRefillCashier' : IDL.Func(
+        [IDL.Opt(_CaffeineStorageRefillInformation)],
+        [_CaffeineStorageRefillResult],
+        [],
+      ),
+    '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+    'addGalleryImage' : IDL.Func([IDL.Text, ExternalBlob], [IDL.Text], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+    'deleteGalleryImage' : IDL.Func([IDL.Text], [IDL.Bool], []),
     'deleteRegistration' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'getAboutContent' : IDL.Func([], [IDL.Opt(AboutContent)], ['query']),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
@@ -232,6 +320,7 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Opt(EventDetailsContent)],
         ['query'],
       ),
+    'getGalleryImages' : IDL.Func([], [IDL.Vec(GalleryImage)], ['query']),
     'getHeroContent' : IDL.Func([], [IDL.Opt(HeroContent)], ['query']),
     'getRegistrationByEmail' : IDL.Func(
         [IDL.Text],
@@ -280,11 +369,6 @@ export const idlFactory = ({ IDL }) => {
         ],
         [IDL.Bool],
         [],
-      ),
-    'verifyAdminCredentials' : IDL.Func(
-        [IDL.Text, IDL.Text],
-        [IDL.Bool],
-        ['query'],
       ),
   });
 };

@@ -39,10 +39,17 @@ export interface EventDetailsContent {
   'registrationFee' : string,
   'eventDate' : string,
 }
+export type ExternalBlob = Uint8Array;
 export interface FeatureCard {
   'title' : string,
   'icon' : string,
   'description' : string,
+}
+export interface GalleryImage {
+  'id' : string,
+  'title' : string,
+  'imageBlob' : ExternalBlob,
+  'uploadedAt' : bigint,
 }
 export interface HeroContent {
   'tagline' : string,
@@ -70,9 +77,37 @@ export interface UserProfile { 'name' : string, 'email' : string }
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
   { 'guest' : null };
+export interface _CaffeineStorageCreateCertificateResult {
+  'method' : string,
+  'blob_hash' : string,
+}
+export interface _CaffeineStorageRefillInformation {
+  'proposed_top_up_amount' : [] | [bigint],
+}
+export interface _CaffeineStorageRefillResult {
+  'success' : [] | [boolean],
+  'topped_up_amount' : [] | [bigint],
+}
 export interface _SERVICE {
+  '_caffeineStorageBlobIsLive' : ActorMethod<[Uint8Array], boolean>,
+  '_caffeineStorageBlobsToDelete' : ActorMethod<[], Array<Uint8Array>>,
+  '_caffeineStorageConfirmBlobDeletion' : ActorMethod<
+    [Array<Uint8Array>],
+    undefined
+  >,
+  '_caffeineStorageCreateCertificate' : ActorMethod<
+    [string],
+    _CaffeineStorageCreateCertificateResult
+  >,
+  '_caffeineStorageRefillCashier' : ActorMethod<
+    [[] | [_CaffeineStorageRefillInformation]],
+    _CaffeineStorageRefillResult
+  >,
+  '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
+  'addGalleryImage' : ActorMethod<[string, ExternalBlob], string>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'deleteGalleryImage' : ActorMethod<[string], boolean>,
   'deleteRegistration' : ActorMethod<[bigint], boolean>,
   'getAboutContent' : ActorMethod<[], [] | [AboutContent]>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
@@ -80,6 +115,7 @@ export interface _SERVICE {
   'getContactContent' : ActorMethod<[], [] | [ContactContent]>,
   'getCoordinatorsContent' : ActorMethod<[], [] | [CoordinatorsContent]>,
   'getEventDetailsContent' : ActorMethod<[], [] | [EventDetailsContent]>,
+  'getGalleryImages' : ActorMethod<[], Array<GalleryImage>>,
   'getHeroContent' : ActorMethod<[], [] | [HeroContent]>,
   'getRegistrationByEmail' : ActorMethod<[string], [] | [Registration]>,
   'getRegistrationCount' : ActorMethod<[], bigint>,
@@ -100,7 +136,6 @@ export interface _SERVICE {
     [bigint, string, string, string, string, string, string, string, string],
     boolean
   >,
-  'verifyAdminCredentials' : ActorMethod<[string, string], boolean>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

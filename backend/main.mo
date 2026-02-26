@@ -8,9 +8,13 @@ import Iter "mo:core/Iter";
 import Principal "mo:core/Principal";
 import Runtime "mo:core/Runtime";
 import MixinAuthorization "authorization/MixinAuthorization";
+import MixinStorage "blob-storage/Mixin";
 import AccessControl "authorization/access-control";
+import Storage "blob-storage/Storage";
 
 actor {
+  include MixinStorage();
+
   // Initialize the user system state
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
@@ -91,6 +95,22 @@ actor {
     };
   };
 
+  public type AdminCredentials = {
+    email : Text;
+    password : Text;
+  };
+
+  public type AdminDetails = {
+    adminName : Text;
+  };
+
+  public type GalleryImage = {
+    id : Text;
+    title : Text;
+    imageBlob : Storage.ExternalBlob;
+    uploadedAt : Int;
+  };
+
   var nextId = 1;
   let registrations = Map.empty<Nat, Registration>();
   let userProfiles = Map.empty<Principal, UserProfile>();
@@ -100,8 +120,9 @@ actor {
   var eventDetailsContent : ?EventDetailsContent = null;
   var coordinatorsContent : ?CoordinatorsContent = null;
   var contactContent : ?ContactContent = null;
+  var galleryImages = Map.empty<Text, GalleryImage>();
 
-  // Public: Submit new registration (no auth required, open to all)
+  // Anyone (including guests) can submit a registration
   public shared ({ caller }) func submitRegistration(
     fullName : Text,
     email : Text,
@@ -130,12 +151,12 @@ actor {
     registration.id;
   };
 
-  // Public: Get total registration count (no auth required)
+  // Public: anyone can see the registration count
   public query func getRegistrationCount() : async Nat {
     registrations.size();
   };
 
-  // Admin only: Get all registrations (sorted by timestamp)
+  // Admin only: view all registrations
   public query ({ caller }) func getRegistrations() : async [Registration] {
     if (not (AccessControl.isAdmin(accessControlState, caller))) {
       Runtime.trap("Unauthorized: Only admins can view all registrations");
@@ -144,7 +165,7 @@ actor {
     registrations.values().toArray().sort(Registration.compareByTimestamp);
   };
 
-  // Admin only: Delete registration by ID
+  // Admin only: delete a registration
   public shared ({ caller }) func deleteRegistration(id : Nat) : async Bool {
     if (not (AccessControl.isAdmin(accessControlState, caller))) {
       Runtime.trap("Unauthorized: Only admins can delete registrations");
@@ -158,25 +179,15 @@ actor {
     };
   };
 
-  // Verify admin credentials — open to any caller (returns bool, no sensitive data exposed).
-  // Actual privileged actions are still guarded by AccessControl.isAdmin checks.
-  public query ({ caller }) func verifyAdminCredentials(email : Text, password : Text) : async Bool {
-    let adminEmail = "athiakash1977@gmail.com";
-    let adminPassword = "Akash@8667099605";
-
-    if (email == adminEmail and password == adminPassword) {
-      true;
-    } else {
-      false;
-    };
-  };
-
-  // User profile: Get the caller's own profile (no auth check needed — anonymous gets null)
+  // Authenticated users only: get their own profile
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can get their profile");
+    };
     userProfiles.get(caller);
   };
 
-  // User profile: Save the caller's own profile (requires at least #user role — guests/anonymous cannot save)
+  // Authenticated users only: save their own profile
   public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only authenticated users can save profiles");
@@ -184,7 +195,7 @@ actor {
     userProfiles.add(caller, profile);
   };
 
-  // User profile: Get another user's profile (admin or self only)
+  // Users can view their own profile; admins can view any profile
   public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
     if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Can only view your own profile");
@@ -192,7 +203,7 @@ actor {
     userProfiles.get(user);
   };
 
-  // Admin only: Get registration by email — exposes personal data so restricted to admins
+  // Admin only: search registration by email
   public query ({ caller }) func getRegistrationByEmail(email : Text) : async ?Registration {
     if (not (AccessControl.isAdmin(accessControlState, caller))) {
       Runtime.trap("Unauthorized: Only admins can search registrations by email");
@@ -206,7 +217,7 @@ actor {
     registration;
   };
 
-  // Admin only: Update existing registration
+  // Admin only: update a registration
   public shared ({ caller }) func updateRegistration(
     id : Nat,
     fullName : Text,
@@ -243,14 +254,12 @@ actor {
     };
   };
 
-  // Editable content functions
-
-  // Hero Section
-
+  // Public: anyone can read CMS content
   public query func getHeroContent() : async ?HeroContent {
     heroContent;
   };
 
+  // Admin only: update hero content
   public shared ({ caller }) func updateHeroContent(content : HeroContent) : async () {
     if (not (AccessControl.isAdmin(accessControlState, caller))) {
       Runtime.trap("Unauthorized: Only admins can update hero content");
@@ -258,12 +267,12 @@ actor {
     heroContent := ?content;
   };
 
-  // About Section
-
+  // Public: anyone can read about content
   public query func getAboutContent() : async ?AboutContent {
     aboutContent;
   };
 
+  // Admin only: update about content
   public shared ({ caller }) func updateAboutContent(content : AboutContent) : async () {
     if (not (AccessControl.isAdmin(accessControlState, caller))) {
       Runtime.trap("Unauthorized: Only admins can update about content");
@@ -271,12 +280,12 @@ actor {
     aboutContent := ?content;
   };
 
-  // Event Details Section
-
+  // Public: anyone can read event details content
   public query func getEventDetailsContent() : async ?EventDetailsContent {
     eventDetailsContent;
   };
 
+  // Admin only: update event details content
   public shared ({ caller }) func updateEventDetailsContent(content : EventDetailsContent) : async () {
     if (not (AccessControl.isAdmin(accessControlState, caller))) {
       Runtime.trap("Unauthorized: Only admins can update event details content");
@@ -284,12 +293,12 @@ actor {
     eventDetailsContent := ?content;
   };
 
-  // Coordinators Section
-
+  // Public: anyone can read coordinators content
   public query func getCoordinatorsContent() : async ?CoordinatorsContent {
     coordinatorsContent;
   };
 
+  // Admin only: update coordinators content
   public shared ({ caller }) func updateCoordinatorsContent(content : CoordinatorsContent) : async () {
     if (not (AccessControl.isAdmin(accessControlState, caller))) {
       Runtime.trap("Unauthorized: Only admins can update coordinators content");
@@ -297,16 +306,56 @@ actor {
     coordinatorsContent := ?content;
   };
 
-  // Contact Section
-
+  // Public: anyone can read contact content
   public query func getContactContent() : async ?ContactContent {
     contactContent;
   };
 
+  // Admin only: update contact content
   public shared ({ caller }) func updateContactContent(content : ContactContent) : async () {
     if (not (AccessControl.isAdmin(accessControlState, caller))) {
       Runtime.trap("Unauthorized: Only admins can update contact content");
     };
     contactContent := ?content;
+  };
+
+  // Public: anyone can view gallery images
+  public query func getGalleryImages() : async [GalleryImage] {
+    galleryImages.values().toArray();
+  };
+
+  // Admin only: add a gallery image
+  public shared ({ caller }) func addGalleryImage(
+    title : Text,
+    imageBlob : Storage.ExternalBlob,
+  ) : async Text {
+    if (not (AccessControl.isAdmin(accessControlState, caller))) {
+      Runtime.trap("Unauthorized: Only admins can add gallery images");
+    };
+
+    let id = Time.now().toText();
+    let newImage : GalleryImage = {
+      id;
+      title;
+      imageBlob;
+      uploadedAt = Time.now();
+    };
+
+    galleryImages.add(id, newImage);
+    id;
+  };
+
+  // Admin only: delete a gallery image
+  public shared ({ caller }) func deleteGalleryImage(id : Text) : async Bool {
+    if (not (AccessControl.isAdmin(accessControlState, caller))) {
+      Runtime.trap("Unauthorized: Only admins can delete gallery images");
+    };
+
+    if (galleryImages.containsKey(id)) {
+      galleryImages.remove(id);
+      true;
+    } else {
+      false;
+    };
   };
 };

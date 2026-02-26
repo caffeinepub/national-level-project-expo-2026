@@ -1,6 +1,7 @@
 import Navbar from '../components/Navbar';
 import About from '../components/About';
 import Footer from '../components/Footer';
+import FloatingSocialButtons from '../components/FloatingSocialButtons';
 
 export default function AboutPage() {
   return (
@@ -10,6 +11,7 @@ export default function AboutPage() {
         <About />
       </main>
       <Footer />
+      <FloatingSocialButtons />
     </>
   );
 }

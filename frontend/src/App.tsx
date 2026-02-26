@@ -1,18 +1,30 @@
-import { createRootRoute, createRoute, createRouter, RouterProvider, Outlet } from '@tanstack/react-router';
+import { RouterProvider, createRouter, createRoute, createRootRoute, Outlet } from '@tanstack/react-router';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AdminAuthProvider } from './context/AdminAuthContext';
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import EventDetailsPage from './pages/EventDetailsPage';
+import RegistrationLookupPage from './pages/RegistrationLookupPage';
+import GalleryPage from './pages/GalleryPage';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
-import RegistrationLookupPage from './pages/RegistrationLookupPage';
-import ProtectedRoute from './components/ProtectedRoute';
+
+const queryClient = new QueryClient();
+
+// Root layout with page transition wrapper
+function RootLayout() {
+  return (
+    <div className="page-transition">
+      <Outlet />
+    </div>
+  );
+}
 
 const rootRoute = createRootRoute({
-  component: () => <Outlet />,
+  component: RootLayout,
 });
 
-const indexRoute = createRoute({
+const homeRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
   component: HomePage,
@@ -36,6 +48,12 @@ const checkRegistrationRoute = createRoute({
   component: RegistrationLookupPage,
 });
 
+const galleryRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/gallery',
+  component: GalleryPage,
+});
+
 const adminLoginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/admin/login',
@@ -45,18 +63,15 @@ const adminLoginRoute = createRoute({
 const adminDashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/admin/dashboard',
-  component: () => (
-    <ProtectedRoute>
-      <AdminDashboard />
-    </ProtectedRoute>
-  ),
+  component: AdminDashboard,
 });
 
 const routeTree = rootRoute.addChildren([
-  indexRoute,
+  homeRoute,
   aboutRoute,
   eventDetailsRoute,
   checkRegistrationRoute,
+  galleryRoute,
   adminLoginRoute,
   adminDashboardRoute,
 ]);
@@ -71,8 +86,10 @@ declare module '@tanstack/react-router' {
 
 export default function App() {
   return (
-    <AdminAuthProvider>
-      <RouterProvider router={router} />
-    </AdminAuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AdminAuthProvider>
+        <RouterProvider router={router} />
+      </AdminAuthProvider>
+    </QueryClientProvider>
   );
 }

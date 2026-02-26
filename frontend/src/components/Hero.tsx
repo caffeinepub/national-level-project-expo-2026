@@ -1,197 +1,276 @@
-import { useState, useEffect } from 'react';
-import { ChevronDown, Users, Trophy } from 'lucide-react';
-import { useGetRegistrationCount, useGetHeroContent } from '../hooks/useQueries';
+import { useState, useEffect, useRef } from 'react';
+import { useGetHeroContent, useGetRegistrationCount } from '../hooks/useQueries';
 
-const DEFAULT_EVENT_TITLE = 'National Level Project Expo 2026';
-const DEFAULT_TAGLINE = 'Innovate · Collaborate · Inspire';
-const DEFAULT_EVENT_DATE = 'April 15, 2026';
-const DEFAULT_COLLEGE_NAME = 'E.G.S. Pillay Engineering College';
-
-function getEventDate(dateStr: string): Date {
-  const parsed = new Date(dateStr);
-  if (!isNaN(parsed.getTime())) return parsed;
-  return new Date('2026-04-15T09:00:00');
+interface TimeLeft {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
 }
 
-function getTimeLeft(eventDate: Date) {
-  const now = new Date();
-  const diff = eventDate.getTime() - now.getTime();
-  if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
-  return {
-    days: Math.floor(diff / (1000 * 60 * 60 * 24)),
-    hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
-    minutes: Math.floor((diff / (1000 * 60)) % 60),
-    seconds: Math.floor((diff / 1000) % 60),
-  };
+function parseEventDate(dateStr: string): Date | null {
+  const formats = [
+    /(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/,
+    /(\w+)\s+(\d{1,2}),?\s+(\d{4})/,
+    /(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/,
+  ];
+  for (const fmt of formats) {
+    const match = dateStr.match(fmt);
+    if (match) {
+      const d = new Date(dateStr);
+      if (!isNaN(d.getTime())) return d;
+    }
+  }
+  const d = new Date(dateStr);
+  if (!isNaN(d.getTime())) return d;
+  return null;
 }
 
-function CountdownUnit({ value, label }: { value: number; label: string }) {
+function useCountUp(target: number, duration: number = 1500): number {
+  const [count, setCount] = useState(0);
+  const rafRef = useRef<number | null>(null);
+  const startTimeRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (target === 0) {
+      setCount(0);
+      return;
+    }
+    startTimeRef.current = null;
+
+    const animate = (timestamp: number) => {
+      if (!startTimeRef.current) startTimeRef.current = timestamp;
+      const elapsed = timestamp - startTimeRef.current;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease-out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.floor(eased * target));
+      if (progress < 1) {
+        rafRef.current = requestAnimationFrame(animate);
+      } else {
+        setCount(target);
+      }
+    };
+
+    rafRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, [target, duration]);
+
+  return count;
+}
+
+function TypewriterText({ text, delay = 500 }: { text: string; delay?: number }) {
+  const [displayed, setDisplayed] = useState('');
+  const [isDone, setIsDone] = useState(false);
+
+  useEffect(() => {
+    setDisplayed('');
+    setIsDone(false);
+    let i = 0;
+    const startTimeout = setTimeout(() => {
+      const interval = setInterval(() => {
+        if (i < text.length) {
+          setDisplayed(text.slice(0, i + 1));
+          i++;
+        } else {
+          clearInterval(interval);
+          setTimeout(() => setIsDone(true), 1500);
+        }
+      }, 45);
+      return () => clearInterval(interval);
+    }, delay);
+    return () => clearTimeout(startTimeout);
+  }, [text, delay]);
+
   return (
-    <div className="flex flex-col items-center">
-      <div className="glass-card w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center rounded-xl border border-expo-green-start/30 shadow-lg shadow-expo-green-start/10">
-        <span className="text-2xl sm:text-3xl font-bold text-white tabular-nums">
-          {String(value).padStart(2, '0')}
-        </span>
-      </div>
-      <span className="mt-2 text-xs text-white/60 uppercase tracking-widest font-medium">{label}</span>
-    </div>
+    <span>
+      {displayed}
+      {!isDone && <span className="typewriter-cursor" aria-hidden="true" />}
+    </span>
   );
 }
 
 export default function Hero() {
   const { data: heroContent } = useGetHeroContent();
-  const { data: countData } = useGetRegistrationCount();
-  const registrationCount = countData ? Number(countData) : 0;
+  const { data: registrationCountRaw } = useGetRegistrationCount();
 
-  const eventTitle = heroContent?.eventTitle || DEFAULT_EVENT_TITLE;
-  const tagline = heroContent?.tagline || DEFAULT_TAGLINE;
-  const eventDateStr = heroContent?.eventDate || DEFAULT_EVENT_DATE;
-  const collegeName = heroContent?.collegeName || DEFAULT_COLLEGE_NAME;
+  const defaults = {
+    eventTitle: 'INNOVATIVE LINK EXPO 2K26',
+    tagline: 'Where Innovation Meets Opportunity',
+    eventDate: 'March 15, 2026',
+    collegeName: 'Sri Eshwar College of Engineering',
+  };
 
-  const eventDate = getEventDate(eventDateStr);
-  const [timeLeft, setTimeLeft] = useState(getTimeLeft(eventDate));
+  const content = heroContent ?? defaults;
+  const registrationCount = registrationCountRaw ? Number(registrationCountRaw) : 0;
+  const animatedCount = useCountUp(registrationCount, 1500);
+
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const [scrollY, setScrollY] = useState(0);
+  const bgRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const timer = setInterval(() => setTimeLeft(getTimeLeft(eventDate)), 1000);
-    return () => clearInterval(timer);
-  }, [eventDate.getTime()]);
+    const eventDate = parseEventDate(content.eventDate);
+    if (!eventDate) return;
 
-  const handleRegisterClick = () => {
-    const el = document.getElementById('registration');
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
-  };
+    const tick = () => {
+      const now = new Date().getTime();
+      const distance = eventDate.getTime() - now;
+      if (distance < 0) {
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+        return;
+      }
+      setTimeLeft({
+        days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+        seconds: Math.floor((distance % (1000 * 60)) / 1000),
+      });
+    };
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [content.eventDate]);
 
-  const handleScrollDown = () => {
-    const el = document.getElementById('about');
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
-  };
+  // Parallax scroll effect (desktop only)
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.innerWidth >= 768) {
+        setScrollY(window.scrollY);
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    if (bgRef.current) {
+      bgRef.current.style.transform = `translateY(${scrollY * 0.4}px)`;
+    }
+  }, [scrollY]);
 
   return (
-    <section
-      id="hero"
-      className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden"
-    >
-      {/* Background Image */}
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background">
+      {/* Parallax background layer */}
       <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: "url('/assets/generated/hero-bg.dim_1920x1080.png')" }}
+        ref={bgRef}
+        className="absolute inset-0 will-change-transform"
+        style={{ zIndex: 0 }}
+      >
+        <img
+          src="/assets/generated/hero-bg.dim_1920x1080.png"
+          alt=""
+          className="w-full h-full object-cover opacity-20"
+          aria-hidden="true"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background" />
+      </div>
+
+      {/* Glow orbs */}
+      <div
+        className="glow-orb glow-orb-1"
+        style={{
+          width: '500px',
+          height: '500px',
+          background: 'radial-gradient(circle, oklch(0.65 0.18 150 / 0.35) 0%, transparent 70%)',
+          top: '5%',
+          left: '-10%',
+        }}
+      />
+      <div
+        className="glow-orb glow-orb-2"
+        style={{
+          width: '400px',
+          height: '400px',
+          background: 'radial-gradient(circle, oklch(0.55 0.22 145 / 0.3) 0%, transparent 70%)',
+          top: '30%',
+          right: '-8%',
+        }}
+      />
+      <div
+        className="glow-orb glow-orb-3"
+        style={{
+          width: '300px',
+          height: '300px',
+          background: 'radial-gradient(circle, oklch(0.70 0.16 155 / 0.25) 0%, transparent 70%)',
+          bottom: '10%',
+          left: '30%',
+        }}
       />
 
-      {/* Dark Green Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-expo-dark/80 via-expo-dark/70 to-expo-dark/90" />
+      {/* Foreground content */}
+      <div className="relative z-10 text-center px-4 max-w-5xl mx-auto py-24">
+        {/* College name */}
+        <p className="text-primary/80 text-sm md:text-base font-medium tracking-widest uppercase mb-4 fade-up" style={{ animationDelay: '0.1s' }}>
+          {content.collegeName}
+        </p>
 
-      {/* Animated Particles */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {Array.from({ length: 20 }).map((_, i) => (
-          <div
-            key={i}
-            className="absolute rounded-full bg-expo-green-start/20 animate-float"
-            style={{
-              width: `${Math.random() * 6 + 2}px`,
-              height: `${Math.random() * 6 + 2}px`,
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
-              animationDuration: `${Math.random() * 10 + 8}s`,
-            }}
-          />
-        ))}
-      </div>
+        {/* Event title */}
+        <h1 className="text-3xl md:text-5xl lg:text-6xl font-black mb-6 leading-tight fade-up gradient-text-animated" style={{ animationDelay: '0.2s' }}>
+          {content.eventTitle}
+        </h1>
 
-      {/* Glowing orbs */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-expo-green-start/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-expo-green-end/10 rounded-full blur-3xl pointer-events-none" />
+        {/* Tagline with typewriter */}
+        <p className="text-lg md:text-2xl text-foreground/80 mb-8 font-light fade-up" style={{ animationDelay: '0.3s' }}>
+          <TypewriterText text={content.tagline} delay={800} />
+        </p>
 
-      {/* Content */}
-      <div className="relative z-10 text-center px-4 sm:px-6 max-w-5xl mx-auto pt-20">
-        {/* College Branding */}
-        <div className="animate-slide-up opacity-0 [animation-fill-mode:forwards] [animation-delay:0.1s]">
-          <span className="inline-block px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold text-expo-green-end border border-expo-green-start/40 bg-expo-green-start/10 backdrop-blur-sm mb-4 tracking-wide uppercase">
-            {collegeName} • ECE Department
-          </span>
-        </div>
-
-        {/* Event Title */}
-        <div className="animate-slide-up opacity-0 [animation-fill-mode:forwards] [animation-delay:0.25s]">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-white leading-tight mb-4">
-            {eventTitle.includes('2026') ? (
-              <>
-                {eventTitle.replace('Project Expo 2026', '')}
-                <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-expo-green-start to-expo-green-end">
-                  Project Expo 2026
-                </span>
-              </>
-            ) : (
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-expo-green-start to-expo-green-end">
-                {eventTitle}
+        {/* Countdown timer */}
+        <div className="flex justify-center gap-4 md:gap-8 mb-10 fade-up" style={{ animationDelay: '0.4s' }}>
+          {[
+            { label: 'Days', value: timeLeft.days },
+            { label: 'Hours', value: timeLeft.hours },
+            { label: 'Minutes', value: timeLeft.minutes },
+            { label: 'Seconds', value: timeLeft.seconds },
+          ].map(({ label, value }) => (
+            <div
+              key={label}
+              className="flex flex-col items-center bg-card/60 backdrop-blur-sm border border-primary/20 rounded-xl px-4 py-3 md:px-6 md:py-4 min-w-[70px] md:min-w-[90px]"
+            >
+              <span className="text-2xl md:text-4xl font-black text-primary font-mono tabular-nums">
+                {String(value).padStart(2, '0')}
               </span>
-            )}
-          </h1>
+              <span className="text-xs text-muted-foreground uppercase tracking-wider mt-1">{label}</span>
+            </div>
+          ))}
         </div>
 
-        {/* Tagline */}
-        <div className="animate-slide-up opacity-0 [animation-fill-mode:forwards] [animation-delay:0.4s]">
-          <p className="text-lg sm:text-xl text-white/70 mb-3 font-medium">
-            {tagline}
-          </p>
-          <p className="text-sm sm:text-base text-white/50 mb-8 max-w-2xl mx-auto">
-            Showcase your groundbreaking projects to industry experts, win exciting prizes, and connect with brilliant minds from across the nation.
+        {/* Registration count */}
+        <div className="mb-10 fade-up" style={{ animationDelay: '0.5s' }}>
+          <p className="text-muted-foreground text-sm">
+            <span className="text-primary font-bold text-xl tabular-nums">{animatedCount}</span>
+            {' '}teams already registered
           </p>
         </div>
 
-        {/* Countdown Timer */}
-        <div className="animate-slide-up opacity-0 [animation-fill-mode:forwards] [animation-delay:0.55s]">
-          <p className="text-xs text-white/50 uppercase tracking-widest mb-4 font-medium">Event Countdown</p>
-          <div className="flex items-start justify-center gap-3 sm:gap-5 mb-8">
-            <CountdownUnit value={timeLeft.days} label="Days" />
-            <span className="text-3xl text-expo-green-end font-bold mt-3">:</span>
-            <CountdownUnit value={timeLeft.hours} label="Hours" />
-            <span className="text-3xl text-expo-green-end font-bold mt-3">:</span>
-            <CountdownUnit value={timeLeft.minutes} label="Mins" />
-            <span className="text-3xl text-expo-green-end font-bold mt-3">:</span>
-            <CountdownUnit value={timeLeft.seconds} label="Secs" />
+        {/* CTA Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center fade-up" style={{ animationDelay: '0.6s' }}>
+          {/* Primary CTA with pulse ring */}
+          <div className="pulse-ring-btn rounded-full">
+            <a
+              href="#registration"
+              className="relative z-10 inline-flex items-center gap-2 bg-primary text-primary-foreground font-bold px-8 py-3 rounded-full hover:bg-primary/90 transition-all duration-300 hover:scale-105 shadow-lg shadow-primary/30"
+            >
+              Register Now
+            </a>
           </div>
-        </div>
 
-        {/* Registration Counter */}
-        <div className="animate-slide-up opacity-0 [animation-fill-mode:forwards] [animation-delay:0.65s]">
-          <div className="flex items-center justify-center gap-6 mb-8">
-            <div className="flex items-center gap-2 glass-card px-4 py-2 rounded-full border border-white/10">
-              <Users className="w-4 h-4 text-expo-green-end" />
-              <span className="text-white font-semibold text-sm">
-                <span className="text-expo-green-end font-bold">{registrationCount}</span> Teams Registered
-              </span>
-            </div>
-            <div className="flex items-center gap-2 glass-card px-4 py-2 rounded-full border border-white/10">
-              <Trophy className="w-4 h-4 text-expo-green-end" />
-              <span className="text-white font-semibold text-sm">
-                <span className="text-expo-green-end font-bold">₹50,000+</span> Prize Pool
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* CTA Button */}
-        <div className="animate-slide-up opacity-0 [animation-fill-mode:forwards] [animation-delay:0.75s]">
-          <button
-            onClick={handleRegisterClick}
-            className="relative inline-flex items-center gap-2 px-8 py-4 text-lg font-bold text-white rounded-full bg-gradient-to-r from-expo-green-start to-expo-green-end shadow-xl shadow-expo-green-start/40 hover:shadow-expo-green-start/60 hover:scale-105 transition-all duration-300 animate-glow-pulse"
+          <a
+            href="#about"
+            className="inline-flex items-center gap-2 border border-primary/40 text-primary font-semibold px-8 py-3 rounded-full hover:bg-primary/10 transition-all duration-300"
           >
-            Register Now — It's Free!
-          </button>
-          <p className="mt-3 text-xs text-white/40">{eventDateStr} • Nagapattinam, Tamil Nadu</p>
+            Learn More
+          </a>
         </div>
       </div>
 
-      {/* Scroll Down Indicator */}
-      <button
-        onClick={handleScrollDown}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/40 hover:text-expo-green-end transition-colors animate-bounce"
-        aria-label="Scroll down"
-      >
-        <ChevronDown className="w-6 h-6" />
-      </button>
+      {/* Scroll indicator */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 opacity-60">
+        <span className="text-xs text-muted-foreground tracking-widest uppercase">Scroll</span>
+        <div className="w-px h-8 bg-gradient-to-b from-primary to-transparent animate-pulse" />
+      </div>
     </section>
   );
 }

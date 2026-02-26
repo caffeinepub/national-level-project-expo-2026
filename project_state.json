@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 27,
+  "projectStateVersion": 43,
   "summary": "Premium animated event website for 'National Level Project Expo 2026' organized by E.G.S. Pillay Engineering College (ECE Dept). Green gradient theme (#0f9d58 → #22c55e), glassmorphism UI, smooth scroll animations, Poppins/Inter fonts, fully responsive. Features 9 sections separated into distinct pages: Home, About, Event Details (timeline), Coordinators (profile cards), Registration (form + validation + success popup), Admin Login (Firebase Auth), Admin Dashboard (table, search, delete, CSV export, analytics), Contact, and Footer.",
   "architectural_notes": [
     "Green gradient theme: #0f9d58 → #22c55e with glassmorphism cards (blur + hover glow)",
@@ -13,9 +13,10 @@
     "All site content (event details, coordinators, about info, etc.) must be editable by the authenticated admin (athiakash1977@gmail.com)"
   ],
   "known_issues": [
-    "Admin login password mismatch — user reports 'password is wrong' when attempting to log in with Akash@8667099605"
+    "Admin login password mismatch — user reports 'password is wrong' when attempting to log in with Akash@8667099605",
+    "Registered team details (registrations) are not shown/loading in the Admin Dashboard table"
   ],
-  "isFixRequest": true,
+  "isFixRequest": false,
   "existing_features": [
     {
       "id": "feature-implement-a-sticky-transparent-navbar-that-becomes-semi-opaque-on-scroll-with-smooth-anchor-navigation-to-all-sections-a-hamburger-menu-on-mobile-and-a-scroll-progress-indicator-bar-at-the-top-of-the-viewport-use-poppins-or-inter-font-throughout-the-entire-site",
@@ -288,6 +289,182 @@
         "REQ-42"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-in-frontend-src-pages-admindashboard-tsx-diagnose-and-fix-the-registrations-tab-so-that-all-submitted-registration-records-are-correctly-fetched-from-the-backend-and-rendered-in-the-table-ensure-the-usegetregistrations-or-equivalent-react-query-hook-in-frontend-src-hooks-usequeries-ts-correctly-calls-the-backend-getregistrations-function-handles-loading-and-error-states-and-passes-the-data-array-to-the-table-the-table-must-display-all-fields-registration-id-full-name-email-phone-number-college-name-department-project-title-category-and-abstract-if-the-query-is-returning-an-empty-array-or-undefined-due-to-a-data-shape-mismatch-e-g-the-backend-returns-a-motoko-array-that-needs-unwrapping-fix-the-mapping-logic-so-records-are-correctly-displayed",
+      "title": "In `frontend/src/pages/AdminDashboard.tsx`, diagnose and fix the Registrations tab so that all submitted registration records are correctly fetched from the backend and rendered in the table. Ensure the `useGetRegistrations` (or equivalent) React Query hook in `frontend/src/hooks/useQueries.ts` correctly calls the backend `getRegistrations` function, handles loading and error states, and passes the data array to the table. The table must display all fields: Registration ID, Full Name, Email, Phone Number, College Name, Department, Project Title, Category, and Abstract. If the query is returning an empty array or undefined due to a data-shape mismatch (e.g., the backend returns a Motoko array that needs unwrapping), fix the mapping logic so records are correctly displayed.",
+      "reqIds": [
+        "REQ-43"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-frontend-src-components-contact-tsx-add-a-dedicated-connect-with-us-subsection-that-displays-a-whatsapp-chat-link-button-using-https-wa-me-918667099605-for-the-organizer-s-whatsapp-number-8667099605-and-an-instagram-profile-link-button-both-links-must-open-in-a-new-tab-style-the-buttons-with-the-existing-green-gradient-0f9d58-22c55e-and-glassmorphism-card-styling-consistent-with-the-rest-of-the-contact-section-include-recognizable-whatsapp-and-instagram-brand-icons-e-g-from-lucide-react-or-inline-svgs-apply-scroll-triggered-fade-in-entrance-animation-matching-the-existing-section-style",
+      "title": "In `frontend/src/components/Contact.tsx`, add a dedicated 'Connect With Us' subsection that displays a WhatsApp chat link button (using https://wa.me/918667099605 for the organizer's WhatsApp number 8667099605) and an Instagram profile link button. Both links must open in a new tab. Style the buttons with the existing green gradient (#0f9d58 → #22c55e) and glassmorphism card styling consistent with the rest of the Contact section. Include recognizable WhatsApp and Instagram brand icons (e.g., from lucide-react or inline SVGs). Apply scroll-triggered fade-in entrance animation matching the existing section style.",
+      "reqIds": [
+        "REQ-45"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-floating-social-contact-buttons-fixed-to-the-bottom-right-corner-of-the-viewport-on-all-pages-one-for-whatsapp-https-wa-me-918667099605-and-one-for-instagram-each-button-should-be-a-circular-icon-button-with-a-green-glow-shadow-effect-on-hover-open-its-respective-link-in-a-new-tab-and-include-a-tooltip-label-chat-on-whatsapp-follow-on-instagram-on-hover-the-buttons-should-be-stacked-vertically-and-visible-on-all-routes-implement-this-as-a-standalone-component-e-g-frontend-src-components-floatingsocialbuttons-tsx-and-render-it-inside-frontend-src-pages-homepage-tsx-frontend-src-pages-aboutpage-tsx-frontend-src-pages-eventdetailspage-tsx-and-frontend-src-pages-registrationlookuppage-tsx",
+      "title": "Add floating social contact buttons fixed to the bottom-right corner of the viewport on all pages — one for WhatsApp (https://wa.me/918667099605) and one for Instagram. Each button should be a circular icon button with a green glow/shadow effect on hover, open its respective link in a new tab, and include a tooltip label ('Chat on WhatsApp' / 'Follow on Instagram') on hover. The buttons should be stacked vertically and visible on all routes. Implement this as a standalone component (e.g., `frontend/src/components/FloatingSocialButtons.tsx`) and render it inside `frontend/src/pages/HomePage.tsx`, `frontend/src/pages/AboutPage.tsx`, `frontend/src/pages/EventDetailsPage.tsx`, and `frontend/src/pages/RegistrationLookupPage.tsx`.",
+      "reqIds": [
+        "REQ-46"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-instagram-link-in-frontend-src-components-floatingsocialbuttons-tsx-to-https-www-instagram-com-innovativelink-expo-2k26-igsh-mtbvbtmzmxjzbwdtmg-and-the-whatsapp-link-to-https-chat-whatsapp-com-h6h4hmb31xzkw0ziktzskg-both-links-must-continue-to-open-in-a-new-tab-all-existing-styling-tooltip-labels-hover-animations-and-layout-must-remain-unchanged",
+      "title": "Update the Instagram link in `frontend/src/components/FloatingSocialButtons.tsx` to `https://www.instagram.com/innovativelink_expo_2k26?igsh=MTBvbTMzMXJzbWdtMg==` and the WhatsApp link to `https://chat.whatsapp.com/H6H4HMb31XzKw0ziktZSkg`. Both links must continue to open in a new tab. All existing styling, tooltip labels, hover animations, and layout must remain unchanged.",
+      "reqIds": [
+        "REQ-47"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-instagram-link-in-frontend-src-components-contact-tsx-the-connect-with-us-subsection-to-https-www-instagram-com-innovativelink-expo-2k26-igsh-mtbvbtmzmxjzbwdtmg-and-the-whatsapp-link-to-https-chat-whatsapp-com-h6h4hmb31xzkw0ziktzskg-both-links-must-continue-to-open-in-a-new-tab-all-existing-glassmorphism-styling-green-gradient-button-styling-scroll-triggered-fade-in-animations-and-icons-must-remain-unchanged",
+      "title": "Update the Instagram link in `frontend/src/components/Contact.tsx` (the 'Connect With Us' subsection) to `https://www.instagram.com/innovativelink_expo_2k26?igsh=MTBvbTMzMXJzbWdtMg==` and the WhatsApp link to `https://chat.whatsapp.com/H6H4HMb31XzKw0ziktZSkg`. Both links must continue to open in a new tab. All existing glassmorphism styling, green gradient button styling, scroll-triggered fade-in animations, and icons must remain unchanged.",
+      "reqIds": [
+        "REQ-48"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-frontend-src-hooks-usequeries-ts-and-frontend-src-pages-admindashboard-tsx-fix-the-registrations-data-flow-so-that-the-usegetregistrations-hook-correctly-calls-the-backend-getregistrations-function-handles-loading-and-error-states-and-passes-the-full-array-of-records-to-the-table-fix-any-data-shape-mismatch-e-g-unwrapping-a-motoko-array-or-mapping-field-names-so-all-fields-registration-id-full-name-email-phone-number-college-name-department-project-title-category-and-abstract-are-correctly-displayed-in-every-row",
+      "title": "In `frontend/src/hooks/useQueries.ts` and `frontend/src/pages/AdminDashboard.tsx`, fix the registrations data flow so that the `useGetRegistrations` hook correctly calls the backend `getRegistrations` function, handles loading and error states, and passes the full array of records to the table. Fix any data-shape mismatch (e.g., unwrapping a Motoko array or mapping field names) so all fields — Registration ID, Full Name, Email, Phone Number, College Name, Department, Project Title, Category, and Abstract — are correctly displayed in every row.",
+      "reqIds": [
+        "REQ-54"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-react-query-hooks-in-frontend-src-hooks-usequeries-ts-for-the-gallery-backend-functions-usegetgalleryimages-query-hook-that-calls-getgalleryimages-follows-the-same-pattern-as-other-useget-hooks-useaddgalleryimage-mutation-hook-that-calls-addgalleryimage-with-title-and-imagedata-invalidates-the-gallery-images-query-on-success-and-usedeletegalleryimage-mutation-hook-that-calls-deletegalleryimage-with-an-image-id-invalidates-the-gallery-images-query-on-success-follow-the-existing-hook-patterns-in-the-file",
+      "title": "Add React Query hooks in `frontend/src/hooks/useQueries.ts` for the gallery backend functions: `useGetGalleryImages()` (query hook that calls `getGalleryImages`, follows the same pattern as other `useGet*` hooks), `useAddGalleryImage()` (mutation hook that calls `addGalleryImage` with title and imageData, invalidates the gallery images query on success), and `useDeleteGalleryImage()` (mutation hook that calls `deleteGalleryImage` with an image ID, invalidates the gallery images query on success). Follow the existing hook patterns in the file.",
+      "reqIds": [
+        "REQ-63"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-new-page-component-frontend-src-pages-gallerypage-tsx-for-the-route-gallery-the-page-must-render-the-navbar-and-footer-consistent-with-other-pages-like-aboutpage-tsx-and-also-render-the-floatingsocialbuttons-component-the-main-gallery-content-must-1-display-a-section-heading-gallery-with-a-decorative-green-gradient-underline-and-scroll-triggered-fade-in-slide-up-entrance-animation-2-fetch-all-gallery-images-using-usegetgalleryimages-and-display-them-in-a-responsive-masonry-or-grid-layout-3-4-columns-on-desktop-2-on-tablet-1-on-mobile-3-each-image-card-must-use-glassmorphism-styling-backdrop-blur-semi-transparent-dark-background-green-glow-on-hover-consistent-with-the-site-theme-display-the-image-and-its-title-and-animate-in-with-a-staggered-fade-in-scale-up-entrance-animation-triggered-by-intersectionobserver-using-the-existing-usescrollanimation-hook-4-show-a-loading-skeleton-state-while-images-are-fetching-5-show-an-empty-state-message-no-photos-yet-check-back-soon-if-no-images-are-available-6-apply-the-green-gradient-0f9d58-22c55e-as-the-section-accent-color",
+      "title": "Create a new page component `frontend/src/pages/GalleryPage.tsx` for the route `/gallery`. The page must render the Navbar and Footer (consistent with other pages like `AboutPage.tsx`), and also render the `FloatingSocialButtons` component. The main gallery content must: (1) Display a section heading 'Gallery' with a decorative green gradient underline and scroll-triggered fade-in/slide-up entrance animation. (2) Fetch all gallery images using `useGetGalleryImages` and display them in a responsive masonry or grid layout (3–4 columns on desktop, 2 on tablet, 1 on mobile). (3) Each image card must use glassmorphism styling (backdrop-blur, semi-transparent dark background, green glow on hover) consistent with the site theme, display the image and its title, and animate in with a staggered fade-in/scale-up entrance animation triggered by IntersectionObserver (using the existing `useScrollAnimation` hook). (4) Show a loading skeleton state while images are fetching. (5) Show an empty state message 'No photos yet — check back soon!' if no images are available. (6) Apply the green gradient (#0f9d58 → #22c55e) as the section accent color.",
+      "reqIds": [
+        "REQ-64"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-register-the-gallery-route-in-frontend-src-app-tsx-using-tanstack-router-pointing-to-the-new-gallerypage-component-preserve-all-existing-routes-about-event-details-check-registration-admin-login-admin-dashboard",
+      "title": "Register the `/gallery` route in `frontend/src/App.tsx` using TanStack Router, pointing to the new `GalleryPage` component. Preserve all existing routes (/, /about, /event-details, /check-registration, /admin/login, /admin/dashboard).",
+      "reqIds": [
+        "REQ-65"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-navbar-component-frontend-src-components-navbar-tsx-to-add-a-gallery-navigation-link-pointing-to-gallery-as-a-tanstack-router-page-level-link-consistent-with-the-existing-page-navigation-links-home-about-event-details-check-registration-the-link-must-appear-in-both-the-desktop-nav-bar-and-the-mobile-hamburger-menu",
+      "title": "Update the Navbar component (`frontend/src/components/Navbar.tsx`) to add a 'Gallery' navigation link pointing to `/gallery` as a TanStack Router page-level link, consistent with the existing page navigation links (Home, About, Event Details, Check Registration). The link must appear in both the desktop nav bar and the mobile hamburger menu.",
+      "reqIds": [
+        "REQ-66"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-gallery-management-tab-or-section-inside-the-admin-dashboard-frontend-src-pages-admindashboard-tsx-accessible-only-to-authenticated-admins-the-gallery-management-ui-must-1-display-all-existing-gallery-images-fetched-via-usegetgalleryimages-in-a-grid-with-image-thumbnail-title-and-a-delete-button-per-image-2-include-an-add-photo-form-with-a-text-input-for-title-and-a-file-input-for-selecting-an-image-accept-image-types-on-file-selection-read-the-file-as-a-base64-data-url-on-form-submit-call-useaddgalleryimage-with-the-title-and-base64-data-url-show-a-success-toast-on-completion-and-refresh-the-gallery-grid-show-an-error-message-on-failure-3-show-a-confirmation-dialog-before-deleting-an-image-via-usedeletegalleryimage-show-a-success-toast-on-deletion-4-style-all-forms-and-cards-with-the-existing-glassmorphism-and-green-accent-theme-consistent-with-the-rest-of-the-admin-dashboard",
+      "title": "Add a 'Gallery Management' tab or section inside the Admin Dashboard (`frontend/src/pages/AdminDashboard.tsx`), accessible only to authenticated admins. The gallery management UI must: (1) Display all existing gallery images fetched via `useGetGalleryImages` in a grid with image thumbnail, title, and a 'Delete' button per image. (2) Include an 'Add Photo' form with a text input for 'Title' and a file input for selecting an image (accept image/* types). On file selection, read the file as a base64 data URL. On form submit, call `useAddGalleryImage` with the title and base64 data URL. Show a success toast on completion and refresh the gallery grid. Show an error message on failure. (3) Show a confirmation dialog before deleting an image via `useDeleteGalleryImage`. Show a success toast on deletion. (4) Style all forms and cards with the existing glassmorphism and green accent theme consistent with the rest of the Admin Dashboard.",
+      "reqIds": [
+        "REQ-67"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-new-frontend-page-component-at-frontend-src-pages-landingpage-tsx-for-the-route-replacing-the-current-home-route-this-page-acts-as-an-animated-entry-gate-before-users-access-the-main-website-it-must-display-1-the-event-title-national-level-project-expo-2026-and-the-ece-department-e-g-s-pillay-engineering-college-branding-2-a-prominent-enter-website-or-explore-now-button-styled-with-the-green-gradient-0f9d58-22c55e-that-navigates-to-home-the-current-home-page-content-3-a-sign-in-with-google-button-placeholder-styled-as-a-pill-button-with-a-google-style-icon-note-actual-google-oauth-is-not-supported-the-button-should-be-a-visually-styled-ui-element-that-when-clicked-shows-a-friendly-toast-message-like-google-sign-in-is-not-available-please-proceed-as-guest-or-simply-navigates-to-home-4-an-animated-particle-or-mesh-background-consistent-with-the-hero-section-s-dark-green-tech-circuit-aesthetic-5-a-glassmorphism-card-centered-on-the-page-containing-the-branding-sign-in-option-and-enter-button-6-entrance-animations-fade-in-and-slide-up-for-the-card-and-its-child-elements-using-css-keyframes-or-the-existing-animation-utility-classes-defined-in-frontend-src-index-css-7-a-floating-green-glow-pulse-animation-on-the-main-cta-button-consistent-with-the-existing-glowing-button-style-on-the-hero-section",
+      "title": "Create a new frontend page component at `frontend/src/pages/LandingPage.tsx` for the route `/` (replacing the current home route). This page acts as an animated entry gate before users access the main website. It must display: (1) The event title 'National Level Project Expo 2026' and the ECE Department / E.G.S. Pillay Engineering College branding, (2) A prominent 'Enter Website' or 'Explore Now' button styled with the green gradient (#0f9d58 → #22c55e) that navigates to `/home` (the current home page content), (3) A 'Sign in with Google' button placeholder (styled as a pill button with a Google-style icon — note: actual Google OAuth is not supported; the button should be a visually styled UI element that, when clicked, shows a friendly toast/message like 'Google Sign-in is not available — please proceed as guest' or simply navigates to `/home`), (4) An animated particle or mesh background consistent with the Hero section's dark green tech/circuit aesthetic, (5) A glassmorphism card centered on the page containing the branding, sign-in option, and enter button, (6) Entrance animations: fade-in and slide-up for the card and its child elements using CSS keyframes or the existing animation utility classes defined in `frontend/src/index.css`, (7) A floating green glow pulse animation on the main CTA button, consistent with the existing glowing button style on the Hero section.",
+      "reqIds": [
+        "REQ-69"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-move-the-existing-home-page-content-currently-at-route-to-a-new-route-home-update-frontend-src-app-tsx-to-register-home-as-the-route-pointing-to-homepage-tsx-and-set-to-point-to-the-new-landingpage-tsx-ensure-all-existing-routes-about-event-details-check-registration-gallery-admin-login-admin-dashboard-are-preserved-unchanged",
+      "title": "Move the existing home page content (currently at route `/`) to a new route `/home`. Update `frontend/src/App.tsx` to register `/home` as the route pointing to `HomePage.tsx`, and set `/` to point to the new `LandingPage.tsx`. Ensure all existing routes (`/about`, `/event-details`, `/check-registration`, `/gallery`, `/admin/login`, `/admin/dashboard`) are preserved unchanged.",
+      "reqIds": [
+        "REQ-70"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-navbar-component-frontend-src-components-navbar-tsx-so-that-the-home-navigation-link-points-to-home-instead-of-to-reflect-the-new-routing-structure-introduced-by-the-landing-page-all-other-navbar-links-about-event-details-check-registration-gallery-must-remain-unchanged",
+      "title": "Update the Navbar component (`frontend/src/components/Navbar.tsx`) so that the 'Home' navigation link points to `/home` instead of `/`, to reflect the new routing structure introduced by the landing page. All other navbar links (About, Event Details, Check Registration, Gallery) must remain unchanged.",
+      "reqIds": [
+        "REQ-71"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-smooth-page-transition-animation-fade-in-slight-upward-slide-that-plays-whenever-the-user-navigates-between-routes-home-about-event-details-check-registration-gallery-implement-this-as-a-wrapper-component-or-css-class-applied-at-the-route-level-in-app-tsx-or-the-individual-page-components",
+      "title": "Add a smooth page transition animation (fade-in + slight upward slide) that plays whenever the user navigates between routes (/, /home, /about, /event-details, /check-registration, /gallery). Implement this as a wrapper component or CSS class applied at the route level in App.tsx or the individual page components.",
+      "reqIds": [
+        "REQ-72"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-floating-animated-glow-orb-or-gradient-blob-two-or-three-large-blurred-radial-gradient-circles-as-decorative-background-elements-on-the-hero-section-about-page-and-event-details-page-the-orbs-should-slowly-drift-or-pulse-using-css-keyframe-animations-reinforcing-the-dark-green-tech-aesthetic-without-obscuring-content",
+      "title": "Add a floating animated glow orb or gradient blob (two or three large blurred radial gradient circles) as decorative background elements on the Hero section, About page, and Event Details page. The orbs should slowly drift or pulse using CSS keyframe animations, reinforcing the dark green tech aesthetic without obscuring content.",
+      "reqIds": [
+        "REQ-73"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-enhance-the-coordinators-section-cards-frontend-src-components-coordinators-tsx-with-a-shimmer-shine-sweep-animation-on-hover-a-subtle-light-sweep-effect-that-passes-across-the-card-surface-from-left-to-right-when-the-user-hovers-over-a-card-using-a-css-pseudo-element-or-gradient-overlay",
+      "title": "Enhance the Coordinators section cards (`frontend/src/components/Coordinators.tsx`) with a shimmer/shine sweep animation on hover — a subtle light sweep effect that passes across the card surface from left to right when the user hovers over a card, using a CSS pseudo-element or gradient overlay.",
+      "reqIds": [
+        "REQ-74"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-typewriter-text-animation-to-the-event-tagline-in-the-hero-section-frontend-src-components-hero-tsx-the-tagline-text-should-appear-character-by-character-using-a-css-or-javascript-typewriter-effect-on-page-load-after-the-initial-fade-in-entrance-animation-completes",
+      "title": "Add a typewriter text animation to the event tagline in the Hero section (`frontend/src/components/Hero.tsx`). The tagline text should appear character by character using a CSS or JavaScript typewriter effect on page load, after the initial fade-in entrance animation completes.",
+      "reqIds": [
+        "REQ-75"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-staggered-bounce-in-or-pop-in-animation-to-the-analytics-cards-and-tab-buttons-in-the-admin-dashboard-frontend-src-pages-admindashboard-tsx-when-the-dashboard-first-loads-each-analytics-card-should-animate-in-sequentially-with-a-slight-scale-up-and-fade-in-stagger-delay-of-100ms-between-cards",
+      "title": "Add a staggered bounce-in or pop-in animation to the analytics cards and tab buttons in the Admin Dashboard (`frontend/src/pages/AdminDashboard.tsx`). When the dashboard first loads, each analytics card should animate in sequentially with a slight scale-up and fade-in (stagger delay of ~100ms between cards).",
+      "reqIds": [
+        "REQ-76"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-pulsing-ring-ripple-animation-around-the-register-now-cta-button-on-the-landing-page-frontend-src-pages-landingpage-tsx-and-hero-section-frontend-src-components-hero-tsx-the-ripple-should-be-a-continuously-expanding-semi-transparent-green-ring-that-fades-out-as-it-expands-drawing-attention-to-the-button",
+      "title": "Add a pulsing ring/ripple animation around the 'Register Now' CTA button on the Landing Page (`frontend/src/pages/LandingPage.tsx`) and Hero section (`frontend/src/components/Hero.tsx`). The ripple should be a continuously expanding semi-transparent green ring that fades out as it expands, drawing attention to the button.",
+      "reqIds": [
+        "REQ-77"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-smooth-number-count-up-animation-to-the-registration-counter-displayed-in-the-hero-section-frontend-src-components-hero-tsx-when-the-registration-count-value-is-fetched-and-rendered-the-number-should-animate-from-0-up-to-the-actual-value-over-1-5-seconds-using-requestanimationframe-or-a-css-counter-approach",
+      "title": "Add a smooth number count-up animation to the registration counter displayed in the Hero section (`frontend/src/components/Hero.tsx`). When the registration count value is fetched and rendered, the number should animate from 0 up to the actual value over ~1.5 seconds using requestAnimationFrame or a CSS counter approach.",
+      "reqIds": [
+        "REQ-78"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-subtle-parallax-scrolling-effect-to-the-hero-section-background-frontend-src-components-hero-tsx-as-the-user-scrolls-down-from-the-hero-the-background-image-particle-canvas-should-scroll-at-a-slower-rate-than-the-foreground-content-creating-a-depth-effect-implement-using-a-scroll-event-listener-that-adjusts-the-background-s-transform-translatey",
+      "title": "Add a subtle parallax scrolling effect to the Hero section background (`frontend/src/components/Hero.tsx`). As the user scrolls down from the hero, the background image/particle canvas should scroll at a slower rate than the foreground content, creating a depth effect. Implement using a scroll event listener that adjusts the background's `transform: translateY()`.",
+      "reqIds": [
+        "REQ-79"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -461,6 +638,156 @@
       "reqIds": [
         "REQ-41"
       ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-41",
+      "summary": "In `backend/main.mo`, verify that the `getRegistrations` function is correctly defined as admin-protected and returns all stored registration records as an array. Ensure the return type and data structure are consistent with what the frontend actor hook expects (e.g., correct field names and types). If there is a mismatch in field names, types, or the function signature between the backend and the frontend actor declaration, reconcile them so the frontend can correctly deserialize and render the records.",
+      "reqIds": [
+        "REQ-44"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-42",
+      "summary": "Add WhatsApp and Instagram contact/connect links for participants — allow participants to connect with the organizers via WhatsApp and Instagram (e.g., WhatsApp chat link and Instagram profile link displayed prominently on the site, such as in the Contact section or as floating social buttons)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-43",
+      "summary": "Update Instagram link to https://www.instagram.com/innovativelink_expo_2k26?igsh=MTBvbTMzMXJzbWdtMg== and WhatsApp link to https://chat.whatsapp.com/H6H4HMb31XzKw0ziktZSkg (WhatsApp community) in all social buttons (floating buttons and Contact section)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-44",
+      "summary": "In `frontend/src/components/FloatingSocialButtons.tsx`, confirm the Instagram link is set to `https://www.instagram.com/innovativelink_expo_2k26?igsh=MTBvbTMzMXJzbWdtMg==` and the WhatsApp link is set to `https://chat.whatsapp.com/H6H4HMb31XzKw0ziktZSkg`. Both must open in a new tab. All existing styling, tooltip labels, hover animations, and layout must remain unchanged.",
+      "reqIds": [
+        "REQ-49"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-45",
+      "summary": "In `frontend/src/components/Contact.tsx`, confirm the 'Connect With Us' subsection Instagram link is set to `https://www.instagram.com/innovativelink_expo_2k26?igsh=MTBvbTMzMXJzbWdtMg==` and the WhatsApp link is set to `https://chat.whatsapp.com/H6H4HMb31XzKw0ziktZSkg`. Both must open in a new tab. All existing glassmorphism styling, green gradient button styling, scroll-triggered fade-in animations, and icons must remain unchanged.",
+      "reqIds": [
+        "REQ-50"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-46",
+      "summary": "In `backend/main.mo`, ensure the `verifyAdminCredentials` function accepts exactly email `athiakash1977@gmail.com` and password `Akash@8667099605` (exact casing and special characters). The admin name stored/returned must be `Akash A`. Fix any comparison logic that would cause a mismatch when the user submits these exact credentials.",
+      "reqIds": [
+        "REQ-51"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-47",
+      "summary": "Update `frontend/src/pages/AdminLogin.tsx` to ensure the login form submits credentials exactly as typed (no trimming or transformation on email or password), the placeholder or pre-filled email field shows `athiakash1977@gmail.com`, and a successful login with email `athiakash1977@gmail.com` and password `Akash@8667099605` redirects to `/admin/dashboard`.",
+      "reqIds": [
+        "REQ-52"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-48",
+      "summary": "In `backend/main.mo`, verify that the `getRegistrations` function is admin-protected and returns all stored registration records as an array with field names and types consistent with the frontend actor declaration. If there is any mismatch between backend field names/types and what the frontend expects, reconcile them so records are correctly deserialized and rendered in the Admin Dashboard table.",
+      "reqIds": [
+        "REQ-53"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-50",
+      "summary": "Ensure `frontend/src/pages/AdminDashboard.tsx` displays the admin contact info card with Name: 'Akash A', Email: 'athiakash1977@gmail.com', Phone: '8667099605', styled consistently with the dashboard's glassmorphism and green accent theme.",
+      "reqIds": [
+        "REQ-55"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-51",
+      "summary": "Confirm that all registration fee displays across the site — in `frontend/src/components/Registration.tsx`, `frontend/src/components/EventDetails.tsx`, and any other components referencing a registration fee — show 'Rs. 150 per head'.",
+      "reqIds": [
+        "REQ-56"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-52",
+      "summary": "Confirm that `frontend/src/components/Registration.tsx` retains the UPI payment block (heading 'Pay Registration Fee', fee 'Rs. 150 per head', QR code for UPI ID `athiakash1977@oksbi`, copyable UPI ID text, and note 'After payment, complete registration below') above the Google Form link/iframe area, with glassmorphism styling consistent with the rest of the site.",
+      "reqIds": [
+        "REQ-57"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-53",
+      "summary": "Confirm that `frontend/src/components/Registration.tsx` includes a prominent 'Register Now' button/link that opens `https://forms.gle/CXHMtehDUjb8D11DA` in a new tab, and optionally an iframe embed of the same Google Form wrapped in a glassmorphism container with rounded corners and minimum height of 600px, using the green gradient (#0f9d58 → #22c55e) for the button styling.",
+      "reqIds": [
+        "REQ-58"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-54",
+      "summary": "Confirm that `frontend/src/components/Coordinators.tsx` lists exactly these three student coordinators: (1) Name: 'AKASH A', Email: 'athiakash1977@gmail.com', Phone: '8667099605', initials 'AA'; (2) Name: 'KEERTHIVASAN R', Email: 'skeerthivasan410@gmail.com', Phone: '9597245927', initials 'KR'; (3) Name: 'AKASH P', Email: 'akashpece', Phone as previously set, initials 'AP'. All card layout, glassmorphism styling, hover animations, and scroll-triggered entrance animations must remain unchanged.",
+      "reqIds": [
+        "REQ-59"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-55",
+      "summary": "Confirm that the Content Management tab in `frontend/src/pages/AdminDashboard.tsx` (via `frontend/src/components/AdminContentManagement.tsx`) is present and functional, with editable forms for Hero, About, Event Details, Coordinators, and Contact sections, each with a 'Save' button that calls the corresponding `update<Section>Content` backend function, shows a success toast on save, and an error message on failure.",
+      "reqIds": [
+        "REQ-60"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-56",
+      "summary": "Confirm that all frontend sections — `frontend/src/components/Hero.tsx`, `frontend/src/components/About.tsx`, `frontend/src/components/EventDetails.tsx`, `frontend/src/components/Coordinators.tsx`, and `frontend/src/components/Contact.tsx` — fetch their display content via React Query hooks from the backend `get<Section>Content` functions and fall back gracefully to hardcoded defaults if the backend returns no content.",
+      "reqIds": [
+        "REQ-61"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-57",
+      "summary": "Add a Gallery page with image upload/management capability for the admin and animated image display for visitors, with scroll/entrance animations consistent with the site theme",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-58",
+      "summary": "Add backend Motoko functions to `backend/main.mo` to support a gallery feature. Define a `GalleryImage` type with fields: `id: Text`, `title: Text`, `imageData: Text` (base64-encoded image data URL), `uploadedAt: Int` (timestamp). Add stable variable `galleryImages: [GalleryImage]`. Implement: `addGalleryImage(title: Text, imageData: Text): async Text` (admin-protected, stores the image, returns the new image ID), `getGalleryImages(): async [GalleryImage]` (public, returns all images in reverse-chronological order), and `deleteGalleryImage(id: Text): async Bool` (admin-protected, removes the image by ID, returns true on success). All functions must use the existing `verifyAdminCredentials` / session-token pattern for admin protection consistent with other admin-protected functions in the actor.",
+      "reqIds": [
+        "REQ-62"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-59",
+      "summary": "Redeploy the current application (Version 17) as-is to ensure all previously implemented features — including the Gallery page, Admin Dashboard with Gallery Management tab, floating social buttons, CMS content management, registration lookup, and all existing routes — are live and accessible at the production URL with no code changes.",
+      "reqIds": [
+        "REQ-68"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-60",
+      "summary": "Add an animated landing/login page that appears before users can enter the main website. Include social sign-in options (e.g., Sign in with Google) and visually appealing animations consistent with the site's green gradient and glassmorphism theme.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-61",
+      "summary": "Add visually appealing animations across the site (unspecified sections — general animation enhancement request)",
+      "reqIds": [],
       "status": "pending"
     }
   ],

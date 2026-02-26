@@ -7,6 +7,13 @@ export interface None {
     __kind__: "None";
 }
 export type Option<T> = Some<T> | None;
+export class ExternalBlob {
+    getBytes(): Promise<Uint8Array<ArrayBuffer>>;
+    getDirectURL(): string;
+    static fromURL(url: string): ExternalBlob;
+    static fromBytes(blob: Uint8Array<ArrayBuffer>): ExternalBlob;
+    withUploadProgress(onProgress: (percentage: number) => void): ExternalBlob;
+}
 export interface AboutContent {
     sectionDescription: string;
     featureCards: Array<FeatureCard>;
@@ -35,32 +42,38 @@ export interface Registration {
     department: string;
     phoneNumber: string;
 }
+export interface CoordinatorsContent {
+    studentCoordinators: Array<Coordinator>;
+    facultyCoordinators: Array<Coordinator>;
+}
 export interface HeroContent {
     tagline: string;
     collegeName: string;
     eventTitle: string;
     eventDate: string;
 }
-export interface FeatureCard {
-    title: string;
-    icon: string;
-    description: string;
-}
-export interface CoordinatorsContent {
-    studentCoordinators: Array<Coordinator>;
-    facultyCoordinators: Array<Coordinator>;
-}
-export interface Coordinator {
-    name: string;
-    role: string;
-    email: string;
-    phone: string;
-}
 export interface ContactContent {
     email: string;
     website: string;
     addressLine1: string;
     addressLine2: string;
+    phone: string;
+}
+export interface GalleryImage {
+    id: string;
+    title: string;
+    imageBlob: ExternalBlob;
+    uploadedAt: bigint;
+}
+export interface FeatureCard {
+    title: string;
+    icon: string;
+    description: string;
+}
+export interface Coordinator {
+    name: string;
+    role: string;
+    email: string;
     phone: string;
 }
 export interface UserProfile {
@@ -73,7 +86,9 @@ export enum UserRole {
     guest = "guest"
 }
 export interface backendInterface {
+    addGalleryImage(title: string, imageBlob: ExternalBlob): Promise<string>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    deleteGalleryImage(id: string): Promise<boolean>;
     deleteRegistration(id: bigint): Promise<boolean>;
     getAboutContent(): Promise<AboutContent | null>;
     getCallerUserProfile(): Promise<UserProfile | null>;
@@ -81,6 +96,7 @@ export interface backendInterface {
     getContactContent(): Promise<ContactContent | null>;
     getCoordinatorsContent(): Promise<CoordinatorsContent | null>;
     getEventDetailsContent(): Promise<EventDetailsContent | null>;
+    getGalleryImages(): Promise<Array<GalleryImage>>;
     getHeroContent(): Promise<HeroContent | null>;
     getRegistrationByEmail(email: string): Promise<Registration | null>;
     getRegistrationCount(): Promise<bigint>;
@@ -95,5 +111,4 @@ export interface backendInterface {
     updateEventDetailsContent(content: EventDetailsContent): Promise<void>;
     updateHeroContent(content: HeroContent): Promise<void>;
     updateRegistration(id: bigint, fullName: string, email: string, phoneNumber: string, collegeName: string, department: string, projectTitle: string, category: string, abstract: string): Promise<boolean>;
-    verifyAdminCredentials(email: string, password: string): Promise<boolean>;
 }
